@@ -160,7 +160,7 @@ class DatabaseFile
 
   def allocate_page(chr : Char)
     if @first_free_page == 0
-      page_ref = PageRef.new(Pointer(UInt8).malloc(@page_size))
+      page_ref = PageRef.new(Bytes.new(@page_size))
       page = page_ref.as_any
       page.value.type = chr.ord.to_u8
       page.value.pos = @page_count
@@ -214,7 +214,7 @@ class DatabaseFile
     slice = Bytes.new(@page_size)
     @file.pos = @page_size * pos
     @file.read(slice)
-    PageRef.new(slice.pointer(@page_size))
+    PageRef.new(slice)
   end
 
   def read_wal_page(pos : UInt32)
@@ -224,7 +224,7 @@ class DatabaseFile
     slice = Bytes.new(@page_size)
     @wal_file.pos = @page_size * pos
     @wal_file.read(slice)
-    PageRef.new(slice.pointer(@page_size))
+    PageRef.new(slice)
   end
 
   def self.open(path : String)
@@ -261,9 +261,7 @@ class DatabaseFile
   end
 
   struct PageRef
-    property pointer
-
-    def initialize(@pointer : Pointer(UInt8))
+    def initialize(@slice : Slice(UInt8))
     end
 
     private def ensure_type(chr)
@@ -272,12 +270,16 @@ class DatabaseFile
       end
     end
 
+    def pointer
+      @slice.pointer(@slice.size)
+    end
+
     def pos
-      @pointer.as(AnyPage*).value.pos
+      pointer.as(AnyPage*).value.pos
     end
 
     def type
-      @pointer.as(AnyPage*).value.type.chr
+      pointer.as(AnyPage*).value.type.chr
     end
 
     def debug
@@ -301,32 +303,32 @@ class DatabaseFile
     end
 
     def as_any
-      return @pointer.as(AnyPage*)
+      return pointer.as(AnyPage*)
     end
 
     def as_header
       ensure_type 'H'
-      return @pointer.as(HeaderPage*)
+      return pointer.as(HeaderPage*)
     end
 
     def as_empty
       ensure_type 'E'
-      return @pointer.as(EmptyPage*)
+      return pointer.as(EmptyPage*)
     end
 
     def as_free
       ensure_type 'F'
-      return @pointer.as(FreePage*)
+      return pointer.as(FreePage*)
     end
 
     def as_commit
       ensure_type 'C'
-      return @pointer.as(CommitPage*)
+      return pointer.as(CommitPage*)
     end
 
     def as_wal
       ensure_type 'W'
-      return @pointer.as(WalStartPage*)
+      return pointer.as(WalStartPage*)
     end
   end
 
