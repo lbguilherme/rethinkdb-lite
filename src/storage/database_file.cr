@@ -88,8 +88,14 @@ class DatabaseFile
 
   def write
     writter = Writter.new(self)
-    yield writter
-    commit
+    begin
+      yield writter
+    rescue ex
+      rollback
+      raise ex
+    else
+      commit
+    end
   end
 
   def read
@@ -126,6 +132,11 @@ class DatabaseFile
     @wal_count += 1
 
     @wal << @next_wal
+    @next_wal = Hash(UInt32, UInt32).new
+  end
+
+  def rollback
+    @wal_count -= @next_wal.size
     @next_wal = Hash(UInt32, UInt32).new
   end
 
