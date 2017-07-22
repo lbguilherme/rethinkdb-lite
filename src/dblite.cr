@@ -12,13 +12,18 @@ end
 
 
 db = DatabaseFile.create("test.db")
-db.allocate_page('E')
-db.commit
-db.allocate_page('E')
-db.allocate_page('E')
-db.delete_page(1u32)
-db.allocate_page('E')
-db.commit
+
+db.write do |writter|
+  writter.alloc('E')
+end
+
+db.write do |writter|
+  writter.alloc('E')
+  writter.alloc('E')
+  writter.del(1u32)
+  writter.alloc('E')
+end
+
 db.debug
 p db
 

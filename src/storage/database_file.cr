@@ -20,6 +20,7 @@ class DatabaseFile
     @wal = Array(Hash(UInt32, UInt32)).new
     @next_wal = Hash(UInt32, UInt32).new
     @wal_count = 1u32
+    @wal_skip = 0u32
 
     header = read_file_page(0u32).as_header.value
 
@@ -32,20 +33,66 @@ class DatabaseFile
     @wal_file.seek(0, IO::Seek::End)
     skip = read_wal_page(0u32).as_wal.value.skip_page_count
     @wal_count = (@wal_file.pos / @page_size).to_u32
+    last_commit_pos = 0u32
     ((skip+1)...@wal_count).each do |wpos|
       page = read_wal_page(wpos)
       if page.type == 'C'
         @wal << @next_wal
         @next_wal = Hash(UInt32, UInt32).new
+        last_commit_pos = page.pos
       else
         @next_wal[page.pos] = wpos
       end
     end
+    @wal_count = last_commit_pos + 1
+    @next_wal = Hash(UInt32, UInt32).new
   end
 
   def close
     @file.close
     @wal_file.close
+  end
+
+  struct Writter
+    def initialize(@db : DatabaseFile)
+    end
+
+    def alloc(chr : Char)
+      @db.allocate_page(chr)
+    end
+
+    def put(page : PageRef)
+      @db.write_page(page)
+    end
+
+    def get(pos : UInt32)
+      @db.read_page(pos)
+    end
+
+    def del(pos : UInt32)
+      @db.delete_page(pos)
+    end
+  end
+
+  struct Reader
+    def initialize(@db : DatabaseFile, @version : UInt32)
+    end
+
+    def get(pos : UInt32)
+      @db.read_page_upto_version(pos, @version)
+    end
+  end
+
+  def write
+    writter = Writter.new(self)
+    yield writter
+    commit
+  end
+
+  def read
+    current_version = @wal.size.to_u32 + @wal_skip
+    reader = Reader.new(self, current_version)
+    yield reader
   end
 
   def debug
@@ -122,14 +169,22 @@ class DatabaseFile
   end
 
   def read_page(pos : UInt32)
-    if pos > @page_count
-      raise Error.new("Reading page #{pos} out of bounds")
-    end
-
     if wpos = @next_wal[pos]?
       return read_wal_page(wpos)
     end
     @wal.reverse_each do |table|
+      if wpos = table[pos]?
+        return read_wal_page(wpos)
+      end
+    end
+
+    read_file_page(pos)
+  end
+
+  def read_page_upto_version(pos : UInt32, version : UInt32)
+    current_version = @wal.size + @wal_skip
+    skip = current_version - version
+    @wal.reverse_each.skip(skip).each do |table|
       if wpos = table[pos]?
         return read_wal_page(wpos)
       end
