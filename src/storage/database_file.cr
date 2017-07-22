@@ -27,20 +27,23 @@ class DatabaseFile
     @page_size = header.page_size
     @file.seek(0, IO::Seek::End)
     @page_count = (@file.pos / @page_size).to_u32
-    @real_page_count = (@file.pos / @page_size).to_u32
+    @real_page_count = @page_count
     @first_free_page = header.first_free_page
 
-    @wal_file.seek(0, IO::Seek::End)
     skip = read_wal_page(0u32).as_wal.value.skip_page_count
+    @wal_file.seek(0, IO::Seek::End)
     @wal_count = (@wal_file.pos / @page_size).to_u32
     last_commit_pos = 0u32
+    next_page_count = @page_count
     ((skip+1)...@wal_count).each do |wpos|
       page = read_wal_page(wpos)
       if page.type == 'C'
         @wal << @next_wal
         @next_wal = Hash(UInt32, UInt32).new
-        last_commit_pos = page.pos
+        last_commit_pos = wpos
+        @page_count = next_page_count
       else
+        next_page_count = {next_page_count, page.pos + 1}.max
         @next_wal[page.pos] = wpos
       end
     end

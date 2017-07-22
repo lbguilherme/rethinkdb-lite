@@ -27,8 +27,8 @@ end
 db.debug
 p db
 
-# db = DatabaseFile.open("test.db")
-# db.debug
-# p db
+db = DatabaseFile.open("test.db")
+db.debug
+p db
 #p db.read_page(3u32)
 
