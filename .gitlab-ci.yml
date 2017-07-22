@@ -1,4 +1,5 @@
 Crystal Spec:
   image: crystallang/crystal
   script:
+    - crystal deps install
     - crystal spec

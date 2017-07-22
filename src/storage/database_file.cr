@@ -90,8 +90,8 @@ class DatabaseFile
         @db.read_page(pos)
       else
         @db.read_page_upto_version(pos, @version.to_u32)
+      end
     end
-  end
   end
 
   def write
@@ -124,10 +124,15 @@ class DatabaseFile
   end
 
   def write_page(page)
-    @wal_file.seek(0, IO::Seek::End)
-    @wal_file.write(Bytes.new(page.pointer, @page_size))
-    @next_wal[page.pos] = @wal_count
-    @wal_count += 1
+    if wpos = @next_wal[page.pos]?
+      @wal_file.seek(wpos * @page_size)
+      @wal_file.write(Bytes.new(page.pointer, @page_size))
+    else
+      @wal_file.seek(0, IO::Seek::End)
+      @wal_file.write(Bytes.new(page.pointer, @page_size))
+      @next_wal[page.pos] = @wal_count
+      @wal_count += 1
+    end
   end
 
   def commit
@@ -282,6 +287,10 @@ class DatabaseFile
       @slice.pointer(@slice.size)
     end
 
+    def size
+      @slice.size
+    end
+
     def pos
       pointer.as(AnyPage*).value.pos
     end
@@ -294,17 +303,21 @@ class DatabaseFile
       print "% 8d " % pos
       case type
       when 'H'
-        print "% 10s | free=%d" % ["Header", as_header.value.first_free_page]
+        print "% 15s | free=%d" % ["Header", as_header.value.first_free_page]
       when 'E'
-        print "% 10s | " % "Empty"
+        print "% 15s | " % "Empty"
       when 'F'
-        print "% 10s | next=%d" % ["Free", as_free.value.next_free_page]
+        print "% 15s | next=%d" % ["Free", as_free.value.next_free_page]
       when 'W'
-        print "% 10s | skip=%d" % ["WAL", as_wal.value.skip_page_count]
+        print "% 15s | skip=%d" % ["WAL", as_wal.value.skip_page_count]
       when 'C'
-        print "% 10s | " % "Commit"
+        print "% 15s | " % "Commit"
+      when 'B'
+        print "% 15s | " % "BTree Internal"
+      when 'L'
+        print "% 15s | %d elements" % ["BTree Leaf", as_leaf.value.count]
       else
-        print "% 10s | " % "Unknown"
+        print "% 15s | " % "Unknown"
       end
 
       puts ""
@@ -337,6 +350,16 @@ class DatabaseFile
     def as_wal
       ensure_type 'W'
       return pointer.as(WalStartPage*)
+    end
+
+    def as_btree
+      ensure_type 'B'
+      return pointer.as(BTreeInternalPage*)
+    end
+
+    def as_leaf
+      ensure_type 'L'
+      return pointer.as(BTreeLeafPage*)
     end
   end
 
@@ -372,6 +395,22 @@ class DatabaseFile
 
   struct WalStartPage < Page
     property skip_page_count = 0u32
+  end
+
+  struct BTreeInternalPage < Page
+    property count = 0u8
+    property reserved2 = 0u8
+    property reserved3 = 0u16
+    property list = StaticArray({UInt32, BTree::Key}, 1).new({0u32, BTree::Key.new(0u8)})
+  end
+
+  struct BTreeLeafPage < Page
+    property prev = 0u32
+    property succ = 0u32
+    property count = 0u8
+    property reserved2 = 0u8
+    property reserved3 = 0u16
+    property list = StaticArray({BTree::Key, UInt32}, 1).new({BTree::Key.new(0u8), 0u32})
   end
 end
 
