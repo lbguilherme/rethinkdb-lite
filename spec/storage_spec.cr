@@ -72,7 +72,8 @@ describe DatabaseFile do
       put_str(page, "Hello 1!")
       w.put(page)
     end
-    expect_raises(MockException, "pew") do
+
+    expect_raises(MockException, "pew!") do
       db.write do |w|
         page = w.get(pos)
         get_str(page).should eq "Hello 1!"
