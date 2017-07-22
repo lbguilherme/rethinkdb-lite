@@ -60,6 +60,10 @@ class DatabaseFile
     def initialize(@db : DatabaseFile)
     end
 
+    def reader
+      Reader.new(@db, -1)
+    end
+
     def alloc(chr : Char)
       @db.allocate_page(chr)
     end
@@ -78,12 +82,16 @@ class DatabaseFile
   end
 
   struct Reader
-    def initialize(@db : DatabaseFile, @version : UInt32)
+    def initialize(@db : DatabaseFile, @version : Int32)
     end
 
     def get(pos : UInt32)
-      @db.read_page_upto_version(pos, @version)
+      if @version < 0
+        @db.read_page(pos)
+      else
+        @db.read_page_upto_version(pos, @version.to_u32)
     end
+  end
   end
 
   def write
@@ -99,7 +107,7 @@ class DatabaseFile
   end
 
   def read
-    current_version = @wal.size.to_u32 + @wal_skip
+    current_version = @wal.size + @wal_skip
     reader = Reader.new(self, current_version)
     yield reader
   end
