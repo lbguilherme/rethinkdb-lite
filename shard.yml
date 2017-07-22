@@ -1,0 +1,13 @@
+name: dblite
+version: 0.1.0
+
+authors:
+  - Guilherme Bernal <dev@lbguilherme.com>
+
+targets:
+  dblite:
+    main: src/dblite.cr
+
+crystal: 0.23.1
+
+license: MIT
