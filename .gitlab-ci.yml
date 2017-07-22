@@ -1,0 +1,4 @@
+Crystal Spec:
+  image: crystallang/crystal
+  script:
+    - crystal spec
