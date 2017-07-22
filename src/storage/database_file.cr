@@ -35,7 +35,7 @@ class DatabaseFile
     @wal_count = (@wal_file.pos / @page_size).to_u32
     last_commit_pos = 0u32
     next_page_count = @page_count
-    ((skip+1)...@wal_count).each do |wpos|
+    (skip...@wal_count).each do |wpos|
       page = read_wal_page(wpos)
       if page.type == 'C'
         @wal << @next_wal
@@ -305,7 +305,7 @@ class DatabaseFile
       when 'H'
         print "% 15s | free=%d" % ["Header", as_header.value.first_free_page]
       when 'E'
-        print "% 15s | " % "Empty"
+        print "% 15s | %s" % ["Empty", String.new(pointer.as(UInt8*) + 200)] # debug
       when 'F'
         print "% 15s | next=%d" % ["Free", as_free.value.next_free_page]
       when 'W'
