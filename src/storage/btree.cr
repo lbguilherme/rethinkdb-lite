@@ -5,6 +5,7 @@ require "openssl"
 
 struct StaticArray(T, N)
   include Comparable(StaticArray(T, N))
+
   def <=>(other : StaticArray(T, N))
     0.upto(size - 1) do |i|
       n = to_unsafe[i] <=> other.to_unsafe[i]
@@ -29,6 +30,7 @@ struct BTree
   end
 
   @@digester = OpenSSL::Digest.new("SHA256")
+
   def self.make_key(obj)
     packer = MessagePack::Packer.new
     packer.write(obj)
@@ -77,7 +79,7 @@ struct BTree
         arr << leaf.value.list.to_unsafe[i]
       end
       arr << {key, value}
-      arr.sort_by! {|e| e[0] }
+      arr.sort_by! { |e| e[0] }
 
       if arr.size > max_count
         new_page = w.alloc('b')
@@ -134,7 +136,7 @@ struct BTree
           arr << node.value.list.to_unsafe[i]
         end
         arr << {key, value}
-        arr.sort_by! {|e| e[0] }
+        arr.sort_by! { |e| e[0] }
 
         if arr.size > max_count
           new_page = w.alloc('B')

@@ -1,4 +1,3 @@
-
 # Header:
 # 8 bytes magic  DBLITE01
 # 2 bytes page size
@@ -476,4 +475,3 @@ class DatabaseFile
     property data = 0u8
   end
 end
-

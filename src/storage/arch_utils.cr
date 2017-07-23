@@ -1,7 +1,5 @@
-
-
 lib LibC
-  FALLOC_FL_KEEP_SIZE = 1
+  FALLOC_FL_KEEP_SIZE  = 1
   FALLOC_FL_PUNCH_HOLE = 2
   fun fsync(fd : Int32) : Int32
   fun fallocate(fd : Int32, mode : Int32, offset : OffT, len : OffT) : Int32
