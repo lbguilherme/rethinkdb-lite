@@ -74,18 +74,6 @@ module ReQL
       DatumString.new(str)
     end
 
-    # def eval(val)
-    #   if val.is_a? Array
-    #     val.map {|e| eval e}.as(Datum::Type)
-    #   elsif val.is_a? Hash
-    #     hash = Hash(String, Type).new
-    #     val.each do |(k, v)|
-    #       hash[k] = eval v
-    #     end
-    #     return hash.as(Datum::Type)
-    #   end
-    # end
-
     macro infix_inspect(name)
       def inspect(io)
         if @args.size == 0

@@ -1,5 +1,6 @@
 require "./storage/*"
 require "./server/*"
+require "./reql/*"
 
 require "file_utils"
 
@@ -30,3 +31,7 @@ sleep
 #   # p (Time.now-ss).to_f
 #   puts [count, Time.now-s, 1000.0/(Time.now-ss).to_f]
 # end
+
+include ReQL::DSL
+
+p r.table("weibc").get("odcbwo").run
