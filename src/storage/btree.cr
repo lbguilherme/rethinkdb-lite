@@ -204,11 +204,11 @@ module Storage
       0u32
     end
 
-    def scan(r : DatabaseFile::Reader, &block : UInt32->)
+    def scan(r : DatabaseFile::Reader, &block : UInt32 ->)
       scan_at_page(r, r.get(@root), &block)
     end
 
-    def scan_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef, &block : UInt32->)
+    def scan_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef, &block : UInt32 ->)
       if page.type == 'b'
         leaf = page.as_leaf
 

@@ -1,4 +1,3 @@
-
 system "rm -rf test_tables"
 system "mkdir test_tables"
 

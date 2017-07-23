@@ -84,7 +84,7 @@ module Storage
       row
     end
 
-    def scan(&block : ReQL::Datum::Type->)
+    def scan(&block : ReQL::Datum::Type ->)
       @db.read do |r|
         @btree.scan(r) do |pos|
           row = Data.new(r.get(pos)).read(r).as(Hash)

@@ -56,9 +56,9 @@ module Server
           when 4 # NOREPLY_WAIT
           when 5 # SERVER_INFO
             info = {
-              "id" => SecureRandom.uuid,
-              "name" => "Crystal Rethink",
-              "proxy" => false
+              "id"    => SecureRandom.uuid,
+              "name"  => "Crystal Rethink",
+              "proxy" => false,
             }
             answer = {"t" => 5, "r" => [info], "p" => [{"duration(ms)" => 0}]}.to_json
           end
