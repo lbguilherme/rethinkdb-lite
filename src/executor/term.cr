@@ -1,25 +1,23 @@
-
 class Term
   alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | String | Term | Nil
 
   def initialize(@args : Array(Type), options : Hash(String, JSON::Type)?)
-
   end
 
-  def self.parse(json : JSON::Type) : Type
+  def self.parse(json : JSON::Type)
     if json.is_a? Hash
       hash = Hash(String, Type).new
       json.each do |(k, v)|
-        hash[k] = Term.parse(v).as(Type)
+        hash[k] = Term.parse(v)
       end
-      return hash
+      return hash.as(Type)
     elsif json.is_a? Array
       type_id = TermType.new(json[0].as(Int).to_i)
       if klass = @@types[type_id]?
-        args = (json[1] || [] of JSON::Type).as(Array).map { |e| Term.parse(e).as(Type) }
-        klass.new(args, json[2]?.as(Hash(String, JSON::Type) | Nil))
+        args = json[1] ? json[1].as(Array).map { |e| Term.parse(e) } : [] of Type
+        klass.new(args, json[2]?.as(Hash(String, JSON::Type) | Nil)).as(Type)
       else
-        raise "Don't know how to handle #{type_id}"
+        raise "Don't know how to handle #{type_id} term"
       end
     else
       return json.as(Type)
