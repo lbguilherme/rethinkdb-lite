@@ -48,6 +48,29 @@ describe DatabaseFile do
       table.get(i).should eq obj
     end
   end
+
+  it "can apply updates to a document" do
+    table = Table.create(random_file)
+
+    5.times do |i|
+      obj = {"id" => i, "v" => 0}
+      table.insert(obj)
+    end
+
+    10.times do |j|
+      5.times do |i|
+        obj = {"id" => i, "v" => j}
+        table.get(i).should eq obj
+
+        table.update(i) do |old_obj|
+          old_obj.should eq obj
+          {"id" => old_obj.as(Hash)["id"], "v" => old_obj.as(Hash)["v"].as(Int) + 1}
+        end
+
+        table.get(i).as(Hash)["v"].should eq j+1
+      end
+    end
+  end
 end
 
 # Helpers

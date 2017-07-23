@@ -60,4 +60,19 @@ class Table
     end
     row
   end
+
+  def update(key)
+    k = BTree.make_key key
+    row = nil
+    @db.write do |w|
+      pos = @btree.query(w.reader, k)
+      if pos != 0u32
+        data = Data.new(w.get(pos))
+        old_row = data.read(w.reader)
+        new_row = yield old_row
+        data.write(w, new_row)
+      end
+    end
+    row
+  end
 end
