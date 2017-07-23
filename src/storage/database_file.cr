@@ -144,7 +144,9 @@ class DatabaseFile
           @skip = wal_page.as_wal.value.skip_page_count = wpos + 1
           @wal_file.seek(0u32)
           @wal_file.write(Bytes.new(wal_page.pointer, @page_size))
-          # fsync
+          # TODO: fsync db
+          # TODO: punch hole on wal
+          # TODO: maybe truncate wal
           @wal_skip += 1
           @wal.shift
           @wal_usage.shift
