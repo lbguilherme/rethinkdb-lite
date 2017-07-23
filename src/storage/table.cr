@@ -39,6 +39,13 @@ module Storage
     def insert(obj : Hash)
       k = BTree.make_key obj["id"]
       @db.write do |w|
+        pos = @btree.query(w.reader, k)
+        if pos != 0
+          row = Data.new(w.get(pos)).read(w.reader).as(Hash)
+          pretty_row = JSON.build(4) { |builder| row.to_json(builder) }
+          pretty_obj = JSON.build(4) { |builder| obj.to_json(builder) }
+          raise ReQL::RuntimeError.new("Duplicate primary key `id`:\n#{pretty_row}\n#{pretty_obj}")
+        end
         data = Data.create(w, obj)
         old_pos = @btree.pos
         @btree.insert(w, k, data.pos)
