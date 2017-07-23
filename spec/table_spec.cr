@@ -27,12 +27,21 @@ describe DatabaseFile do
   end
 
   it "can handle several objects in the table" do
-    table = Table.create(random_file)
+    file = random_file
+    table = Table.create(file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}
       table.insert(obj)
     end
+
+    300.times do |i|
+      obj = {"id" => i, "v" => i}
+      table.get(i).should eq obj
+    end
+
+    table.close
+    table = Table.open(file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}

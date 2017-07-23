@@ -12,6 +12,7 @@ class Table
 
       header = w.get(0u32)
       header.as_header.value.table_btree_pos = btree.pos
+      w.put(header)
     end
 
     new db, btree.not_nil!
@@ -27,6 +28,10 @@ class Table
     new db, BTree.new(btree_pos)
   end
 
+  def close
+    @db.close
+  end
+
   def initialize(@db : DatabaseFile, @btree : BTree)
   end
 
@@ -34,7 +39,13 @@ class Table
     k = BTree.make_key obj["id"]
     @db.write do |w|
       data = Data.create(w, obj)
+      old_pos = @btree.pos
       @btree.insert(w, k, data.pos)
+      if @btree.pos != old_pos
+        header = w.get(0u32)
+        header.as_header.value.table_btree_pos = @btree.pos
+        w.put(header)
+      end
     end
   end
 

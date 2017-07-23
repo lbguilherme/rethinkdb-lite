@@ -135,7 +135,7 @@ class DatabaseFile
   end
 
   def flush
-    return if @wal_count - @skip < 1000
+    return if @wal_count - @skip < 15
     while @wal_usage.size > 1 && @wal_usage[0] == 0
       (@skip...@wal_count).each do |wpos|
         page = read_wal_page(wpos)
@@ -334,10 +334,11 @@ class DatabaseFile
     end
 
     def debug
+      return if type == 'D'
       print "% 5d " % pos
       case type
       when 'H'
-        print "% 14s | free=%d" % ["Header", as_header.value.first_free_page]
+        print "% 14s | free=%d table=%d" % ["Header", as_header.value.first_free_page, as_header.value.table_btree_pos]
       when 'E'
         print "% 14s | %s" % ["Empty", String.new(pointer.as(UInt8*) + 200)] # debug
       when 'F'
