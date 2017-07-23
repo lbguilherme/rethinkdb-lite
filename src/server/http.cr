@@ -2,14 +2,15 @@ require "./connection"
 require "../reql/*"
 require "http/server"
 require "json"
+require "http/server/handlers/static_file_handler"
 
 module Server
   @@http_connections = {} of String => ClientConnection
 
   def self.start_http
+    static_handler = HTTP::StaticFileHandler.new("rethinkdb-webui/dist/", false, false)
     server = HTTP::Server.new(8080) do |context|
-      uri = URI.parse(context.request.resource)
-      case uri.path
+      case context.request.path
       when "/ajax/reql/open-new-connection"
         conn_id = SecureRandom.base64
         @@http_connections[conn_id] = ClientConnection.new
@@ -72,20 +73,14 @@ module Server
         context.response.write_bytes(answer.size)
         context.response.print answer
       else
-        p context.request
-        context.response.status_code = 400
+        if context.request.path == "/"
+          context.request.path = "/index.html"
+        end
+        static_handler.call(context)
       end
-
-      # res = HTTP::Client.new("172.17.0.2", 8080).exec(context.request)
-      # p res.body
-      # res.headers.each do |(k ,v)|
-      #   context.response.headers[k] = v
-      # end
-      # context.response.status_code = res.status_code
-      # context.response.print res.body
     end
 
-    puts "Listening on http://127.0.0.1:3000"
+    puts "Listening on http://127.0.0.1:8080"
     server.listen
   end
 end

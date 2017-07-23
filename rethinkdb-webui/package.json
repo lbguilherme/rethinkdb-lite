@@ -1,0 +1,35 @@
+{
+  "name": "rethinkdb-webui",
+  "version": "2.0.0",
+  "description": "WebUI for RethinkDB.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "mkdir -p dist && npm run build-js && npm run build-css && npm run build-static",
+    "build-js": "browserify -t coffeeify -t browserify-handlebars src/coffee/app.coffee -o dist/cluster.js",
+    "build-css": "cd src/less && cat styles* | lessc - ../../dist/cluster.css",
+    "build-static": "cd public && cp -a * ../dist/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rethinkdb/rethinkdb"
+  },
+  "author": "RethinkDB",
+  "license": "AGPL 3.0",
+  "bugs": {
+    "url": "https://github.com/rethinkdb/rethinkdb/issues"
+  },
+  "homepage": "https://github.com/rethinkdb/rethinkdb",
+  "dependencies": {
+    "browserify": "^13.1.0",
+    "browserify-handlebars": "^1.0.0",
+    "coffeeify": "^2.0.0",
+    "express": "^4.14.0",
+    "handlebars": "^3.0.1",
+    "hbsfy": "^2.2.1",
+    "http-route-proxy": "^0.2.2",
+    "less": "^2.4.0",
+    "moment": "^2.10.3",
+    "rethinkdb": "^2.3.0",
+    "virtual-dom": "^2.0.1"
+  }
+}
