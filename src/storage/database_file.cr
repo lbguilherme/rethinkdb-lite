@@ -310,7 +310,7 @@ class DatabaseFile
         print "% 14s | " % "Commit"
       when 'B'
         print "% 14s | %d pointers" % ["BTree Node", as_node.value.count]
-      when 'L'
+      when 'b'
         print "% 14s | %d elements" % ["BTree Leaf", as_leaf.value.count]
       else
         print "% 14s | " % "Unknown"
@@ -354,7 +354,7 @@ class DatabaseFile
     end
 
     def as_leaf
-      ensure_type 'L'
+      ensure_type 'b'
       return pointer.as(BTreeLeafPage*)
     end
   end

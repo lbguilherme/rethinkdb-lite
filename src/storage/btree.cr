@@ -22,7 +22,7 @@ struct BTree
   end
 
   def self.create(w : DatabaseFile::Writter)
-    new(w.alloc('L').pos)
+    new(w.alloc('b').pos)
   end
 
   @@digester = OpenSSL::Digest.new("SHA256")
@@ -65,7 +65,7 @@ struct BTree
   end
 
   private def insert_at_page(w : DatabaseFile::Writter, page : DatabaseFile::PageRef, key : Key, value : UInt32)
-    if page.type == 'L'
+    if page.type == 'b'
       leaf = page.as_leaf
       max_count = {255, ((page.size - list_offset) / (sizeof(Key) + 4)).to_i}.min
 
@@ -77,7 +77,7 @@ struct BTree
       arr.sort_by! {|e| e[0] }
 
       if arr.size > max_count
-        new_page = w.alloc('L')
+        new_page = w.alloc('b')
         new_leaf = new_page.as_leaf
         new_leaf.value.succ = leaf.value.succ
         new_leaf.value.prev = page.pos
