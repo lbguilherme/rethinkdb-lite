@@ -44,9 +44,24 @@ struct BTree
     pointerof(x.@list).address - pointerof(x).address
   end
 
+  def node_offset
+    x = DatabaseFile::BTreeNodePage.new
+    pointerof(x.@list).address - pointerof(x).address
+  end
+
   def insert(w : DatabaseFile::Writter, key : Key, value : UInt32)
     page = w.get(@root)
-    insert_at_page(w, page, key, value)
+    if pair = insert_at_page(w, page, key, value)
+      key, value = pair
+
+      new_page = w.alloc('B')
+      new_root = new_page.as_node
+      new_root.value.count = 2u8
+      new_root.value.list.to_unsafe[0] = {Key.new(0u8), @root}
+      new_root.value.list.to_unsafe[1] = {key, value}
+      @root = new_page.pos
+      w.put(new_page)
+    end
   end
 
   private def insert_at_page(w : DatabaseFile::Writter, page : DatabaseFile::PageRef, key : Key, value : UInt32)
@@ -64,52 +79,96 @@ struct BTree
       if arr.size > max_count
         new_page = w.alloc('L')
         new_leaf = new_page.as_leaf
+        new_leaf.value.succ = leaf.value.succ
+        new_leaf.value.prev = page.pos
+        leaf.value.succ = new_page.pos
 
+        size1 = arr.size/2
         arr.each_with_index do |e, i|
-          if i < max_count/2
+          if i < size1
             leaf.value.list.to_unsafe[i] = e
           else
-            new_leaf.value.list.to_unsafe[i - max_count/2] = e
+            new_leaf.value.list.to_unsafe[i - size1] = e
           end
         end
 
-        leaf.value.count = (max_count/2).to_u8
-        new_leaf.value.count = (arr.size - max_count/2).to_u8
+        leaf.value.count = (size1).to_u8
+        new_leaf.value.count = (arr.size - size1).to_u8
 
         w.put(page)
         w.put(new_page)
+
+        {new_leaf.value.list.to_unsafe[0][0], new_page.pos}
       else
         arr.each_with_index do |e, i|
           leaf.value.list.to_unsafe[i] = e
         end
 
-        p arr.size
-
         leaf.value.count = leaf.value.count + 1
         w.put(page)
+
+        nil
       end
     else
-      # node
+      node = page.as_node
+
+      max_count = {255, ((page.size - node_offset) / (sizeof(Key) + 4)).to_i}.min
+
+      target_pos = 0u32
+      node.value.count.times do |i|
+        if key >= node.value.list.to_unsafe[i][0]
+          target_pos = node.value.list.to_unsafe[i][1]
+        else
+          break
+        end
+      end
+
+      if pair = insert_at_page(w, w.get(target_pos), key, value)
+        key, value = pair
+
+        arr = [] of {Key, UInt32}
+        node.value.count.times do |i|
+          arr << node.value.list.to_unsafe[i]
+        end
+        arr << {key, value}
+        arr.sort_by! {|e| e[0] }
+
+        if arr.size > max_count
+          new_page = w.alloc('B')
+          new_node = new_page.as_node
+
+          size1 = arr.size/2
+          arr.each_with_index do |e, i|
+            if i < size1
+              node.value.list.to_unsafe[i] = e
+            else
+              new_node.value.list.to_unsafe[i - size1] = e
+            end
+          end
+
+          node.value.count = size1.to_u8
+          new_node.value.count = (arr.size - size1).to_u8
+
+          w.put(page)
+          w.put(new_page)
+
+          {arr[size1][0], new_page.pos}
+        else
+          arr.each_with_index do |e, i|
+            node.value.list.to_unsafe[i] = e
+          end
+
+          node.value.count = node.value.count + 1
+          w.put(page)
+
+          nil
+        end
+      else
+        nil
+      end
     end
   end
 
   def query(r : DatabaseFile::Reader, key : Key)
-  end
-
-  def debug
-# digraph g {
-# node [shape = record,height=.1];
-# node0[label = "<f0> |10|<f1> |20|<f2> |30|<f3>"];
-# node1[label = "<f0> |1|<f1> |2|<f2>"];
-# "node0":f0 -> "node1"
-# node2[label = "<f0> |11|<f1> |12|<f2>"];
-# "node0":f1 -> "node2"
-# node3[label = "<f0> |21|<f1> |22|<f2>"];
-# "node0":f2 -> "node3"
-# node4[label = "<f0> |31|<f1> |32|<f2>"];
-# "node0":f3 -> "node4"
-# }
-
-
   end
 end

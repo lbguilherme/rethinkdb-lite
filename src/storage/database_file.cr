@@ -13,7 +13,7 @@ class DatabaseFile
     @wal_file.sync = true
     @wal_file.rewind
 
-    @page_size = 1024u16
+    @page_size = 1024u64
     @page_count = 1u32
     @real_page_count = 1u32
     @first_free_page = 0u32
@@ -24,7 +24,7 @@ class DatabaseFile
 
     header = read_file_page(0u32).as_header.value
 
-    @page_size = header.page_size
+    @page_size = header.page_size.to_u64
     @file.seek(0, IO::Seek::End)
     @page_count = (@file.pos / @page_size).to_u32
     @real_page_count = @page_count
@@ -191,10 +191,6 @@ class DatabaseFile
     end
   end
 
-  def todo
-    raise Error.new("TODO")
-  end
-
   def read_page(pos : UInt32)
     if wpos = @next_wal[pos]?
       return read_wal_page(wpos)
@@ -300,24 +296,24 @@ class DatabaseFile
     end
 
     def debug
-      print "% 8d " % pos
+      print "% 5d " % pos
       case type
       when 'H'
-        print "% 15s | free=%d" % ["Header", as_header.value.first_free_page]
+        print "% 14s | free=%d" % ["Header", as_header.value.first_free_page]
       when 'E'
-        print "% 15s | %s" % ["Empty", String.new(pointer.as(UInt8*) + 200)] # debug
+        print "% 14s | %s" % ["Empty", String.new(pointer.as(UInt8*) + 200)] # debug
       when 'F'
-        print "% 15s | next=%d" % ["Free", as_free.value.next_free_page]
+        print "% 14s | next=%d" % ["Free", as_free.value.next_free_page]
       when 'W'
-        print "% 15s | skip=%d" % ["WAL", as_wal.value.skip_page_count]
+        print "% 14s | skip=%d" % ["WAL", as_wal.value.skip_page_count]
       when 'C'
-        print "% 15s | " % "Commit"
+        print "% 14s | " % "Commit"
       when 'B'
-        print "% 15s | " % "BTree Internal"
+        print "% 14s | %d pointers" % ["BTree Node", as_node.value.count]
       when 'L'
-        print "% 15s | %d elements" % ["BTree Leaf", as_leaf.value.count]
+        print "% 14s | %d elements" % ["BTree Leaf", as_leaf.value.count]
       else
-        print "% 15s | " % "Unknown"
+        print "% 14s | " % "Unknown"
       end
 
       puts ""
@@ -352,9 +348,9 @@ class DatabaseFile
       return pointer.as(WalStartPage*)
     end
 
-    def as_btree
+    def as_node
       ensure_type 'B'
-      return pointer.as(BTreeInternalPage*)
+      return pointer.as(BTreeNodePage*)
     end
 
     def as_leaf
@@ -397,11 +393,11 @@ class DatabaseFile
     property skip_page_count = 0u32
   end
 
-  struct BTreeInternalPage < Page
+  struct BTreeNodePage < Page
     property count = 0u8
     property reserved2 = 0u8
     property reserved3 = 0u16
-    property list = StaticArray({UInt32, BTree::Key}, 1).new({0u32, BTree::Key.new(0u8)})
+    property list = StaticArray({BTree::Key, UInt32}, 1).new({BTree::Key.new(0u8), 0u32})
   end
 
   struct BTreeLeafPage < Page

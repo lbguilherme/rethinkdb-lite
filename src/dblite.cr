@@ -13,14 +13,16 @@ end
 
 db = DatabaseFile.create("test.db")
 
+s=Time.now
 db.write do |w|
   tree = BTree.create(w)
 
-  320.times do |i|
+  10000.times do |i|
     k = BTree.make_key i
     tree.insert(w, k, i.to_u32)
   end
 end
+t=Time.now-s
 
 # db.write do |writter|
 #   writter.alloc('E')
@@ -34,4 +36,5 @@ end
 # end
 
 db.debug
-p db
+p t
+# p db
