@@ -1,4 +1,5 @@
 require "./database_file"
+require "../reql/executor/datum"
 require "msgpack"
 
 module Storage
@@ -16,7 +17,37 @@ module Storage
     def read(r : DatabaseFile::Reader)
       io = DataIO.new(r, @page)
       unpacker = MessagePack::Unpacker.new(io)
-      unpacker.read_value
+      value_to_datum_type unpacker.read_value
+    end
+
+    def value_to_datum_type(arr : Array)
+      arr.map do |e|
+        value_to_datum_type(e).as(ReQL::Datum::Type)
+      end.as(ReQL::Datum::Type)
+    end
+
+    def value_to_datum_type(hsh : Hash)
+      result = {} of String => ReQL::Datum::Type
+      hsh.each do |(k, v)|
+        result[k.as(String)] = value_to_datum_type v
+      end
+      result.as(ReQL::Datum::Type)
+    end
+
+    def value_to_datum_type(val : Bool | Float64 | Int64 | String | Nil)
+      val.as(ReQL::Datum::Type)
+    end
+
+    def value_to_datum_type(val : Int)
+      value_to_datum_type val.to_i64
+    end
+
+    def value_to_datum_type(val : Float)
+      value_to_datum_type val.to_f64
+    end
+
+    def value_to_datum_type(val : Bytes)
+      value_to_datum_type nil
     end
 
     def write(w : DatabaseFile::Writter, obj)
