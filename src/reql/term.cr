@@ -34,7 +34,7 @@ module ReQL
         elsif klass = @@types[type_id]?
           klass.new(args, json[2]?.as(Hash(String, JSON::Type) | Nil)).as(Type)
         else
-          raise "Don't know how to handle #{type_id} term"
+          raise CompileError.new("Don't know how to handle #{type_id} term")
         end
       else
         return json.as(Type)

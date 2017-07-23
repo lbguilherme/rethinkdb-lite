@@ -22,9 +22,11 @@ module Server
         conn = @@http_connections[conn_id]
         body = context.request.body || IO::Memory.new
         query_id = body.read_bytes(UInt64)
-        message = JSON.parse(body.gets_to_end).raw.as(Array)
-
-        answer = {"t" => 18, "r" => ["hmm..."], "b" => [] of String}.to_json
+        puts "-------------------------------------------------------------------"
+        message_json = body.gets_to_end
+        puts message_json
+        message = JSON.parse(message_json).raw.as(Array)
+        answer = "{}"
         begin
           case message[0]
           when 1 # START
@@ -41,6 +43,12 @@ module Server
           when 3 # STOP
           when 4 # NOREPLY_WAIT
           when 5 # SERVER_INFO
+            info = {
+              "id" => SecureRandom.uuid,
+              "name" => "Crystal Rethink",
+              "proxy" => false
+            }
+            answer = {"t" => 5, "r" => [info], "p" => [{"duration(ms)" => 0}]}.to_json
           end
         rescue ex : ReQL::CompileError
           answer = {"t" => 17, "r" => [ex.message], "b" => [] of String}.to_json

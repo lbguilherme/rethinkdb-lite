@@ -2,4 +2,5 @@
 /lib/
 /bin/
 /.shards/
+/test_tables/
 test.db*
