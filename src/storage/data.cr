@@ -12,21 +12,22 @@ struct Data
   def initialize(@page : DatabaseFile::PageRef)
   end
 
-  def read
-
+  def read(r : DatabaseFile::Reader)
+    io = DataIO.new(r, @page)
+    unpacker = MessagePack::Unpacker.new(io)
+    unpacker.read_value
   end
 
   def write(w : DatabaseFile::Writter, obj)
     packer = MessagePack::Packer.new
     packer.write(obj)
     slice = packer.to_slice
-    p slice
     pos = 0
     max_size_per_page = page.size - data_offset
     page = @page
     while pos < slice.size
       count = Math.min(max_size_per_page, slice.size)
-      slice.copy_from(page.pointer + data_offset, count)
+      slice.copy_to(page.pointer + data_offset, count)
       page.as_data.value.size = count.to_u32
       pos += count
       if pos < slice.size
@@ -85,7 +86,7 @@ struct Data
             break
           end
         end
-        count = Math.min(page_size - @page_pos, slize.size - pos)
+        count = Math.min(page_size - @page_pos, slice.size - pos)
         slice.copy_from(@page.pointer + data_offset + @page_pos, count)
         pos += count
         @pos += count

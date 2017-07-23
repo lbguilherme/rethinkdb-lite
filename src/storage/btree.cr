@@ -20,6 +20,10 @@ struct BTree
   def initialize(@root : UInt32)
   end
 
+  def pos
+    @root
+  end
+
   def self.create(w : DatabaseFile::Writter)
     new(w.alloc('b').pos)
   end

@@ -18,8 +18,9 @@ db.write do |w|
   tree = BTree.create(w)
 
   5.times do |i|
-    k = BTree.make_key i
-    obj = "Hello #{i}!"
+    obj = {"id" => "#{i}", "str" => "Hello #{i}!"}
+
+    k = BTree.make_key obj["id"]
     data = Data.create(w, obj)
     tree.insert(w, k, data.pos)
   end
