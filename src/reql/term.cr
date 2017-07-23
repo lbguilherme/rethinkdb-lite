@@ -1,12 +1,7 @@
 require "./executor/*"
+require "./error"
 
 module ReQL
-  class CompileError < Exception
-  end
-
-  class RuntimeError < Exception
-  end
-
   abstract class Term
     alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | String | Term | Nil
 

@@ -1,5 +1,7 @@
 require "./database_file"
 require "./btree"
+require "../reql/error"
+require "json"
 
 module Storage
   class Table
