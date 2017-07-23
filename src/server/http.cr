@@ -10,7 +10,8 @@ module Server
   def self.start_http
     static_handler = HTTP::StaticFileHandler.new("rethinkdb-webui/dist/", false, false)
     server = HTTP::Server.new(8080) do |context|
-      case context.request.path
+      uri = URI.parse(context.request.resource)
+      case uri.path
       when "/ajax/reql/open-new-connection"
         conn_id = SecureRandom.base64
         @@http_connections[conn_id] = ClientConnection.new
