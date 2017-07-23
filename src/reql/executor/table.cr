@@ -16,9 +16,5 @@ module ReQL
     def insert(obj : Datum::Type)
       @table.insert(obj.as(Hash))
     end
-
-    def response
-      [1]
-    end
   end
 end
