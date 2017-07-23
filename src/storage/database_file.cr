@@ -313,7 +313,7 @@ class DatabaseFile
       when 'b'
         print "% 14s | %d elements" % ["BTree Leaf", as_leaf.value.count]
       when 'D'
-        print "% 14s | %d bytes" % ["Data", as_data.value.size]
+        print "% 14s | %d bytes -- succ=%d" % ["Data", as_data.value.size, as_data.value.succ]
       else
         print "% 14s | " % "Unknown"
       end

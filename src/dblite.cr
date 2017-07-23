@@ -32,17 +32,5 @@ db.read do |r|
 end
 t=Time.now-s
 
-# db.write do |writter|
-#   writter.alloc('E')
-# end
-
-# db.write do |writter|
-#   writter.alloc('E')
-#   writter.alloc('E')
-#   writter.del(1u32)
-#   writter.alloc('E')
-# end
-
 db.debug
 p t
-# p db

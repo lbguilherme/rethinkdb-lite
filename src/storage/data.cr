@@ -26,8 +26,8 @@ struct Data
     max_size_per_page = page.size - data_offset
     page = @page
     while pos < slice.size
-      count = Math.min(max_size_per_page, slice.size)
-      slice.copy_to(page.pointer + data_offset, count)
+      count = Math.min(max_size_per_page, slice.size - pos)
+      slice[pos, count].copy_to(page.pointer + data_offset, count)
       page.as_data.value.size = count.to_u32
       pos += count
       if pos < slice.size
@@ -76,12 +76,12 @@ struct Data
       pos = 0
       while pos < slice.size
         page_size = @page.as_data.value.size
-        while @page_pos == page_size
+        if @page_pos == page_size
           succ = @page.as_data.value.succ
           if succ != 0
             @page = @r.get(succ)
-            page_size = @page.as_data.value.size
             @page_pos = 0
+            next
           else
             break
           end
