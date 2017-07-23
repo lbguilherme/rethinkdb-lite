@@ -26,6 +26,25 @@ describe DatabaseFile do
       table.get(r, 5).should eq nil
     end
   end
+
+  it "can handle several objects in the table" do
+    db = DatabaseFile.create(random_file)
+    table = make_table(db)
+
+    300.times do |i|
+      obj = {"id" => i, "v" => i}
+      db.write do |w|
+        table.insert(w, obj)
+      end
+    end
+
+    db.read do |r|
+      300.times do |i|
+        obj = {"id" => i, "v" => i}
+        table.get(r, i).should eq obj
+      end
+    end
+  end
 end
 
 # Helpers
