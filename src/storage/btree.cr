@@ -173,5 +173,31 @@ struct BTree
   end
 
   def query(r : DatabaseFile::Reader, key : Key)
+    query_at_page(r, r.get(@root), key)
+  end
+
+  def query_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef, key : Key)
+    if page.type == 'b'
+      leaf = page.as_leaf
+
+      leaf.value.count.times do |i|
+        if leaf.value.list.to_unsafe[i][0] == key
+          return leaf.value.list.to_unsafe[i][1]
+        end
+      end
+    else
+      node = page.as_node
+      target_pos = 0u32
+      node.value.count.times do |i|
+        if key >= node.value.list.to_unsafe[i][0]
+          target_pos = node.value.list.to_unsafe[i][1]
+        else
+          break
+        end
+      end
+
+      return query_at_page(r, r.get(target_pos), key)
+    end
+    0u32
   end
 end

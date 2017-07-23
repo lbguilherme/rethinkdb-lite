@@ -14,15 +14,20 @@ end
 db = DatabaseFile.create("test.db")
 
 s=Time.now
+
+table = Table.new(0u32)
 db.write do |w|
-  tree = BTree.create(w)
+  table = Table.create(w)
 
   5.times do |i|
     obj = {"id" => "#{i}", "str" => "Hello #{i}!"}
+    table.insert(w, obj)
+  end
+end
 
-    k = BTree.make_key obj["id"]
-    data = Data.create(w, obj)
-    tree.insert(w, k, data.pos)
+db.read do |r|
+  5.times do |i|
+    p table.get(r, "#{i}")
   end
 end
 t=Time.now-s
