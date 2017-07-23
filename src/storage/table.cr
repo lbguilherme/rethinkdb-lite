@@ -94,5 +94,13 @@ module Storage
         end
       end
     end
+
+    def count
+      count = 0i64
+      @db.read do |r|
+        count = @btree.count(r)
+      end
+      count
+    end
   end
 end

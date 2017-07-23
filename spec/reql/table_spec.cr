@@ -42,4 +42,14 @@ describe ReQL do
     list = r.table("test4").run.value.as(Array)
     list.map { |e| e.as(Hash)["value"].as(String) }.sort.should eq ["hello", "bye", "lala"].sort
   end
+
+  it "counts the number of documents" do
+    r.table("test5").count.run.value.should eq 0
+    r.table("test5").insert({"a" => 1}).run
+    r.table("test5").count.run.value.should eq 1
+    r.table("test5").insert({"a" => 1}).run
+    r.table("test5").count.run.value.should eq 2
+    r.table("test5").insert({"a" => 1}).run
+    r.table("test5").count.run.value.should eq 3
+  end
 end

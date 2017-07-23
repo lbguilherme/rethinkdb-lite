@@ -224,5 +224,26 @@ module Storage
         end
       end
     end
+
+    def count(r : DatabaseFile::Reader)
+      count_at_page(r, r.get(@root))
+    end
+
+    def count_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef)
+      if page.type == 'b'
+        leaf = page.as_leaf
+
+        leaf.value.count.to_i64
+      else
+        node = page.as_node
+        target_pos = 0u32
+        count = 0i64
+        node.value.count.times do |i|
+          pos = node.value.list.to_unsafe[i][1]
+          count += count_at_page(r, r.get(pos))
+        end
+        count
+      end
+    end
   end
 end

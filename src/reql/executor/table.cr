@@ -17,6 +17,10 @@ module ReQL
       @table.insert(obj.as(Hash))
     end
 
+    def count
+      @table.count
+    end
+
     def start_reading
       @channel = Channel(Datum::Type).new
       spawn do

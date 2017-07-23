@@ -64,5 +64,6 @@ module ReQL
     term table, TableTerm
     term get, GetTerm
     term insert, InsertTerm
+    term count, CountTerm
   end
 end
