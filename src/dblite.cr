@@ -17,9 +17,11 @@ s=Time.now
 db.write do |w|
   tree = BTree.create(w)
 
-  10000.times do |i|
+  5.times do |i|
     k = BTree.make_key i
-    tree.insert(w, k, i.to_u32)
+    obj = "Hello #{i}!"
+    data = Data.create(w, obj)
+    tree.insert(w, k, data.pos)
   end
 end
 t=Time.now-s

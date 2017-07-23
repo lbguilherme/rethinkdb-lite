@@ -3,7 +3,6 @@ require "./database_file"
 require "msgpack"
 require "openssl"
 
-
 struct StaticArray(T, N)
   include Comparable(StaticArray(T, N))
   def <=>(other : StaticArray(T, N))

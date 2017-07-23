@@ -160,7 +160,7 @@ class DatabaseFile
 
     header_page_ref = read_page(0u32)
 
-    page_ref = PageRef.new(Pointer(UInt8).malloc(@page_size))
+    page_ref = PageRef.new(Bytes.new(@page_size))
     page = page_ref.as_any
     page.value.type = 'F'.ord.to_u8
     page.value.pos = pos
@@ -312,6 +312,8 @@ class DatabaseFile
         print "% 14s | %d pointers" % ["BTree Node", as_node.value.count]
       when 'b'
         print "% 14s | %d elements" % ["BTree Leaf", as_leaf.value.count]
+      when 'D'
+        print "% 14s | %d bytes" % ["Data", as_data.value.size]
       else
         print "% 14s | " % "Unknown"
       end
@@ -356,6 +358,11 @@ class DatabaseFile
     def as_leaf
       ensure_type 'b'
       return pointer.as(BTreeLeafPage*)
+    end
+
+    def as_data
+      ensure_type 'D'
+      return pointer.as(DataPage*)
     end
   end
 
@@ -407,6 +414,12 @@ class DatabaseFile
     property reserved2 = 0u8
     property reserved3 = 0u16
     property list = StaticArray({BTree::Key, UInt32}, 1).new({BTree::Key.new(0u8), 0u32})
+  end
+
+  struct DataPage < Page
+    property size = 0u32
+    property succ = 0u32
+    property data = 0u8
   end
 end
 
