@@ -35,7 +35,7 @@ class Table
   def initialize(@db : DatabaseFile, @btree : BTree)
   end
 
-  def insert(obj)
+  def insert(obj : Hash)
     k = BTree.make_key obj["id"]
     @db.write do |w|
       data = Data.create(w, obj)
@@ -55,7 +55,7 @@ class Table
     @db.read do |r|
       pos = @btree.query(r, k)
       if pos != 0u32
-        row = Data.new(r.get(pos)).read(r)
+        row = Data.new(r.get(pos)).read(r).as(Hash)
       end
     end
     row
@@ -68,7 +68,7 @@ class Table
       pos = @btree.query(w.reader, k)
       if pos != 0u32
         data = Data.new(w.get(pos))
-        old_row = data.read(w.reader)
+        old_row = data.read(w.reader).as(Hash)
         new_row = yield old_row
         data.write(w, new_row)
       end

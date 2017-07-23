@@ -64,10 +64,10 @@ describe DatabaseFile do
 
         table.update(i) do |old_obj|
           old_obj.should eq obj
-          {"id" => old_obj.as(Hash)["id"], "v" => old_obj.as(Hash)["v"].as(Int) + 1}
+          {"id" => old_obj["id"], "v" => old_obj["v"].as(Int) + 1}
         end
 
-        table.get(i).as(Hash)["v"].should eq j+1
+        table.get(i).not_nil!["v"].should eq j+1
       end
     end
   end
