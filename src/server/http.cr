@@ -19,7 +19,11 @@ module Server
         @@http_connections.delete conn_id
       when "/ajax/reql/"
         conn_id = (uri.query || "").sub("conn_id=", "")
-        conn = @@http_connections[conn_id]
+        conn = @@http_connections[conn_id]?
+        unless conn
+          context.response.status_code = 400
+          next
+        end
         body = context.request.body || IO::Memory.new
         query_id = body.read_bytes(UInt64)
         puts "-------------------------------------------------------------------"
