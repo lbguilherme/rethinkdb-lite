@@ -1,4 +1,3 @@
-
 module ReQL
   class CompileError < Exception
   end
