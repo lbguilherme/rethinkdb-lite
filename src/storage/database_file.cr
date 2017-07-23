@@ -17,7 +17,9 @@ class DatabaseFile
     @page_count = 1u32
     @real_page_count = 1u32
     @first_free_page = 0u32
-    @wal = Array(Hash(UInt32, UInt32)).new
+    @wal = Deque(Hash(UInt32, UInt32)).new
+    @wal_usage = Deque(UInt32).new
+    @wal_usage << 0u32
     @next_wal = Hash(UInt32, UInt32).new
     @wal_count = 1u32
     @wal_skip = 0u32
@@ -30,15 +32,17 @@ class DatabaseFile
     @real_page_count = @page_count
     @first_free_page = header.first_free_page
 
-    skip = read_wal_page(0u32).as_wal.value.skip_page_count
+    @skip = 1u32
+    @skip = read_wal_page(0u32).as_wal.value.skip_page_count
     @wal_file.seek(0, IO::Seek::End)
     @wal_count = (@wal_file.pos / @page_size).to_u32
     last_commit_pos = 0u32
     next_page_count = @page_count
-    (skip...@wal_count).each do |wpos|
+    (@skip...@wal_count).each do |wpos|
       page = read_wal_page(wpos)
       if page.type == 'C'
         @wal << @next_wal
+        @wal_usage << 0u32
         @next_wal = Hash(UInt32, UInt32).new
         last_commit_pos = wpos
         @page_count = next_page_count
@@ -95,6 +99,7 @@ class DatabaseFile
   end
 
   def write
+    flush
     writter = Writter.new(self)
     begin
       yield writter
@@ -104,12 +109,17 @@ class DatabaseFile
     else
       commit
     end
+    flush
   end
 
   def read
+    flush
     current_version = @wal.size + @wal_skip
+    @wal_usage[current_version - @wal_skip] += 1
     reader = Reader.new(self, current_version)
     yield reader
+    @wal_usage[current_version - @wal_skip] -= 1
+    flush
   end
 
   def debug
@@ -118,8 +128,33 @@ class DatabaseFile
       read_page(pos).debug
     end
     puts "\nWAL:"
-    @wal_count.times do |pos|
-      read_wal_page(pos).debug
+    skip = read_wal_page(0u32).as_wal.value.skip_page_count
+    (skip...@wal_count).each do |wpos|
+      read_wal_page(wpos).debug
+    end
+  end
+
+  def flush
+    return if @wal_count - @skip < 1000
+    while @wal_usage.size > 1 && @wal_usage[0] == 0
+      (@skip...@wal_count).each do |wpos|
+        page = read_wal_page(wpos)
+        if page.type == 'C'
+          wal_page = read_wal_page(0u32)
+          @skip = wal_page.as_wal.value.skip_page_count = wpos + 1
+          @wal_file.seek(0u32)
+          @wal_file.write(Bytes.new(wal_page.pointer, @page_size))
+          # fsync
+          @wal_skip += 1
+          @wal.shift
+          @wal_usage.shift
+          break
+        else
+          @file.seek(page.pos * @page_size)
+          @file.write(Bytes.new(page.pointer, @page_size))
+          @real_page_count = Math.max(@real_page_count, page.pos + 1)
+        end
+      end
     end
   end
 
@@ -145,6 +180,7 @@ class DatabaseFile
     @wal_count += 1
 
     @wal << @next_wal
+    @wal_usage << 0u32
     @next_wal = Hash(UInt32, UInt32).new
   end
 
