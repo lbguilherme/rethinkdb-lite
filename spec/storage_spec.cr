@@ -5,9 +5,9 @@ require "secure_random"
 system "rm -rf /tmp/dblite"
 system "mkdir /tmp/dblite"
 
-describe DatabaseFile do
+describe Storage::DatabaseFile do
   it "accepts writes and reads" do
-    db = DatabaseFile.create(random_file)
+    db = Storage::DatabaseFile.create(random_file)
 
     pos = 0u32
     db.write do |w|
@@ -23,7 +23,7 @@ describe DatabaseFile do
   end
 
   it "takes multiple writes" do
-    db = DatabaseFile.create(random_file)
+    db = Storage::DatabaseFile.create(random_file)
 
     pos = 0u32
     db.write do |w|
@@ -44,7 +44,7 @@ describe DatabaseFile do
 
   it "persists writes across file opens" do
     file = random_file
-    db = DatabaseFile.create(file)
+    db = Storage::DatabaseFile.create(file)
 
     pos = 0u32
     db.write do |w|
@@ -55,7 +55,7 @@ describe DatabaseFile do
     end
 
     db.close
-    db = DatabaseFile.open(file)
+    db = Storage::DatabaseFile.open(file)
 
     db.read do |r|
       get_str(r.get(pos)).should eq "Hello!"
@@ -63,7 +63,7 @@ describe DatabaseFile do
   end
 
   it "rolls back in case a write aborts" do
-    db = DatabaseFile.create(random_file)
+    db = Storage::DatabaseFile.create(random_file)
 
     pos = 0u32
     db.write do |w|
@@ -90,7 +90,7 @@ describe DatabaseFile do
   end
 
   it "doesnt affects on-going reads with writes" do
-    db = DatabaseFile.create(random_file)
+    db = Storage::DatabaseFile.create(random_file)
 
     pos = 0u32
     db.write do |w|

@@ -5,9 +5,9 @@ require "secure_random"
 system "rm -rf /tmp/dblite"
 system "mkdir /tmp/dblite"
 
-describe DatabaseFile do
+describe Storage::Table do
   it "can insert and read documents with table" do
-    table = Table.create(random_file)
+    table = Storage::Table.create(random_file)
 
     objs = [
       {"id" => 47, "a": "hmm", "b": 13},
@@ -28,7 +28,7 @@ describe DatabaseFile do
 
   it "can handle several objects in the table" do
     file = random_file
-    table = Table.create(file)
+    table = Storage::Table.create(file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}
@@ -41,7 +41,7 @@ describe DatabaseFile do
     end
 
     table.close
-    table = Table.open(file)
+    table = Storage::Table.open(file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}
@@ -50,7 +50,7 @@ describe DatabaseFile do
   end
 
   it "can apply updates to a document" do
-    table = Table.create(random_file)
+    table = Storage::Table.create(random_file)
 
     5.times do |i|
       obj = {"id" => i, "v" => 0}

@@ -1,5 +1,5 @@
 require "./connection"
-require "../executor/*"
+require "../reql/*"
 require "http/server"
 require "json"
 
