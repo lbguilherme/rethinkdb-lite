@@ -87,7 +87,7 @@ struct Data
           end
         end
         count = Math.min(page_size - @page_pos, slice.size - pos)
-        slice.copy_from(@page.pointer + data_offset + @page_pos, count)
+        slice[pos, count].copy_from(@page.pointer + data_offset + @page_pos, count)
         pos += count
         @pos += count
         @page_pos += count

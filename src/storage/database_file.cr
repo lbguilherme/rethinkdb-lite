@@ -370,52 +370,56 @@ class DatabaseFile
     property page_size = 4096u16
   end
 
+  @[Packed]
   abstract struct Page
     property type = 0u8
     property version = 0u8
-    property reserved1 = 0u16
     property pos = 0u32
   end
 
+  @[Packed]
   struct AnyPage < Page
   end
 
+  @[Packed]
   struct HeaderPage < Page
     property page_size = 0u16
-    property reserved2 = 0u16
     property first_free_page = 0u32
   end
 
+  @[Packed]
   struct EmptyPage < Page
   end
 
+  @[Packed]
   struct CommitPage < Page
   end
 
+  @[Packed]
   struct FreePage < Page
     property next_free_page = 0u32
   end
 
+  @[Packed]
   struct WalStartPage < Page
     property skip_page_count = 0u32
   end
 
+  @[Packed]
   struct BTreeNodePage < Page
     property count = 0u8
-    property reserved2 = 0u8
-    property reserved3 = 0u16
     property list = StaticArray({BTree::Key, UInt32}, 1).new({BTree::Key.new(0u8), 0u32})
   end
 
+  @[Packed]
   struct BTreeLeafPage < Page
     property prev = 0u32
     property succ = 0u32
     property count = 0u8
-    property reserved2 = 0u8
-    property reserved3 = 0u16
     property list = StaticArray({BTree::Key, UInt32}, 1).new({BTree::Key.new(0u8), 0u32})
   end
 
+  @[Packed]
   struct DataPage < Page
     property size = 0u32
     property succ = 0u32
