@@ -135,21 +135,31 @@ class DatabaseFile
   end
 
   def flush
-    return if @wal_count - @skip < 15
+    return if @wal_count - @skip < 100
     while @wal_usage.size > 1 && @wal_usage[0] == 0
       (@skip...@wal_count).each do |wpos|
         page = read_wal_page(wpos)
         if page.type == 'C'
+          @skip = wpos + 1
+          if @skip == @wal_count
+            @skip = 1u32
+            @wal_count = 1u32
+            ArchUtils.truncate_file(@wal_file, (@wal_count + 1).to_u64 * @page_size)
+          end
+
           wal_page = read_wal_page(0u32)
-          @skip = wal_page.as_wal.value.skip_page_count = wpos + 1
+          wal_page.as_wal.value.skip_page_count = @skip
           @wal_file.seek(0u32)
           @wal_file.write(Bytes.new(wal_page.pointer, @page_size))
-          # TODO: fsync db
-          # TODO: punch hole on wal
-          # TODO: maybe truncate wal
+
           @wal_skip += 1
           @wal.shift
           @wal_usage.shift
+
+          # TODO: fsync db
+          # TODO: punch hole on wal ?
+          # TODO: maybe truncate wal
+          # ArchUtils.punch_hole_in_file(@wal_file, @skip.to_u64 * @page_size, (wpos - @skip + 1).to_u64 * @page_size)
           break
         else
           @file.seek(page.pos * @page_size)
@@ -165,7 +175,7 @@ class DatabaseFile
       @wal_file.seek(wpos * @page_size)
       @wal_file.write(Bytes.new(page.pointer, @page_size))
     else
-      @wal_file.seek(0, IO::Seek::End)
+      @wal_file.seek(@wal_count * @page_size)
       @wal_file.write(Bytes.new(page.pointer, @page_size))
       @next_wal[page.pos] = @wal_count
       @wal_count += 1
@@ -177,7 +187,7 @@ class DatabaseFile
     page = ptr.as(CommitPage*)
     page.value.type = 'C'.ord.to_u8
 
-    @wal_file.seek(0, IO::Seek::End)
+    @wal_file.seek(@wal_count * @page_size)
     @wal_file.write(Bytes.new(ptr, @page_size))
     @wal_count += 1
 
