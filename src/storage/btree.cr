@@ -203,5 +203,26 @@ module Storage
       end
       0u32
     end
+
+    def scan(r : DatabaseFile::Reader, &block : UInt32->)
+      scan_at_page(r, r.get(@root), &block)
+    end
+
+    def scan_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef, &block : UInt32->)
+      if page.type == 'b'
+        leaf = page.as_leaf
+
+        leaf.value.count.times do |i|
+          block.call leaf.value.list.to_unsafe[i][1]
+        end
+      else
+        node = page.as_node
+        target_pos = 0u32
+        node.value.count.times do |i|
+          pos = node.value.list.to_unsafe[i][1]
+          scan_at_page(r, r.get(pos), &block)
+        end
+      end
+    end
   end
 end

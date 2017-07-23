@@ -36,8 +36,16 @@ module Server
             duration = (Time.now - start).to_f
             if result.is_a? ReQL::Datum
               answer = {"t" => 1, "r" => [result.value], "p" => [{"duration(ms)" => duration}]}.to_json
+            elsif result.is_a? ReQL::Stream
+              result.start_reading
+              list = [] of ReQL::Datum::Type
+              while tup = result.next_row
+                list << tup[0]
+              end
+              result.finish_reading
+              answer = {"t" => 2, "r" => list, "p" => [{"duration(ms)" => duration}]}.to_json
             else
-              answer = {"t" => 2, "r" => ["stream here", 1, 2, 3], "p" => [{"duration(ms)" => duration}]}.to_json
+              raise ReQL::RuntimeError.new("Odd... this query returned neither a datum nor a stream")
             end
           when 2 # CONTINUE
           when 3 # STOP

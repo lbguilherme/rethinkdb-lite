@@ -112,8 +112,11 @@ module Storage
       current_version = @wal.size + @wal_skip
       @wal_usage[current_version - @wal_skip] += 1
       reader = Reader.new(self, current_version)
-      yield reader
-      @wal_usage[current_version - @wal_skip] -= 1
+      begin
+        yield reader
+      ensure
+        @wal_usage[current_version - @wal_skip] -= 1
+      end
       flush
     end
 
