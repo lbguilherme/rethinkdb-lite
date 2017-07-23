@@ -7,8 +7,7 @@ system "mkdir /tmp/dblite"
 
 describe DatabaseFile do
   it "can insert and read documents with table" do
-    db = DatabaseFile.create(random_file)
-    table = make_table(db)
+    table = Table.create(random_file)
 
     objs = [
       {"id" => 47, "a": "hmm", "b": 13},
@@ -16,46 +15,33 @@ describe DatabaseFile do
       {"id" => (1..3500).to_a, "lala": ("a".."z").to_a}
     ]
 
-    db.write do |w|
-      objs.each {|obj| table.insert(w, obj) }
+    objs.each do |obj|
+      table.insert(obj)
     end
 
-    db.read do |r|
-      objs.each {|obj| table.get(r, obj["id"]).should eq obj }
-
-      table.get(r, 5).should eq nil
+    objs.each do |obj|
+      table.get(obj["id"]).should eq obj
     end
+
+    table.get(5).should eq nil
   end
 
   it "can handle several objects in the table" do
-    db = DatabaseFile.create(random_file)
-    table = make_table(db)
+    table = Table.create(random_file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}
-      db.write do |w|
-        table.insert(w, obj)
-      end
+      table.insert(obj)
     end
 
-    db.read do |r|
-      300.times do |i|
-        obj = {"id" => i, "v" => i}
-        table.get(r, i).should eq obj
-      end
+    300.times do |i|
+      obj = {"id" => i, "v" => i}
+      table.get(i).should eq obj
     end
   end
 end
 
 # Helpers
-
-def make_table(db)
-  table = Table.new(0u32)
-  db.write do |w|
-    table = Table.create(w)
-  end
-  table
-end
 
 def random_file
   "/tmp/dblite/#{SecureRandom.hex}.db"

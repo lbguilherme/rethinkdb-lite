@@ -347,9 +347,9 @@ class DatabaseFile
       when 'C'
         print "% 14s | " % "Commit"
       when 'B'
-        print "% 14s | %d pointers" % ["BTree Node", as_node.value.count]
+        print "% 14s | %d pointers" % ["Table Node", as_node.value.count]
       when 'b'
-        print "% 14s | %d elements" % ["BTree Leaf", as_leaf.value.count]
+        print "% 14s | %d elements" % ["Table Leaf", as_leaf.value.count]
       when 'D'
         print "% 14s | %d bytes -- succ=%d" % ["Data", as_data.value.size, as_data.value.succ]
       else
@@ -423,6 +423,7 @@ class DatabaseFile
   struct HeaderPage < Page
     property page_size = 0u16
     property first_free_page = 0u32
+    property table_btree_pos = 0u32
   end
 
   @[Packed]
