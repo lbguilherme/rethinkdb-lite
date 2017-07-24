@@ -9,6 +9,7 @@ end
 
 describe ReQL do
   it "inspects r.table().get()" do
+    inspect_check %{r.table("test").get(nil)}
     inspect_check %{r.table("test").get(123)}
     inspect_check %{r.table("test").get("123")}
     inspect_check %{r.table("test").get([1, 2, "aa"])}

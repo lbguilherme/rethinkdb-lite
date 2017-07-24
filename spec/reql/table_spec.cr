@@ -5,6 +5,7 @@ include ReQL::DSL
 
 describe ReQL do
   it "reading document that doesnt exist returns null" do
+    r.table("test0").get(nil).run.value.should eq nil
     r.table("test0").get(123).run.value.should eq nil
     r.table("test0").get("123").run.value.should eq nil
     r.table("test0").get([1, 2, "aa"]).run.value.should eq nil
@@ -44,6 +45,11 @@ describe ReQL do
 
     list = r.table("test4").run.value.as(Array)
     list.map { |e| e.as(Hash)["value"].as(String) }.sort.should eq ["hello", "bye", "lala"].sort
+  end
+
+  it "accepts nil as a key" do
+    r.table("test1").insert({"id" => nil, "value" => "well"}).run.value.as(Hash)["inserted"].should eq 1
+    r.table("test1").get(nil).run.value.should eq({"id" => nil, "value" => "well"})
   end
 
   it "counts the number of documents" do
