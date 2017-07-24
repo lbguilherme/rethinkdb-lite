@@ -49,7 +49,7 @@ module ReQL
     end
 
     def self.eval(arr : Array)
-      Datum.new(arr.map do |e|
+      DatumArray.new(arr.map do |e|
         e = eval e
         expect_type e, Datum
         e.value.as(Datum::Type)

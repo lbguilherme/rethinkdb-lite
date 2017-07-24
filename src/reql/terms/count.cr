@@ -23,10 +23,10 @@ module ReQL
         end
         target.finish_reading
         Datum.new(count)
-      when Datum
-        Datum.new(nil)
+      when DatumArray, DatumString
+        Datum.new(target.value.size.to_i64)
       else
-        Datum.new(nil)
+        raise RuntimeError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end
     end
   end

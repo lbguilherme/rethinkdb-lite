@@ -11,7 +11,7 @@ module ReQL
         list << tup[0]
       end
       finish_reading
-      Datum.new(list)
+      DatumArray.new(list)
     end
 
     def value
