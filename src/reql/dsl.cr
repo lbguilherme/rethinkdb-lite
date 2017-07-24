@@ -45,6 +45,10 @@ module ReQL
           x.as(Term::Type)
         end
 
+        def inspect(io)
+          @term.inspect io
+        end
+
         def run
           Term.eval @term
         end

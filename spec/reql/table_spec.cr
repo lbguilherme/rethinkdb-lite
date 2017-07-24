@@ -30,8 +30,11 @@ describe ReQL do
   end
 
   it "generates a key for you" do
-    key = r.table("test3").insert({"value" => "hey"}).run.value.as(Hash)["generated_keys"].as(Array)[0].as(String)
-    r.table("test3").get(key).run.value.should eq({"id" => key, "value" => "hey"})
+    key1 = r.table("test3").insert({"value" => "hey"}).run.value.as(Hash)["generated_keys"].as(Array)[0].as(String)
+    key2 = r.table("test3").insert({"value" => "hey"}).run.value.as(Hash)["generated_keys"].as(Array)[0].as(String)
+    key1.should_not eq key2
+    r.table("test3").get(key1).run.value.should eq({"id" => key1, "value" => "hey"})
+    r.table("test3").get(key2).run.value.should eq({"id" => key2, "value" => "hey"})
   end
 
   it "presents all documents when doing a table scan" do
