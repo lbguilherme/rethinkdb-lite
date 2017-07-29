@@ -1,3 +1,5 @@
+[![Travis](https://travis-ci.org/lbguilherme/rethinkdb-lite.svg?branch=master)](https://travis-ci.org/lbguilherme/rethinkdb-lite)
+
 # RethinkDB-lite
 
 RethinkDB-compactible database written in Crystal
