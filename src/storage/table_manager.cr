@@ -1,5 +1,7 @@
-system "rm -rf test_tables"
-system "mkdir test_tables"
+require "file_utils"
+
+FileUtils.rm_rf "test_tables"
+FileUtils.mkdir_p "test_tables"
 
 module Storage
   module TableManager
@@ -16,5 +18,5 @@ module Storage
 end
 
 at_exit do
-  system "rm -rf test_tables"
+  FileUtils.rm_rf "test_tables"
 end
