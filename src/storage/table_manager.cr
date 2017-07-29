@@ -1,6 +1,7 @@
 require "file_utils"
 
-FileUtils.mkdir_p "/tmp/rethinkdb-lite/test_tables"
+FileUtils.rm_rf "/tmp/rethinkdb-lite/test_tables/"
+FileUtils.mkdir_p "/tmp/rethinkdb-lite/test_tables/"
 
 module Storage
   module TableManager
