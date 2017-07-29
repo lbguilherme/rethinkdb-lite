@@ -8,7 +8,7 @@ module Server
   @@http_connections = {} of String => ClientConnection
 
   def self.start_http
-    static_handler = HTTP::StaticFileHandler.new("rethinkdb-webui/dist/", false, false)
+    static_handler = HTTP::StaticFileHandler.new("vendor/rethinkdb-webui/dist/", false, false)
     server = HTTP::Server.new(8080) do |context|
       uri = URI.parse(context.request.resource)
       case uri.path
