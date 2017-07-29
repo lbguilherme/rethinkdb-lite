@@ -30,14 +30,12 @@ module Storage
       new(w.alloc('b').pos)
     end
 
-    @@digester = OpenSSL::Digest.new("SHA256")
-
     def self.make_key(obj)
       packer = MessagePack::Packer.new
       packer.write(obj)
 
-      @@digester.reset
-      @@digester.update(packer.to_slice)
+      digester = OpenSSL::Digest.new("SHA256")
+      digester.update(packer.to_slice)
 
       slice = @@digester.digest
       Key.new do |i|
