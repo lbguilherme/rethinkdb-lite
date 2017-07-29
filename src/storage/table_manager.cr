@@ -14,3 +14,7 @@ module Storage
     end
   end
 end
+
+at_exit do
+  system "rm -rf test_tables"
+end
