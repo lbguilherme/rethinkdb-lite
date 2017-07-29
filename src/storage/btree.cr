@@ -37,7 +37,7 @@ module Storage
       digester = OpenSSL::Digest.new("SHA256")
       digester.update(packer.to_slice)
 
-      slice = @@digester.digest
+      slice = digester.digest
       Key.new do |i|
         i < slice.size ? slice[i] : 0u8
       end
