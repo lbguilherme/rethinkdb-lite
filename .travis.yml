@@ -1,4 +1,6 @@
-language: crystal
-crystal:
-  - latest
-  # - nightly
+language: generic
+sudo: required
+services:
+  - docker
+script:
+  - docker run -t -u $(id -u) -v $(pwd):/mnt -w /mnt crystallang/crystal bash -c "crystal deps && crystal spec"
