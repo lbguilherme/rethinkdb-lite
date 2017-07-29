@@ -1,18 +1,20 @@
-# dblite
+# RethinkDB-lite
 
 RethinkDB-compactible database written in Crystal
 
 ## Installation
 
 ```
-cd rethinkdb-webui
+cd vendor/rethinkdb-webui
 npm install
 npm run build
-cd ..
-crystal src/dblite.cr
+cd ../..
+crystal deps
+crystal src/main.cr
 ```
 
 ## Thanks
 
 - https://github.com/rethinkdb/rethinkdb
 - https://github.com/AtnNn/rethinkdb-webui
+- https://github.com/crystal-lang/crystal

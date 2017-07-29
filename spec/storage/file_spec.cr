@@ -2,8 +2,8 @@ require "spec"
 require "../src/storage/*"
 require "secure_random"
 
-system "rm -rf /tmp/dblite"
-system "mkdir /tmp/dblite"
+system "rm -rf /tmp/rethinkdb-lite"
+system "mkdir /tmp/rethinkdb-lite"
 
 describe Storage::DatabaseFile do
   it "accepts writes and reads" do
@@ -129,7 +129,7 @@ class MockException < Exception
 end
 
 def random_file
-  "/tmp/dblite/#{SecureRandom.hex}.db"
+  "/tmp/rethinkdb-lite/#{SecureRandom.hex}.db"
 end
 
 def get_str(page)

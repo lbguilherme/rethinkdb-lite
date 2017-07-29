@@ -1,12 +1,12 @@
-name: dblite
+name: rethinkdb-lite
 version: 0.1.0
 
 authors:
   - Guilherme Bernal <dev@lbguilherme.com>
 
 targets:
-  dblite:
-    main: src/dblite.cr
+  rethinkdb-lite:
+    main: src/main.cr
 
 crystal: 0.23.1
 

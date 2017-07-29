@@ -2,8 +2,8 @@ require "spec"
 require "../src/storage/*"
 require "secure_random"
 
-system "rm -rf /tmp/dblite"
-system "mkdir /tmp/dblite"
+system "rm -rf /tmp/rethinkdb-lite"
+system "mkdir /tmp/rethinkdb-lite"
 
 describe Storage::Table do
   it "can insert and read documents with table" do
@@ -76,5 +76,5 @@ end
 # Helpers
 
 def random_file
-  "/tmp/dblite/#{SecureRandom.hex}.db"
+  "/tmp/rethinkdb-lite/#{SecureRandom.hex}.db"
 end
