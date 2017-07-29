@@ -1,7 +1,6 @@
 require "file_utils"
 
-FileUtils.rm_rf "test_tables"
-FileUtils.mkdir_p "test_tables"
+FileUtils.mkdir_p "/tmp/rethinkdb-lite/test_tables"
 
 module Storage
   module TableManager
@@ -11,12 +10,8 @@ module Storage
       if table = @@tables[name]?
         table
       else
-        @@tables[name] = Table.create("test_tables/" + name)
+        @@tables[name] = Table.create("/tmp/rethinkdb-lite/test_tables/" + name)
       end
     end
   end
-end
-
-at_exit do
-  FileUtils.rm_rf "test_tables"
 end
