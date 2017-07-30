@@ -1,7 +1,7 @@
 require "./database_file"
 
 require "msgpack"
-require "openssl"
+require "digest"
 
 struct StaticArray(T, N)
   include Comparable(StaticArray(T, N))
@@ -34,10 +34,8 @@ module Storage
       packer = MessagePack::Packer.new
       packer.write(obj)
 
-      digester = OpenSSL::Digest.new("sha256")
-      digester.update(packer.to_slice)
+      slice = Digest::SHA1.digest(packer.to_slice).to_slice
 
-      slice = digester.digest
       Key.new do |i|
         i < slice.size ? slice[i] : 0u8
       end
