@@ -34,7 +34,7 @@ module Storage
       packer = MessagePack::Packer.new
       packer.write(obj)
 
-      digester = OpenSSL::Digest.new("SHA256")
+      digester = OpenSSL::Digest.new("sha256")
       digester.update(packer.to_slice)
 
       slice = digester.digest
