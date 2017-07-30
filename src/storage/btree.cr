@@ -17,7 +17,7 @@ end
 
 module Storage
   struct BTree
-    alias Key = StaticArray(UInt8, 32)
+    alias Key = StaticArray(UInt8, 20)
 
     def initialize(@root : UInt32)
     end
@@ -34,11 +34,7 @@ module Storage
       packer = MessagePack::Packer.new
       packer.write(obj)
 
-      slice = Digest::SHA1.digest(packer.to_slice).to_slice
-
-      Key.new do |i|
-        i < slice.size ? slice[i] : 0u8
-      end
+      return Digest::SHA1.digest(packer.to_slice)
     end
 
     def list_offset
