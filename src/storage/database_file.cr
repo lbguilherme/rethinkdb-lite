@@ -18,6 +18,7 @@ module Storage
       @next_wal = Hash(UInt32, UInt32).new
       @wal_count = 1u32
       @wal_skip = 0u32
+      @pending_wal = Hash(UInt32, Bytes).new
 
       header = read_file_page(0u32).as_header.value
 
@@ -170,17 +171,21 @@ module Storage
 
     def write_page(page)
       if wpos = @next_wal[page.pos]?
-        @wal_file.seek(wpos * @page_size)
-        @wal_file.write(Bytes.new(page.pointer, @page_size))
+        @pending_wal[wpos] = Bytes.new(page.pointer, @page_size).clone
       else
-        @wal_file.seek(@wal_count * @page_size)
-        @wal_file.write(Bytes.new(page.pointer, @page_size))
+        @pending_wal[@wal_count] = Bytes.new(page.pointer, @page_size).clone
         @next_wal[page.pos] = @wal_count
         @wal_count += 1
       end
     end
 
     def commit
+      @pending_wal.each do |(wpos, bytes)|
+        @wal_file.seek(wpos * @page_size)
+        @wal_file.write(bytes)
+      end
+      @pending_wal = Hash(UInt32, Bytes).new
+
       ptr = Pointer(UInt8).malloc(@page_size)
       page = ptr.as(CommitPage*)
       page.value.type = 'C'.ord.to_u8
@@ -275,6 +280,9 @@ module Storage
     def read_wal_page(pos : UInt32)
       if pos > @wal_count
         raise Error.new("Reading page #{pos} out of bounds")
+      end
+      if slice = @pending_wal[pos]?
+        return PageRef.new(slice.clone)
       end
       slice = Bytes.new(@page_size)
       @wal_file.pos = @page_size * pos
