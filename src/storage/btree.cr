@@ -38,12 +38,12 @@ module Storage
     end
 
     def list_offset
-      x = DatabaseFile::BTreeLeafPage.new
+      x = BTreeLeafPage.new
       pointerof(x.@list).address - pointerof(x).address
     end
 
     def node_offset
-      x = DatabaseFile::BTreeNodePage.new
+      x = BTreeNodePage.new
       pointerof(x.@list).address - pointerof(x).address
     end
 
@@ -62,7 +62,7 @@ module Storage
       end
     end
 
-    private def insert_at_page(w : DatabaseFile::Writter, page : DatabaseFile::PageRef, key : Key, value : UInt32)
+    private def insert_at_page(w : DatabaseFile::Writter, page : PageRef, key : Key, value : UInt32)
       if page.type == 'b'
         leaf = page.as_leaf
         max_count = {255, ((page.size - list_offset) / (sizeof(Key) + 4)).to_i}.min
@@ -171,7 +171,7 @@ module Storage
       query_at_page(r, r.get(@root), key)
     end
 
-    def query_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef, key : Key)
+    def query_at_page(r : DatabaseFile::Reader, page : PageRef, key : Key)
       if page.type == 'b'
         leaf = page.as_leaf
 
@@ -200,7 +200,7 @@ module Storage
       scan_at_page(r, r.get(@root), &block)
     end
 
-    def scan_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef, &block : UInt32 ->)
+    def scan_at_page(r : DatabaseFile::Reader, page : PageRef, &block : UInt32 ->)
       if page.type == 'b'
         leaf = page.as_leaf
 
@@ -221,7 +221,7 @@ module Storage
       count_at_page(r, r.get(@root))
     end
 
-    def count_at_page(r : DatabaseFile::Reader, page : DatabaseFile::PageRef)
+    def count_at_page(r : DatabaseFile::Reader, page : PageRef)
       if page.type == 'b'
         leaf = page.as_leaf
 

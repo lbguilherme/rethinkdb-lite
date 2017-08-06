@@ -6,25 +6,25 @@ module ReQL
       "TABLE"
     end
 
-    def initialize(@table : Storage::Table)
+    def initialize(@storage : Storage::Table)
     end
 
     def get(key : Datum::Type)
-      Row.new(@table, key)
+      Row.new(@storage, key)
     end
 
     def insert(obj : Datum::Type)
-      @table.insert(obj.as(Hash))
+      @storage.insert(obj.as(Hash))
     end
 
     def count
-      @table.count
+      @storage.count
     end
 
     def start_reading
       @channel = Channel(Datum::Type).new
       spawn do
-        @table.scan do |row|
+        @storage.scan do |row|
           if ch = @channel
             ch.send row
           end

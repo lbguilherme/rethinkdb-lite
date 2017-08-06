@@ -4,14 +4,14 @@ require "msgpack"
 
 module Storage
   def self.data_offset
-    x = DatabaseFile::DataPage.new
+    x = DataPage.new
     pointerof(x.@data).address - pointerof(x).address
   end
 
   struct Data
     getter page
 
-    def initialize(@page : DatabaseFile::PageRef)
+    def initialize(@page : PageRef)
     end
 
     def read(r : DatabaseFile::Reader)
@@ -99,7 +99,7 @@ module Storage
     class DataIO
       include IO
 
-      def initialize(@r : DatabaseFile::Reader, @page : DatabaseFile::PageRef)
+      def initialize(@r : DatabaseFile::Reader, @page : PageRef)
         @pos = 0
         @page_pos = 0
       end
