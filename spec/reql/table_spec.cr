@@ -61,4 +61,12 @@ describe ReQL do
     r.table("test5").insert({"a" => 1}).run
     r.table("test5").count.run.value.should eq 3
   end
+
+  it "handles inserting and reading many rows" do
+    1000.times do |i|
+      r.table("test6").insert({"value" => i}).run
+    end
+
+    r.table("test6").run.value.as(Array).map {|x| x.as(Hash)["value"].as(Int64) }.sort.should eq (0...1000).to_a
+  end
 end
