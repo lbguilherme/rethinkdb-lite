@@ -140,26 +140,31 @@ module Storage
         (@skip...@wal_count).each do |wpos|
           page = read_wal_page(wpos)
           if page.type == 'C'
+            ArchUtils.sync_file(@file)
             @skip = wpos + 1
             if @skip == @wal_count
               @skip = 1u32
               @wal_count = 1u32
-              ArchUtils.truncate_file(@wal_file, (@wal_count + 1).to_u64 * @page_size)
-            end
 
-            wal_page = read_wal_page(0u32)
-            wal_page.as_wal.value.skip_page_count = @skip
-            @wal_file.seek(0u32)
-            @wal_file.write(Bytes.new(wal_page.pointer, @page_size))
+              wal_page = read_wal_page(0u32)
+              wal_page.as_wal.value.skip_page_count = @skip
+              @wal_file.seek(0u32)
+              @wal_file.write(Bytes.new(wal_page.pointer, @page_size))
+              ArchUtils.sync_file(@wal_file)
+
+              ArchUtils.truncate_file(@wal_file, (@wal_count + 1).to_u64 * @page_size)
+            else
+              wal_page = read_wal_page(0u32)
+              wal_page.as_wal.value.skip_page_count = @skip
+              @wal_file.seek(0u32)
+              @wal_file.write(Bytes.new(wal_page.pointer, @page_size))
+            end
 
             @wal_skip += 1
             @wal.shift
             @wal_usage.shift
 
-            # TODO: fsync db
-            # TODO: punch hole on wal ?
-            # TODO: maybe truncate wal
-            # ArchUtils.punch_hole_in_file(@wal_file, @skip.to_u64 * @page_size, (wpos - @skip + 1).to_u64 * @page_size)
+            ArchUtils.punch_hole_in_file(@wal_file, @page_size, (@skip - 1).to_u64 * @page_size)
             break
           else
             @file.seek(page.pos * @page_size)
@@ -198,6 +203,8 @@ module Storage
       @wal << @next_wal
       @wal_usage << 0u32
       @next_wal = Hash(UInt32, UInt32).new
+
+      ArchUtils.sync_file(@wal_file)
     end
 
     def rollback

@@ -26,6 +26,7 @@ module ArchUtils
   end
 
   def self.punch_hole_in_file(file : File, offset : UInt64, len : UInt64)
+    return if len == 0
     if LibC.fallocate(file.@fd, LibC::FALLOC_FL_PUNCH_HOLE | LibC::FALLOC_FL_KEEP_SIZE, offset, len) != 0
       raise Errno.new("fallocate")
     end
