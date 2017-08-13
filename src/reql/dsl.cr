@@ -90,7 +90,7 @@ module ReQL
         def self.{{name}}(*args, &block : R -> R::Type)
           vari = {R.make_var_i}.map(&.as(Term::Type))
           vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
-          func = ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil))
+          func = ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil)
           R{{name}}.new(*args, func)
         end
 
