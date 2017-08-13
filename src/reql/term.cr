@@ -42,6 +42,12 @@ module ReQL
       end
     end
 
+    macro expect_args(min, max)
+      if @args.size < {{min}} || @args.size > {{max}}
+        raise CompileError.new("Expected between #{ {{min}}} and #{ {{max}}} arguments but found #{@args.size}")
+      end
+    end
+
     macro expect_type(val, type)
       unless {{val}}.is_a? {{type.id}}
         raise RuntimeError.new("Expected type #{{{type}}.reql_name} but found #{{{val}}.class.reql_name}")
