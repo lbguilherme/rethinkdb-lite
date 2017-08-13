@@ -67,6 +67,6 @@ describe ReQL do
       r.table("test6").insert({"value" => i}).run
     end
 
-    r.table("test6").run.value.as(Array).map {|x| x.as(Hash)["value"].as(Int64) }.sort.should eq (0...1000).to_a
+    r.table("test6").run.value.as(Array).map { |x| x.as(Hash)["value"].as(Int64) }.sort.should eq (0...1000).to_a
   end
 end

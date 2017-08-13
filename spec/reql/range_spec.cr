@@ -25,7 +25,7 @@ describe ReQL do
   end
 
   it "infinite ranges iterates from zero to infinity" do
-    stream = r.range().run.as ReQL::Stream
+    stream = r.range.run.as ReQL::Stream
     stream.start_reading
     1000.times do |i|
       stream.next_val.should eq({i.to_i64})
