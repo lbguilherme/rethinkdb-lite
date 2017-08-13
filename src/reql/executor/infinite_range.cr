@@ -10,7 +10,7 @@ module ReQL
       @value = 0i64
     end
 
-    def next_row
+    def next_val
       v = @value
       @value += 1
       return {v}

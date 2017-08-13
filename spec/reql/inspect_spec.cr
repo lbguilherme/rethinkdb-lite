@@ -24,4 +24,10 @@ describe ReQL do
   it "inspects r.table().count()" do
     inspect_check %{r.table("test").count()}
   end
+
+  it "inspects r.range()" do
+    inspect_check %{r.range()}
+    inspect_check %{r.range(10)}
+    inspect_check %{r.range(5, 30)}
+  end
 end
