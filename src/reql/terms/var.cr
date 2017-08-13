@@ -3,7 +3,7 @@ module ReQL
     register_type VAR
 
     def inspect(io)
-      io << "var" << @args[0]
+      io << "var_" << @args[0]
     end
 
     def compile

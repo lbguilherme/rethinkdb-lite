@@ -6,10 +6,10 @@ module ReQL
       vars = @args[0].as(Array)
       body = @args[1]
       if vars.size == 1
-        io << "var" << vars[0] << " => "
+        io << "var_" << vars[0] << " => "
       else
         io << "("
-        vars.map { |i| "var#{i}" }.join(", ")
+        vars.map { |i| "var_#{i}" }.join(", ")
         io << ") => "
       end
       body.inspect(io)
