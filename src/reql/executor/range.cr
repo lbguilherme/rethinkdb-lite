@@ -15,7 +15,7 @@ module ReQL
     end
 
     def next_val
-      if @value == @to
+      if @value >= @to
         return nil
       else
         v = @value
