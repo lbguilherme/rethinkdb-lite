@@ -7,15 +7,16 @@ module ReQL
     end
 
     def start_reading
-      @value = @from - 1
+      @value = @from
     end
 
     def next_row
       if @value == @to
         return nil
       else
+        v = @value
         @value += 1
-        return {@value}
+        return {v}
       end
     end
 
