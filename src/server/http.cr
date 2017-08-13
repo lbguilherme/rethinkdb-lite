@@ -56,7 +56,7 @@ module Server
               list = [] of ReQL::Datum::Type
               has_more = true
               40.times do
-                tup = result.next_row
+                tup = result.next_val
                 unless tup
                   conn.streams.delete query_id
                   result.finish_reading
@@ -80,7 +80,7 @@ module Server
             has_more = true
             if result
               40.times do
-                tup = result.next_row
+                tup = result.next_val
                 unless tup
                   conn.streams.delete query_id
                   result.finish_reading

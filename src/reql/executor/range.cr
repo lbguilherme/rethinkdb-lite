@@ -14,7 +14,7 @@ module ReQL
       @value = @from
     end
 
-    def next_row
+    def next_val
       if @value == @to
         return nil
       else

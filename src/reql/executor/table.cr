@@ -36,7 +36,7 @@ module ReQL
       end
     end
 
-    def next_row
+    def next_val
       begin
         if ch = @channel
           return {ch.receive}

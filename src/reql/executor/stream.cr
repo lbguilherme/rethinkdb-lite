@@ -7,7 +7,7 @@ module ReQL
     def to_datum_array
       start_reading
       list = [] of ReQL::Datum::Type
-      while tup = next_row
+      while tup = next_val
         list << tup[0]
       end
       finish_reading
@@ -21,7 +21,7 @@ module ReQL
     def count
       start_reading
       count = 0i64
-      while tup = next_row
+      while tup = next_val
         count += 1
       end
       finish_reading
