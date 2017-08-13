@@ -4,12 +4,22 @@ module ReQL
       @@next_var_i = 1i64
       alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | String | Nil | R
 
+      def self.reset_next_var_i
+        @@next_var_i = 1i64
+      end
+
       def self.convert_type(x : R)
         x.val.as(Term::Type)
       end
 
       def self.convert_type(x : Term)
         x.as(Term::Type)
+      end
+
+      def self.convert_type(block : R -> R::Type)
+        vari = {R.make_var_i}.map(&.as(Term::Type))
+        vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
+        ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil).as(Term::Type)
       end
 
       def self.convert_type(x : Int)
@@ -88,17 +98,11 @@ module ReQL
         end
 
         def self.{{name}}(*args, &block : R -> R::Type)
-          vari = {R.make_var_i}.map(&.as(Term::Type))
-          vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
-          func = ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil)
-          R{{name}}.new(*args, func)
+          R{{name}}.new(*args, block)
         end
 
         def {{name}}(*args, &block : R -> R::Type)
-          vari = {R.make_var_i}.map(&.as(Term::Type))
-          vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
-          func = ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil)
-          R{{name}}.new(self, *args, func)
+          R{{name}}.new(self, *args, block)
         end
       end
     end
