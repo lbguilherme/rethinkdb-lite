@@ -196,46 +196,40 @@ module Storage
       0u32
     end
 
-    def scan(r : DatabaseFile::Reader, &block : UInt32 ->)
-      scan_at_page(r, r.get(@root), &block)
+    private def find_first_leaf(r : DatabaseFile::Reader, page : PageRef)
+      while page.type == 'B'
+        page = r.get(page.as_node.value.list.to_unsafe[0][1]);
+      end
+
+      return page
     end
 
-    def scan_at_page(r : DatabaseFile::Reader, page : PageRef, &block : UInt32 ->)
-      if page.type == 'b'
+    private def each_leaf(r : DatabaseFile::Reader)
+      page = find_first_leaf(r, r.get(@root))
+      loop do
         leaf = page.as_leaf
+        yield leaf
 
+        succ = leaf.value.succ
+        break if succ == 0
+        page = r.get(succ)
+      end
+    end
+
+    def scan(r : DatabaseFile::Reader)
+      each_leaf(r) do |leaf|
         leaf.value.count.times do |i|
-          block.call leaf.value.list.to_unsafe[i][1]
-        end
-      else
-        node = page.as_node
-        target_pos = 0u32
-        node.value.count.times do |i|
-          pos = node.value.list.to_unsafe[i][1]
-          scan_at_page(r, r.get(pos), &block)
+          yield leaf.value.list.to_unsafe[i][1]
         end
       end
     end
 
     def count(r : DatabaseFile::Reader)
-      count_at_page(r, r.get(@root))
-    end
-
-    def count_at_page(r : DatabaseFile::Reader, page : PageRef)
-      if page.type == 'b'
-        leaf = page.as_leaf
-
-        leaf.value.count.to_i64
-      else
-        node = page.as_node
-        target_pos = 0u32
-        count = 0i64
-        node.value.count.times do |i|
-          pos = node.value.list.to_unsafe[i][1]
-          count += count_at_page(r, r.get(pos))
-        end
-        count
+      result = 0i64
+      each_leaf(r) do |leaf|
+        result += leaf.value.count
       end
+      result
     end
   end
 end
