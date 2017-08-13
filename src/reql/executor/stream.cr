@@ -17,5 +17,15 @@ module ReQL
     def value
       to_datum_array.value
     end
+
+    def count
+      start_reading
+      count = 0i64
+      while tup = next_row
+        count += 1
+      end
+      finish_reading
+      count
+    end
   end
 end

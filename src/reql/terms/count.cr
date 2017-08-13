@@ -13,16 +13,8 @@ module ReQL
       target = eval term.args[0]
 
       case target
-      when Table
-        Datum.new(target.count)
       when Stream
-        target.start_reading
-        count = 0i64
-        while tup = target.next_row
-          count += 1
-        end
-        target.finish_reading
-        Datum.new(count)
+        Datum.new(target.count)
       when DatumArray, DatumString
         Datum.new(target.value.size.to_i64)
       else
