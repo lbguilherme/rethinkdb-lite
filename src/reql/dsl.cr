@@ -69,5 +69,6 @@ module ReQL
     term get, GetTerm
     term insert, InsertTerm
     term count, CountTerm
+    term range, RangeTerm
   end
 end
