@@ -18,6 +18,10 @@ module Server
         context.response.print conn_id
       when "/ajax/reql/close-connection"
         conn_id = (uri.query || "").sub("conn_id=", "")
+        conn = @@http_connections[conn_id]?
+        if conn
+          conn.streams.values.each &.finish_reading
+        end
         @@http_connections.delete conn_id
       when "/ajax/reql/"
         conn_id = (uri.query || "").sub("conn_id=", "")
