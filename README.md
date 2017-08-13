@@ -13,7 +13,7 @@ This is a personal project aiming at reimplementing everything [RethinkDB](https
 
 #### Non-goals
 
-- Make it stable and ready for production use (unless you want to shot your self in the head... with a machine gun.. you should simply use RethinkDB)
+- Make it stable and ready for production use (you should simply use RethinkDB itself)
 - Break compactibility to introduce features that would not fit the original RethinkDB
 
 ## Running
