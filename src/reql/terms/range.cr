@@ -12,11 +12,11 @@ module ReQL
     def self.eval(term : RangeTerm)
       case term.args.size
       when 0
-        Range.new(0i64, nil)
+        InfiniteRange.new()
       when 1
-        from = eval term.args[0]
-        expect_type from, Datum
-        Range.new(from.value.as(Int64), nil)
+        to = eval term.args[0]
+        expect_type to, Datum
+        Range.new(0i64, to.value.as(Int64))
       when 2
         from = eval term.args[0]
         expect_type from, Datum

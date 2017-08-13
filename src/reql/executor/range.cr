@@ -2,8 +2,12 @@ require "./stream"
 
 module ReQL
   class Range < Stream
-    def initialize(@from : Int64, @to : Int64?)
+    def initialize(@from : Int64, @to : Int64)
       @value = 0i64
+    end
+
+    def count
+      @to - @from
     end
 
     def start_reading
