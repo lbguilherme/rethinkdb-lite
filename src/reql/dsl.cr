@@ -50,7 +50,7 @@ module ReQL
         end
 
         def run
-          Term.eval @term
+          Evalutator.new.eval @term
         end
       end
 

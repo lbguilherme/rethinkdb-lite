@@ -48,38 +48,6 @@ module ReQL
       end
     end
 
-    macro expect_type(val, type)
-      unless {{val}}.is_a? {{type.id}}
-        raise RuntimeError.new("Expected type #{{{type}}.reql_name} but found #{{{val}}.class.reql_name}")
-      end
-    end
-
-    def self.eval(arr : Array)
-      DatumArray.new(arr.map do |e|
-        e = eval e
-        expect_type e, Datum
-        e.value.as(Datum::Type)
-      end)
-    end
-
-    def self.eval(hsh : Hash)
-      result = {} of String => Datum::Type
-      hsh.each do |(k, v)|
-        v = eval v
-        expect_type v, Datum
-        result[k] = v.value
-      end
-      Datum.new(result)
-    end
-
-    def self.eval(primitive : Bool | Float64 | Int64 | Nil)
-      Datum.new(primitive)
-    end
-
-    def self.eval(str : String)
-      DatumString.new(str)
-    end
-
     macro infix_inspect(name)
       def inspect(io)
         if @args.size == 0
@@ -123,6 +91,40 @@ module ReQL
 
     macro register_type(const)
       Term.add_type(TermType::{{const.id}}, self)
+    end
+  end
+
+  class Evalutator
+    def eval(arr : Array)
+      DatumArray.new(arr.map do |e|
+        e = eval e
+        expect_type e, Datum
+        e.value.as(Datum::Type)
+      end)
+    end
+
+    def eval(hsh : Hash)
+      result = {} of String => Datum::Type
+      hsh.each do |(k, v)|
+        v = eval v
+        expect_type v, Datum
+        result[k] = v.value
+      end
+      Datum.new(result)
+    end
+
+    def eval(primitive : Bool | Float64 | Int64 | Nil)
+      Datum.new(primitive)
+    end
+
+    def eval(str : String)
+      DatumString.new(str)
+    end
+
+    macro expect_type(val, type)
+      unless {{val}}.is_a? {{type.id}}
+        raise RuntimeError.new("Expected type #{{{type}}.reql_name} but found #{{{val}}.class.reql_name}")
+      end
     end
   end
 

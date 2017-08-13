@@ -42,7 +42,7 @@ module Server
           case message[0]
           when 1 # START
             query = ReQL::Query.new(query_id, message[1], message[2]?.as(Hash(String, JSON::Type) | Nil))
-            result = query.start
+            result = query.run
             if result.is_a? ReQL::Datum
               answer = {
                 "t" => 1,

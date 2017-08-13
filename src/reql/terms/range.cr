@@ -8,8 +8,8 @@ module ReQL
     end
   end
 
-  class Term
-    def self.eval(term : RangeTerm)
+  class Evalutator
+    def eval(term : RangeTerm)
       case term.args.size
       when 0
         InfiniteRange.new()

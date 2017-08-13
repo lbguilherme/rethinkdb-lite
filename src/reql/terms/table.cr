@@ -16,8 +16,8 @@ module ReQL
     end
   end
 
-  class Term
-    def self.eval(term : TableTerm)
+  class Evalutator
+    def eval(term : TableTerm)
       name = eval term.args[0]
       expect_type name, DatumString
       Table.new(Storage::TableManager.find(name.value))

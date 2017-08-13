@@ -9,8 +9,8 @@ module ReQL
       p @term
     end
 
-    def start
-      Term.eval @term
+    def run
+      Evalutator.new.eval @term
     end
   end
 end
