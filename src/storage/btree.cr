@@ -198,7 +198,7 @@ module Storage
 
     private def find_first_leaf(r : DatabaseFile::Reader, page : PageRef)
       while page.type == 'B'
-        page = r.get(page.as_node.value.list.to_unsafe[0][1]);
+        page = r.get(page.as_node.value.list.to_unsafe[0][1])
       end
 
       return page

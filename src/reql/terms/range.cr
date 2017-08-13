@@ -12,7 +12,7 @@ module ReQL
     def eval(term : RangeTerm)
       case term.args.size
       when 0
-        InfiniteRange.new()
+        InfiniteRange.new
       when 1
         to = eval term.args[0]
         expect_type to, Datum

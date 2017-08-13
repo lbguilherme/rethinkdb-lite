@@ -48,7 +48,7 @@ module Server
                 "t" => 1,
                 "r" => [result.value],
                 "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
-                "n" => [] of String
+                "n" => [] of String,
               }.to_json
             elsif result.is_a? ReQL::Stream
               result.start_reading
@@ -69,7 +69,7 @@ module Server
                 "t" => has_more ? 3 : 2,
                 "r" => list,
                 "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
-                "n" => [] of String
+                "n" => [] of String,
               }.to_json
             else
               raise ReQL::RuntimeError.new("Odd... this query returned neither a datum nor a stream")
@@ -96,7 +96,7 @@ module Server
               "t" => has_more ? 3 : 2,
               "r" => list,
               "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
-              "n" => [] of String
+              "n" => [] of String,
             }.to_json
           when 3 # STOP
             result = conn.streams[query_id]?
@@ -108,7 +108,7 @@ module Server
               "t" => 2,
               "r" => [] of String,
               "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
-              "n" => [] of String
+              "n" => [] of String,
             }.to_json
           when 4 # NOREPLY_WAIT
           when 5 # SERVER_INFO

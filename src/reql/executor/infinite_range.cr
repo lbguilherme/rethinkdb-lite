@@ -2,7 +2,7 @@ require "./infinite_stream"
 
 module ReQL
   class InfiniteRange < InfiniteStream
-    def initialize()
+    def initialize
       @value = 0i64
     end
 
