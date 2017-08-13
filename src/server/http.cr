@@ -47,7 +47,7 @@ module Server
               answer = {
                 "t" => 1,
                 "r" => [result.value],
-                "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+                "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
                 "n" => [] of String
               }.to_json
             elsif result.is_a? ReQL::Stream
@@ -68,7 +68,7 @@ module Server
               answer = {
                 "t" => has_more ? 3 : 2,
                 "r" => list,
-                "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+                "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
                 "n" => [] of String
               }.to_json
             else
@@ -95,7 +95,7 @@ module Server
             answer = {
               "t" => has_more ? 3 : 2,
               "r" => list,
-              "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+              "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
               "n" => [] of String
             }.to_json
           when 3 # STOP
@@ -107,7 +107,7 @@ module Server
             answer = {
               "t" => 2,
               "r" => [] of String,
-              "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+              "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
               "n" => [] of String
             }.to_json
           when 4 # NOREPLY_WAIT
