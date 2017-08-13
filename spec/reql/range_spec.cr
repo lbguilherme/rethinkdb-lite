@@ -14,6 +14,16 @@ describe ReQL do
     r.range(0).run.value.should eq [] of Int64
   end
 
+  it "finite ranges has consistent count" do
+    r.range(5, 176).count.run.value.should eq (5...176).size
+    r.range(51, 58).count.run.value.should eq (51...58).size
+    r.range(10, 10).count.run.value.should eq 0
+    r.range(10, 2).count.run.value.should eq 0
+
+    r.range(17).count.run.value.should eq (0...17).size
+    r.range(0).count.run.value.should eq 0
+  end
+
   it "infinite ranges iterates from zero to infinity" do
     stream = r.range().run.as ReQL::Stream
     stream.start_reading

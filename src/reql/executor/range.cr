@@ -7,7 +7,7 @@ module ReQL
     end
 
     def count
-      @to - @from
+      Math.max(0i64, @to - @from)
     end
 
     def start_reading
