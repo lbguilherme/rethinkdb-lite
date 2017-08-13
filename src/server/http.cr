@@ -34,9 +34,9 @@ module Server
         message = JSON.parse(message_json).raw.as(Array)
         answer = "{}"
         begin
+          start = Time.now
           case message[0]
           when 1 # START
-            start = Time.now
             query = ReQL::Query.new(query_id, message[1], message[2]?.as(Hash(String, JSON::Type) | Nil))
             result = query.start
             if result.is_a? ReQL::Datum
@@ -44,18 +44,68 @@ module Server
                 "t" => 1,
                 "r" => [result.value],
                 "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+                "n" => [] of String
               }.to_json
             elsif result.is_a? ReQL::Stream
+              result.start_reading
+              conn.streams[query_id] = result
+              list = [] of ReQL::Datum::Type
+              has_more = true
+              40.times do
+                tup = result.next_row
+                unless tup
+                  conn.streams.delete query_id
+                  result.finish_reading
+                  has_more = false
+                  break
+                end
+                list << tup[0]
+              end
               answer = {
-                "t" => 2,
-                "r" => result.value,
+                "t" => has_more ? 3 : 2,
+                "r" => list,
                 "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+                "n" => [] of String
               }.to_json
             else
               raise ReQL::RuntimeError.new("Odd... this query returned neither a datum nor a stream")
             end
           when 2 # CONTINUE
+            result = conn.streams[query_id]?
+            list = [] of ReQL::Datum::Type
+            has_more = true
+            if result
+              40.times do
+                tup = result.next_row
+                unless tup
+                  conn.streams.delete query_id
+                  result.finish_reading
+                  has_more = false
+                  break
+                end
+                list << tup[0]
+              end
+            else
+              has_more = false
+            end
+            answer = {
+              "t" => has_more ? 3 : 2,
+              "r" => list,
+              "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+              "n" => [] of String
+            }.to_json
           when 3 # STOP
+            result = conn.streams[query_id]?
+            if result
+              conn.streams.delete query_id
+              result.finish_reading
+            end
+            answer = {
+              "t" => 2,
+              "r" => [] of String,
+              "p" => [{"duration(ms)" => (Time.now - start).to_f}],
+              "n" => [] of String
+            }.to_json
           when 4 # NOREPLY_WAIT
           when 5 # SERVER_INFO
             info = {
