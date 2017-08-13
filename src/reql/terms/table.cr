@@ -16,7 +16,7 @@ module ReQL
     end
   end
 
-  class Evalutator
+  class Evaluator
     def eval(term : TableTerm)
       name = eval term.args[0]
       expect_type name, DatumString

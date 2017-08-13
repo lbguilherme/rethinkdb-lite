@@ -4,7 +4,7 @@ module ReQL
     infix_inspect "insert"
   end
 
-  class Evalutator
+  class Evaluator
     def eval(term : InsertTerm)
       table = eval term.args[0]
       expect_type table, Table

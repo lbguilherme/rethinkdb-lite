@@ -11,4 +11,10 @@ module ReQL
       @value.as(Array)
     end
   end
+
+  class Datum
+    def self.wrap(val : Array)
+      DatumArray.new(val)
+    end
+  end
 end

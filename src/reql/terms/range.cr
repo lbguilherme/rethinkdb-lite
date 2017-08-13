@@ -8,7 +8,7 @@ module ReQL
     end
   end
 
-  class Evalutator
+  class Evaluator
     def eval(term : RangeTerm)
       case term.args.size
       when 0

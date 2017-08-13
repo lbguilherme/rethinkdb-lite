@@ -8,7 +8,7 @@ module ReQL
     end
   end
 
-  class Evalutator
+  class Evaluator
     def eval(term : GetTerm)
       table = eval term.args[0]
       expect_type table, Table

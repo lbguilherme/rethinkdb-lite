@@ -8,7 +8,7 @@ module ReQL
     end
   end
 
-  class Evalutator
+  class Evaluator
     def eval(term : CountTerm)
       target = eval term.args[0]
 

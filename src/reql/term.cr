@@ -94,7 +94,9 @@ module ReQL
     end
   end
 
-  class Evalutator
+  class Evaluator
+    property vars = {} of Int64 => Datum
+
     def eval(arr : Array)
       DatumArray.new(arr.map do |e|
         e = eval e
