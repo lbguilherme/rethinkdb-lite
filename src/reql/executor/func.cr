@@ -21,5 +21,9 @@ module ReQL
     def value
       raise RuntimeError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)"
     end
+
+    def datum
+      raise RuntimeError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)"
+    end
   end
 end

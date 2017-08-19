@@ -27,5 +27,9 @@ module ReQL
       finish_reading
       count
     end
+
+    def datum
+      Datum.wrap(value)
+    end
   end
 end

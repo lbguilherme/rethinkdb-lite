@@ -16,5 +16,9 @@ module ReQL
     def self.wrap(val : Bool | Float64 | Hash(String, Type) | Int64 | Nil)
       Datum.new(val)
     end
+
+    def datum
+      self
+    end
   end
 end

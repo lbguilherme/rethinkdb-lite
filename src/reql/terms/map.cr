@@ -15,11 +15,13 @@ module ReQL
       expect_type func, Func
 
       case target
-      # when Stream
-      #   Datum.new(target.count)
+      when Stream
+        MapStream.new(target, ->(val : Datum) {
+          return func.as(Func).eval(self, val).datum
+        })
       when DatumArray
         DatumArray.new(target.value.map do |val|
-          func.eval(self, Datum.wrap(val)).value.as(Datum::Type)
+          func.as(Func).eval(self, Datum.wrap(val)).value.as(Datum::Type)
         end)
       else
         raise RuntimeError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
