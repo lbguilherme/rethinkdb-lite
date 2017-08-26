@@ -113,5 +113,8 @@ module ReQL
     term count, CountTerm
     term range, RangeTerm
     term map, MapTerm
+    term slice, SliceTerm
+    term limit, LimitTerm
+    term skip, SkipTerm
   end
 end

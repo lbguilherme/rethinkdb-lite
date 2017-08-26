@@ -1,17 +1,18 @@
 require "./stream"
 
 module ReQL
-  class MapStream < Stream
-    def initialize(@stream : Stream, @func : Datum -> Datum)
+  class LimitStream < Stream
+    def initialize(@stream : Stream, @size : Int64)
 
     end
 
     def count(max)
-      @stream.count(max)
+      @stream.count(Math.min(max, @size))
     end
 
     def skip(count)
       @stream.skip(count)
+      @size -= count
     end
 
     def start_reading
@@ -19,10 +20,11 @@ module ReQL
     end
 
     def next_val
-      if val = @stream.next_val
-        {@func.call(Datum.wrap(val[0])).value}
+      if @size == 0
+        return nil
       else
-        nil
+        @size -= 1i64
+        @stream.next_val
       end
     end
 

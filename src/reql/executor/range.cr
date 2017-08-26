@@ -6,8 +6,12 @@ module ReQL
       @value = 0i64
     end
 
-    def count
-      Math.max(0i64, @to - @from)
+    def count(max)
+      Math.min(max, Math.max(0i64, @to - @from))
+    end
+
+    def skip(count)
+      @value += count
     end
 
     def start_reading

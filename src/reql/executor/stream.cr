@@ -18,14 +18,18 @@ module ReQL
       to_datum_array.value
     end
 
-    def count
+    def count(max)
       start_reading
       count = 0i64
-      while tup = next_val
-        count += 1
+      while count < max && next_val
+        count += 1i64
       end
       finish_reading
       count
+    end
+
+    def skip(count)
+      count.times { next_val }
     end
 
     def datum

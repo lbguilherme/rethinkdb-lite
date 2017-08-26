@@ -17,8 +17,8 @@ module ReQL
       @storage.insert(obj.as(Hash))
     end
 
-    def count
-      @storage.count
+    def count(max)
+      Math.min(max, @storage.count)
     end
 
     def start_reading
