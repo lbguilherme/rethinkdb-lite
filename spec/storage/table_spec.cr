@@ -6,9 +6,9 @@ require "file_utils"
 FileUtils.rm_rf "/tmp/rethinkdb-lite/storage/"
 FileUtils.mkdir_p "/tmp/rethinkdb-lite/storage/"
 
-describe Storage::Table do
+describe Storage::StoredTable do
   it "can insert and read documents with table" do
-    table = Storage::Table.create(random_file)
+    table = Storage::StoredTable.create(random_file)
 
     objs = [
       {"id" => 47, "a": "hmm", "b": 13},
@@ -29,7 +29,7 @@ describe Storage::Table do
 
   it "can handle several objects in the table" do
     file = random_file
-    table = Storage::Table.create(file)
+    table = Storage::StoredTable.create(file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}
@@ -42,7 +42,7 @@ describe Storage::Table do
     end
 
     table.close
-    table = Storage::Table.open(file)
+    table = Storage::StoredTable.open(file)
 
     300.times do |i|
       obj = {"id" => i, "v" => i}
@@ -51,7 +51,7 @@ describe Storage::Table do
   end
 
   it "can apply replaces to a document" do
-    table = Storage::Table.create(random_file)
+    table = Storage::StoredTable.create(random_file)
 
     5.times do |i|
       obj = {"id" => i, "v" => 0}

@@ -6,7 +6,7 @@ module ReQL
       "ROW"
     end
 
-    def initialize(@table : Storage::Table, @key : Datum::Type)
+    def initialize(@table : Storage::AbstractTable, @key : Datum::Type)
     end
 
     def value

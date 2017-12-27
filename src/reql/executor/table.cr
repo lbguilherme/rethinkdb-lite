@@ -2,7 +2,7 @@ require "./stream"
 
 module ReQL
   class Table < Stream
-    @storage : Storage::Table?
+    @storage : Storage::AbstractTable?
 
     def self.reql_name
       "TABLE"

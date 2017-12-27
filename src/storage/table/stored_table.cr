@@ -1,10 +1,10 @@
-require "./database_file"
-require "./btree"
-require "../reql/error"
+require "../database_file"
+require "../btree"
+require "../../reql/error"
 require "json"
 
 module Storage
-  class Table
+  class StoredTable < AbstractTable
     @db : DatabaseFile
 
     def self.create(path : String)

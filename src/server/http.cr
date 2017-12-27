@@ -13,7 +13,7 @@ module Server
       uri = URI.parse(context.request.resource)
       case uri.path
       when "/ajax/reql/open-new-connection"
-        conn_id = SecureRandom.base64
+        conn_id = Random::Secure.base64
         @@http_connections[conn_id] = ClientConnection.new
         context.response.print conn_id
       when "/ajax/reql/close-connection"
@@ -113,7 +113,7 @@ module Server
           when 4 # NOREPLY_WAIT
           when 5 # SERVER_INFO
             info = {
-              "id"    => SecureRandom.uuid,
+              "id"    => UUID.random.to_s,
               "name"  => "Crystal Rethink",
               "proxy" => false,
             }
