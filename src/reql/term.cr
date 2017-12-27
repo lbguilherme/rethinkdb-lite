@@ -112,7 +112,7 @@ module ReQL
         expect_type v, Datum
         result[k] = v.value
       end
-      Datum.new(result)
+      DatumObject.new(result)
     end
 
     def eval(primitive : Bool | Float64 | Int64 | Int32 | Nil)
