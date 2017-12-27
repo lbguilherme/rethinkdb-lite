@@ -17,6 +17,15 @@ module Storage
     end
 
     def self.find_table(db_name, table_name) : AbstractTable?
+      if db_name == "rethinkdb"
+        case table_name
+        when "db_config"
+          return VirtualDbConfigTable.new
+        else
+          return nil
+        end
+      end
+
       id = Config.databases.find { |db| db.name == db_name }.try &.tables.find { |table| table.name == table_name }.try &.id
       id ? @@tables[id] : nil
     end
