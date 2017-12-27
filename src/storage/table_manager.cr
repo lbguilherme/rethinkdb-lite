@@ -29,5 +29,12 @@ module Storage
       path = File.join(@@data_path, name)
       @@tables[name] = Table.create(path)
     end
+
+    def self.close_all
+      @@tables.each_value &.close
+      @@tables = {} of String => Table
+    end
   end
 end
+
+at_exit { Storage::TableManager.close_all }

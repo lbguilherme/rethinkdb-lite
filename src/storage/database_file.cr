@@ -53,6 +53,7 @@ module Storage
     end
 
     def close
+      flush!
       @file.close
       @wal_file.close
     end
@@ -96,7 +97,6 @@ module Storage
     end
 
     def write
-      flush
       writter = Writter.new(self)
       begin
         yield writter
@@ -110,7 +110,6 @@ module Storage
     end
 
     def read
-      flush
       current_version = @wal.size + @wal_skip
       @wal_usage[current_version - @wal_skip] += 1
       reader = Reader.new(self, current_version)
@@ -136,6 +135,10 @@ module Storage
 
     def flush
       return if @wal_count - @skip < 100
+      flush!
+    end
+
+    def flush!
       while @wal_usage.size > 1 && @wal_usage[0] == 0
         (@skip...@wal_count).each do |wpos|
           page = read_wal_page(wpos)
