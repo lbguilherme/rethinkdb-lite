@@ -299,17 +299,17 @@ module Storage
     end
 
     def self.open(path : String)
-      file = File.new(path, "r+")
+      file = File.new(path + ".dat", "r+")
       walfile = File.new(path + ".wal", "r+")
       return new(file, walfile)
     end
 
     def self.create(path : String, options : CreateOptions = CreateOptions.new)
-      if File.exists?(path)
+      if File.exists?(path + ".dat")
         raise Error.new("File '#{path}' already exists")
       end
 
-      file = File.new(path, "w+")
+      file = File.new(path + ".dat", "w+")
       ArchUtils.grow_sparse_file(file, 1u64 * options.page_size)
 
       header = HeaderPage.new

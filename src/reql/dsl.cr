@@ -111,6 +111,7 @@ module ReQL
       end
     end
 
+    term db, DbTerm
     term table, TableTerm
     term get, GetTerm
     term insert, InsertTerm

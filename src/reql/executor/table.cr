@@ -6,7 +6,8 @@ module ReQL
       "TABLE"
     end
 
-    def initialize(@storage : Storage::Table)
+    def initialize(@db : Db?, @name : String)
+      @storage = Storage::TableManager.find(@db.try &.name || "test", @name)
     end
 
     def get(key : Datum::Type)
