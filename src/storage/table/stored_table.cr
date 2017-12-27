@@ -46,7 +46,7 @@ module Storage
           row = Data.new(w.get(pos)).read(w.reader).as(Hash)
           pretty_row = JSON.build(4) { |builder| row.to_json(builder) }
           pretty_obj = JSON.build(4) { |builder| obj.to_json(builder) }
-          raise ReQL::RuntimeError.new("Duplicate primary key `id`:\n#{pretty_row}\n#{pretty_obj}")
+          raise ReQL::OpFailedError.new("Duplicate primary key `id`:\n#{pretty_row}\n#{pretty_obj}")
         end
         data = Data.create(w, obj)
         old_pos = @btree.pos

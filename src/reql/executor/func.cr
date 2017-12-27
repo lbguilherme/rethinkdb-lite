@@ -10,7 +10,7 @@ module ReQL
     def eval(evaluator : Evaluator, *args)
       evaluator = evaluator.dup
       if @vars.size > args.size
-        raise RuntimeError.new("Function expects #{@vars.size} arguments, but only #{args.size} available")
+        raise QueryLogicError.new("Function expects #{@vars.size} arguments, but only #{args.size} available")
       end
       @vars.each.with_index do |var, i|
         evaluator.vars[var] = args[i]
@@ -19,11 +19,11 @@ module ReQL
     end
 
     def value
-      raise RuntimeError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)"
+      raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)"
     end
 
     def datum
-      raise RuntimeError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)"
+      raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)"
     end
   end
 end

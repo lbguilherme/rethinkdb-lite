@@ -24,7 +24,7 @@ module ReQL
           func.as(Func).eval(self, Datum.wrap(val)).value.as(Datum::Type)
         end)
       else
-        raise RuntimeError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end
     end
   end

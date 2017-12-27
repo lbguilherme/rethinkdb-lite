@@ -25,7 +25,7 @@ module ReQL
       when DatumArray
         DatumArray.new(target.value[skip, limit])
       else
-        raise RuntimeError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end
     end
   end

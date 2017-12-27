@@ -43,14 +43,7 @@ module Server
           when 1 # START
             query = ReQL::Query.new(query_id, message[1], message[2]?.as(Hash(String, JSON::Type) | Nil))
             result = query.run
-            if result.is_a? ReQL::Datum
-              answer = {
-                "t" => 1,
-                "r" => [result.value],
-                "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
-                "n" => [] of String,
-              }.to_json
-            elsif result.is_a? ReQL::Stream
+            if result.is_a? ReQL::Stream
               result.start_reading
               conn.streams[query_id] = result
               list = [] of ReQL::Datum::Type
@@ -72,7 +65,12 @@ module Server
                 "n" => [] of String,
               }.to_json
             else
-              raise ReQL::RuntimeError.new("Odd... this query returned neither a datum nor a stream")
+              answer = {
+                "t" => 1,
+                "r" => [result.value],
+                "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
+                "n" => [] of String,
+              }.to_json
             end
           when 2 # CONTINUE
             result = conn.streams[query_id]?
@@ -122,7 +120,18 @@ module Server
         rescue ex : ReQL::CompileError
           answer = {"t" => 17, "r" => [ex.message], "b" => [] of String}.to_json
         rescue ex : ReQL::RuntimeError
-          answer = {"t" => 18, "r" => [ex.message], "b" => [] of String}.to_json
+          error_type = case ex
+          when ReQL::InternalError; 1000000
+          when ReQL::ResourceLimitError; 2000000
+          when ReQL::QueryLogicError; 3000000
+          when ReQL::NonExistenceError; 3100000
+          when ReQL::OpFailedError; 4100000
+          when ReQL::OpIndeterminateError; 4200000
+          when ReQL::UserError; 5000000
+          when ReQL::PermissionError; 6000000
+          else; 0
+          end
+          answer = {"t" => 18, "e" => error_type, "r" => [ex.message], "b" => [] of String}.to_json
         end
         puts answer
         context.response.write_bytes(query_id)

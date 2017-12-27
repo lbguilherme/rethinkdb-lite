@@ -41,7 +41,7 @@ module ReQL
       end
 
       if Storage::TableManager.find_table(db_name, table_name)
-        raise RuntimeError.new("Table `#{db_name}.#{table_name}` already exists")
+        raise OpFailedError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
       Storage::TableManager.create_table(db_name, table_name)

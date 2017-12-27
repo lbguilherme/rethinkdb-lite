@@ -112,6 +112,7 @@ module ReQL
     end
 
     term db, DbTerm
+    term db_create, DbCreateTerm
     term table, TableTerm
     term table_create, TableCreateTerm
     term get, GetTerm

@@ -7,7 +7,7 @@ module ReQL
     end
 
     private def err
-      raise RuntimeError.new "Cannot use an infinite stream with an aggregation function (`reduce`, `count`, etc.) or coerce it to an array"
+      raise QueryLogicError.new "Cannot use an infinite stream with an aggregation function (`reduce`, `count`, etc.) or coerce it to an array"
     end
 
     def to_datum_array

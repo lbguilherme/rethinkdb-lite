@@ -22,8 +22,8 @@ module Storage
     end
 
     def self.create_db(db_name)
-      if Config.databases.find { |db| db.name == db_name }
-        raise "db already exists"
+      if db_name == "rethinkdb" || Config.databases.find { |db| db.name == db_name }
+        raise ReQL::OpFailedError.new("Database `#{db_name}` already exists")
       end
       Config.databases << Config::Database.new(
         UUID.random.to_s,
@@ -44,7 +44,7 @@ module Storage
 
       FileUtils.mkdir_p Config.data_path
       id = UUID.random.to_s
-      @@tables[id] = StoredTable.create(File.join(Config.data_path, table_name))
+      @@tables[id] = StoredTable.create(File.join(Config.data_path, id))
 
       Config.databases.find { |db| db.name == db_name }.not_nil!.tables << Config::Table.new(id, table_name)
       Config.save

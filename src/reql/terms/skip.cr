@@ -23,7 +23,7 @@ module ReQL
         array = target.value
         DatumArray.new(array.size > skip ? array[skip..-1] : [] of Datum::Type)
       else
-        raise RuntimeError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end
     end
   end

@@ -18,7 +18,7 @@ module ReQL
       when DatumArray, DatumString
         Datum.new(target.value.size.to_i64)
       else
-        raise RuntimeError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end
     end
   end

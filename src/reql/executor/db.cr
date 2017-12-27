@@ -12,11 +12,11 @@ module ReQL
     end
 
     def value
-      raise RuntimeError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
+      raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
     end
 
     def datum
-      raise RuntimeError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
+      raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
     end
   end
 end
