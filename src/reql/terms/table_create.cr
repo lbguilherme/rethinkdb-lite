@@ -40,11 +40,11 @@ module ReQL
         table_name = name.value
       end
 
-      if Storage::TableManager.find(db_name, table_name)
+      if Storage::TableManager.find_table(db_name, table_name)
         raise RuntimeError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
-      Storage::TableManager.create(db_name, table_name)
+      Storage::TableManager.create_table(db_name, table_name)
 
       Datum.new(Hash(String, Datum::Type).new)
     end

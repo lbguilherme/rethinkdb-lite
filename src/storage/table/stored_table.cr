@@ -5,7 +5,7 @@ require "json"
 
 module Storage
   class StoredTable < AbstractTable
-    @db : DatabaseFile
+    @file : DatabaseFile
 
     def self.create(path : String)
       db = DatabaseFile.create(path)
@@ -32,15 +32,15 @@ module Storage
     end
 
     def close
-      @db.close
+      @file.close
     end
 
-    def initialize(@db : DatabaseFile, @btree : BTree)
+    def initialize(@file : DatabaseFile, @btree : BTree)
     end
 
     def insert(obj : Hash)
       k = BTree.make_key obj["id"]
-      @db.write do |w|
+      @file.write do |w|
         pos = @btree.query(w.reader, k)
         if pos != 0
           row = Data.new(w.get(pos)).read(w.reader).as(Hash)
@@ -62,7 +62,7 @@ module Storage
     def get(key)
       k = BTree.make_key key
       row = nil
-      @db.read do |r|
+      @file.read do |r|
         pos = @btree.query(r, k)
         if pos != 0u32
           row = Data.new(r.get(pos)).read(r).as(Hash)
@@ -74,11 +74,21 @@ module Storage
     def replace(key)
       k = BTree.make_key key
       row = nil
-      @db.write do |w|
+      @file.write do |w|
         pos = @btree.query(w.reader, k)
-        if pos != 0u32
+        if pos == 0u32
+          new_row = yield nil
+          data = Data.create(w, new_row.as(Hash))
+          old_pos = @btree.pos
+          @btree.insert(w, k, data.pos)
+          if @btree.pos != old_pos
+            header = w.get(0u32)
+            header.as_header.value.table_btree_pos = @btree.pos
+            w.put(header)
+          end
+        else
           data = Data.new(w.get(pos))
-          old_row = data.read(w.reader).as(Hash)
+          old_row = data.read(w.reader).as?(Hash)
           new_row = yield old_row
           data.write(w, new_row)
         end
@@ -87,7 +97,7 @@ module Storage
     end
 
     def scan(&block : ReQL::Datum::Type ->)
-      @db.read do |r|
+      @file.read do |r|
         @btree.scan(r) do |pos|
           row = Data.new(r.get(pos)).read(r).as(Hash)
           block.call row
@@ -97,7 +107,7 @@ module Storage
 
     def count
       count = 0i64
-      @db.read do |r|
+      @file.read do |r|
         count = @btree.count(r)
       end
       count

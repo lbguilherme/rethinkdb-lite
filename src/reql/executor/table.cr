@@ -17,7 +17,7 @@ module ReQL
         return x
       end
       db_name = @db.try &.name || "test"
-      x = @storage = Storage::TableManager.find(db_name, @name)
+      x = @storage = Storage::TableManager.find_table(db_name, @name)
       if x.nil?
         raise RuntimeError.new("Table `#{db_name}.#{@name}` does not exist")
       end

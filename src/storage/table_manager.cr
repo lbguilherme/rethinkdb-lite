@@ -1,49 +1,58 @@
 require "file_utils"
 require "./table/*"
-
-FileUtils.rm_rf "/tmp/rethinkdb-lite/data/"
+require "./config"
 
 module Storage
   module TableManager
-    @@tables = {} of String => Hash(String, AbstractTable)
-    class_property data_path : String = "/tmp/rethinkdb-lite/data/"
+    @@tables = {} of String => AbstractTable
 
     def self.load_all
-      FileUtils.mkdir_p @@data_path
-      Dir.new(@@data_path).each_child do |child|
-        next unless child =~ /([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.dat/
-        db_name = $1
-        table_name = $2
-
-        unless @@tables[db_name]?
-          @@tables[db_name] = Hash(String, AbstractTable).new
+      Config.databases.each do |db|
+        db.tables.each do |tbl|
+          @@tables[tbl.id] = StoredTable.open(File.join(Config.data_path, tbl.id))
         end
-
-        @@tables[db_name][table_name] = StoredTable.open(File.join(@@data_path, "#{db_name}.#{table_name}"))
       end
 
-      if @@tables.size == 0
-        @@tables["test"] = Hash(String, AbstractTable).new
-      end
+      create_db("test")
     end
 
-    def self.find(db_name, table_name) : AbstractTable?
-      @@tables[db_name]?.try &.[table_name]?
+    def self.find_table(db_name, table_name) : AbstractTable?
+      id = Config.databases.find { |db| db.name == db_name }.try &.tables.find { |table| table.name == table_name }.try &.id
+      id ? @@tables[id] : nil
     end
 
-    def self.create(db_name, table_name) : AbstractTable
-      FileUtils.mkdir_p @@data_path
-      name = "#{db_name}.#{table_name}"
-      path = File.join(@@data_path, name)
-      unless @@tables[db_name]?
-        @@tables[db_name] = Hash(String, AbstractTable).new
+    def self.create_db(db_name)
+      if Config.databases.find { |db| db.name == db_name }
+        raise "db already exists"
       end
-      @@tables[db_name][table_name] = StoredTable.create(path)
+      Config.databases << Config::Database.new(
+        UUID.random.to_s,
+        db_name,
+        [] of Config::Table
+      )
+      Config.save
+    end
+
+    def self.create_table(db_name, table_name)
+      db = Config.databases.find { |db| db.name == db_name }
+      unless db
+        raise "db doesnt exists"
+      end
+      if db.tables.find { |table| table.name == table_name }
+        raise "table already exists"
+      end
+
+      FileUtils.mkdir_p Config.data_path
+      id = UUID.random.to_s
+      @@tables[id] = StoredTable.create(File.join(Config.data_path, table_name))
+
+      Config.databases.find { |db| db.name == db_name }.not_nil!.tables << Config::Table.new(id, table_name)
+      Config.save
     end
 
     def self.close_all
-      @@tables.each_value &.each_value &.close
-      @@tables = {} of String => Hash(String, AbstractTable)
+      @@tables.each_value &.close
+      @@tables = {} of String => AbstractTable
     end
   end
 end
