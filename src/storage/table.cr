@@ -71,7 +71,7 @@ module Storage
       row
     end
 
-    def update(key)
+    def replace(key)
       k = BTree.make_key key
       row = nil
       @db.write do |w|

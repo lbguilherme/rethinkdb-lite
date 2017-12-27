@@ -50,7 +50,7 @@ describe Storage::Table do
     end
   end
 
-  it "can apply updates to a document" do
+  it "can apply replaces to a document" do
     table = Storage::Table.create(random_file)
 
     5.times do |i|
@@ -63,7 +63,7 @@ describe Storage::Table do
         obj = {"id" => i, "v" => j}
         table.get(i).should eq obj
 
-        table.update(i) do |old_obj|
+        table.replace(i) do |old_obj|
           old_obj.should eq obj
           {"id" => old_obj["id"], "v" => old_obj["v"].as(Int) + 1}
         end

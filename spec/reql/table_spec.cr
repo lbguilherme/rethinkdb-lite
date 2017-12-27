@@ -47,11 +47,6 @@ describe ReQL do
     list.map { |e| e.as(Hash)["value"].as(String) }.sort.should eq ["hello", "bye", "lala"].sort
   end
 
-  it "accepts nil as a key" do
-    r.table("test1").insert({"id" => nil, "value" => "well"}).run.value.as(Hash)["inserted"].should eq 1
-    r.table("test1").get(nil).run.value.should eq({"id" => nil, "value" => "well"})
-  end
-
   it "counts the number of documents" do
     r.table("test5").count.run.value.should eq 0
     r.table("test5").insert({"a" => 1}).run
@@ -68,5 +63,10 @@ describe ReQL do
     end
 
     r.table("test6").run.value.as(Array).map { |x| x.as(Hash)["value"].as(Int64) }.sort.should eq (0...1000).to_a
+  end
+
+  it "accepts nil as a key" do
+    r.table("test7").insert({"id" => nil, "value" => "well"}).run.value.as(Hash)["inserted"].should eq 1
+    r.table("test7").get(nil).run.value.should eq({"id" => nil, "value" => "well"})
   end
 end
