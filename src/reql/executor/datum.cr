@@ -4,7 +4,7 @@ module ReQL
       "DATUM"
     end
 
-    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | String | Nil
+    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Nil
 
     def initialize(@value : Type)
     end
@@ -13,7 +13,7 @@ module ReQL
       @value
     end
 
-    def self.wrap(val : Bool | Float64 | Hash(String, Type) | Int64 | Nil)
+    def self.wrap(val : Bool | Float64 | Hash(String, Type) | Int64 | Int32 | Nil)
       Datum.new(val)
     end
 

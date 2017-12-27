@@ -2,7 +2,7 @@ module ReQL
   module DSL
     module R
       @@next_var_i = 1i64
-      alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | String | Nil | R
+      alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Nil | R
 
       def self.reset_next_var_i
         @@next_var_i = 1i64
@@ -20,6 +20,10 @@ module ReQL
         vari = {R.make_var_i}.map(&.as(Term::Type))
         vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
         ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil).as(Term::Type)
+      end
+
+      def self.convert_type(x : Int32)
+        x.as(Term::Type)
       end
 
       def self.convert_type(x : Int)

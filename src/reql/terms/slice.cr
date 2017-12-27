@@ -16,8 +16,8 @@ module ReQL
       limit = eval term.args[2]
       expect_type limit, Datum
 
-      skip = skip.value.as(Int64)
-      limit = limit.value.as(Int64)
+      skip = skip.value.as(Int32 | Int64).to_i64
+      limit = limit.value.as(Int32 | Int64).to_i64
 
       case target
       when Stream

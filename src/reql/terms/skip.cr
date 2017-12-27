@@ -14,7 +14,7 @@ module ReQL
       skip = eval term.args[1]
       expect_type skip, Datum
 
-      skip = skip.value.as(Int64)
+      skip = skip.value.as(Int32 | Int64).to_i64
 
       case target
       when Stream

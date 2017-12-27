@@ -16,13 +16,13 @@ module ReQL
       when 1
         to = eval term.args[0]
         expect_type to, Datum
-        Range.new(0i64, to.value.as(Int64))
+        Range.new(0i64, to.value.as(Int32 | Int64).to_i64)
       when 2
         from = eval term.args[0]
         expect_type from, Datum
         to = eval term.args[1]
         expect_type to, Datum
-        Range.new(from.value.as(Int64), to.value.as(Int64))
+        Range.new(from.value.as(Int32 | Int64).to_i64, to.value.as(Int32 | Int64).to_i64)
       else
         raise "BUG: args should be 0..2"
       end

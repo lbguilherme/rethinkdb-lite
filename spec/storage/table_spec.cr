@@ -1,6 +1,6 @@
 require "spec"
-require "../src/storage/*"
-require "secure_random"
+require "../../src/storage/*"
+require "random/secure"
 require "file_utils"
 
 FileUtils.rm_rf "/tmp/rethinkdb-lite/storage/"

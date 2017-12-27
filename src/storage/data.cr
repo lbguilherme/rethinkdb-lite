@@ -96,9 +96,7 @@ module Storage
       w.del(pos)
     end
 
-    class DataIO
-      include IO
-
+    class DataIO < IO
       def initialize(@r : DatabaseFile::Reader, @page : PageRef)
         @pos = 0
         @page_pos = 0

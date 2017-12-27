@@ -1,6 +1,6 @@
 require "spec"
-require "../src/storage/*"
-require "secure_random"
+require "../../src/storage/*"
+require "random/secure"
 require "file_utils"
 
 FileUtils.rm_rf "/tmp/rethinkdb-lite/storage/"
@@ -130,7 +130,7 @@ class MockException < Exception
 end
 
 def random_file
-  "/tmp/rethinkdb-lite/storage/#{SecureRandom.hex}.db"
+  "/tmp/rethinkdb-lite/storage/#{Random::Secure.hex}.db"
 end
 
 def get_str(page)

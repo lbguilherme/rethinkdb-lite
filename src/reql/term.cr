@@ -3,7 +3,7 @@ require "./error"
 
 module ReQL
   abstract class Term
-    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | String | Term | Nil
+    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil
 
     getter args
 
@@ -115,7 +115,7 @@ module ReQL
       Datum.new(result)
     end
 
-    def eval(primitive : Bool | Float64 | Int64 | Nil)
+    def eval(primitive : Bool | Float64 | Int64 | Int32 | Nil)
       Datum.new(primitive)
     end
 

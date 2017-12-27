@@ -1,3 +1,5 @@
+require "uuid"
+
 module ReQL
   class InsertTerm < Term
     register_type INSERT
@@ -19,7 +21,7 @@ module ReQL
 
       obj = datum.value.as(Hash)
       unless obj.has_key? "id"
-        id = SecureRandom.uuid
+        id = UUID.random.to_s
         obj["id"] = id
         result["generated_keys"] = Array(Datum::Type){id}
       end
