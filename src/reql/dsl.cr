@@ -113,6 +113,7 @@ module ReQL
 
     term db, DbTerm
     term table, TableTerm
+    term table_create, TableCreateTerm
     term get, GetTerm
     term insert, InsertTerm
     term count, CountTerm

@@ -10,6 +10,8 @@ module ReQL
     def eval(term : InsertTerm)
       table = eval term.args[0]
       expect_type table, Table
+      table.check
+
       datum = eval term.args[1]
       expect_type datum, Datum
 
@@ -25,7 +27,6 @@ module ReQL
         obj["id"] = id
         result["generated_keys"] = Array(Datum::Type){id}
       end
-
       begin
         table.insert(obj)
       rescue err : RuntimeError

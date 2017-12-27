@@ -2,30 +2,49 @@ require "./stream"
 
 module ReQL
   class Table < Stream
+    @storage : Storage::Table?
+
     def self.reql_name
       "TABLE"
     end
 
     def initialize(@db : Db?, @name : String)
-      @storage = Storage::TableManager.find(@db.try &.name || "test", @name)
+    end
+
+    private def storage
+      x = @storage
+      unless x.nil?
+        return x
+      end
+      db_name = @db.try &.name || "test"
+      x = @storage = Storage::TableManager.find(db_name, @name)
+      if x.nil?
+        raise RuntimeError.new("Table `#{db_name}.#{@name}` does not exist")
+      end
+      return x
+    end
+
+    def check
+      storage
     end
 
     def get(key : Datum::Type)
-      Row.new(@storage, key)
+      Row.new(storage, key)
     end
 
     def insert(obj : Datum::Type)
-      @storage.insert(obj.as(Hash))
+      storage.insert(obj.as(Hash))
     end
 
     def count(max)
-      Math.min(max, @storage.count)
+      Math.min(max, storage.count)
     end
 
     def start_reading
       @channel = Channel(Datum::Type).new
+      s = storage
       spawn do
-        @storage.scan do |row|
+        s.scan do |row|
           if ch = @channel
             ch.send row
           end
