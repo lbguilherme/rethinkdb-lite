@@ -72,7 +72,7 @@ module Storage
 
     private def self.load_v0(data)
       @@databases = [] of DatabaseInfo
-      @@server_info = ServerInfo.new(UUID.random.to_s, File.read("/etc/hostname").strip)
+      @@server_info = ServerInfo.new(UUID.random.to_s, initial_server_name)
     end
 
     private def self.load_v1(data)
@@ -92,6 +92,12 @@ module Storage
         data["server_info"].as(Hash)["id"].as(String),
         data["server_info"].as(Hash)["name"].as(String)
       )
+    end
+
+    private def self.initial_server_name
+      hostname = File.read("/etc/hostname").strip.gsub(/[^A-Za-z0-9_]/, "_")
+      alphabet = ("A".."Z").to_a + ("a".."z").to_a + ("1".."0").to_a
+      hostname + "_" + (0...3).map { alphabet.sample }.join
     end
   end
 end
