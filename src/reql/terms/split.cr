@@ -34,19 +34,19 @@ module ReQL
 
       if sep == ""
         arr = if max && max < str.size
-          str.chars.first(max).map &.to_s + [str[max..-1]]
-        else
-          str.chars.map &.to_s
-        end
+                str.chars.first(max).map &.to_s + [str[max..-1]]
+              else
+                str.chars.map &.to_s
+              end
         arr.reject! { |x| x == "" }
       elsif sep.nil?
         sep = /\s+/
         str = str.sub(/^#{sep}/, "")
         arr = if max
-          str.split(sep, max+1)
-        else
-          str.split(sep)
-        end
+                str.split(sep, max + 1)
+              else
+                str.split(sep)
+              end
         if arr.size > 0
           arr[0] = arr[0].strip
         end
@@ -56,10 +56,10 @@ module ReQL
         arr.reject! { |x| x == "" }
       else
         arr = if max
-          str.split(sep, max+1)
-        else
-          str.split(sep)
-        end
+                str.split(sep, max + 1)
+              else
+                str.split(sep)
+              end
       end
 
       # p [str, sep, max, arr] if sep == /\s+/ && max == 3

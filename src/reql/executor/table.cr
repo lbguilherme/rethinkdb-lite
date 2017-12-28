@@ -1,4 +1,5 @@
 require "./stream"
+require "../../storage/*"
 
 module ReQL
   class Table < Stream

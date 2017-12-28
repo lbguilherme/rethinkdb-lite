@@ -1,4 +1,3 @@
-require "./storage/*"
 require "./server/*"
 require "./reql/*"
 
@@ -12,6 +11,8 @@ r.db("foo").table_create("bar").run
 r.db("foo").table_create("baz").run
 
 Server::HttpServer.new(8080).start
+Server::DriverServer.new(28015).start
+
 puts "Server #{Storage::Config.server_info.name.inspect} (#{Storage::Config.server_info.id}) ready."
 
 sleep
