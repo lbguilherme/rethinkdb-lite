@@ -123,5 +123,7 @@ module ReQL
     term slice, SliceTerm
     term limit, LimitTerm
     term skip, SkipTerm
+    term eq, EqTerm
+    term ne, NeTerm
   end
 end
