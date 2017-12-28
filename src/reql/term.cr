@@ -115,12 +115,16 @@ module ReQL
       DatumObject.new(result)
     end
 
-    def eval(primitive : Bool | Float64 | Int64 | Int32 | Nil)
+    def eval(primitive : Bool | Nil)
       Datum.new(primitive)
     end
 
     def eval(str : String)
       DatumString.new(str)
+    end
+
+    def eval(str : Float64 | Int64 | Int32 )
+      DatumNumber.new(str)
     end
 
     macro expect_type(val, type)

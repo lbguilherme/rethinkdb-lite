@@ -36,7 +36,12 @@ module ReQL
           when DatumArray
             raise QueryLogicError.new("Cannot perform bracket on a sequence of sequences")
           when DatumObject
-            Datum.wrap(val.value[field])
+            val = val.value
+            if val.has_key? field
+              Datum.wrap(val[field])
+            else
+              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| val.to_json(builder) }}")
+            end
           else
             raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
           end
@@ -47,13 +52,22 @@ module ReQL
           when Array
             raise QueryLogicError.new("Cannot perform bracket on a sequence of sequences")
           when Hash
-            val[field]
+            if val.has_key? field
+              val[field]
+            else
+              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| val.to_json(builder) }}")
+            end
           else
             raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
           end
         }.map(&.as(ReQL::Datum::Type)))
       when DatumObject
-        Datum.wrap(target.value[field])
+        target = target.value
+        if target.has_key? field
+          Datum.wrap(target[field])
+        else
+          raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| target.to_json(builder) }}")
+        end
       else
         raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
       end

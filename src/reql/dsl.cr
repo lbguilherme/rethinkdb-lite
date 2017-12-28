@@ -120,9 +120,12 @@ module ReQL
     term count, CountTerm
     term range, RangeTerm
     term map, MapTerm
+    term merge, MergeTerm
+    term default, DefaultTerm
     term slice, SliceTerm
     term limit, LimitTerm
     term skip, SkipTerm
+    term sum, SumTerm
     term order_by, OrderByTerm
     term eq, EqTerm
     term ne, NeTerm
