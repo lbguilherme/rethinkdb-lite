@@ -14,7 +14,6 @@ module Storage
     end
 
     abstract def insert(obj : Hash)
-    abstract def get(key)
     abstract def replace(key, &block : ReQL::Datum::Type -> ReQL::Datum::Type)
     abstract def scan(&block : ReQL::Datum::Type ->)
 
