@@ -156,6 +156,9 @@ module ReQL
     term coerce_to, CoerceToTerm
     term order_by, OrderByTerm
     term distinct, DistinctTerm
+    term split, SplitTerm
+    term upcase, UpCaseTerm
+    term downcase, DownCaseTerm
     term eq, EqTerm
     term ne, NeTerm
   end

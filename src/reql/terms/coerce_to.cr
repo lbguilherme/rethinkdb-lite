@@ -23,7 +23,11 @@ module ReQL
       when "NUMBER"
         case source
         when DatumString
-          return Datum.wrap(source.value.to_f64)
+          begin
+            return Datum.wrap(source.value.to_f64)
+          rescue ex : ArgumentError
+            raise QueryLogicError.new "Could not coerce `#{source.value}` to NUMBER."
+          end
         end
       when "STRING"
         case source
