@@ -155,6 +155,7 @@ module ReQL
     term type_of, TypeOfTerm
     term coerce_to, CoerceToTerm
     term order_by, OrderByTerm
+    term distinct, DistinctTerm
     term eq, EqTerm
     term ne, NeTerm
   end
