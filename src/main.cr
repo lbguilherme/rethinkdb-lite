@@ -13,6 +13,13 @@ if File.exists? "#{f}.wal"
   FileUtils.rm "#{f}.wal"
 end
 
+r.table_create("a").run
+r.table_create("b").run
+r.table_create("c").run
+r.db_create("foo").run
+r.db("foo").table_create("bar").run
+r.db("foo").table_create("baz").run
+
 Server.start_http
 
 sleep
