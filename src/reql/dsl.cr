@@ -8,45 +8,57 @@ module ReQL
         @@next_var_i = 1i64
       end
 
-      def self.convert_type(x : R)
+      def self.convert_type(x : R, max_depth)
         x.val.as(Term::Type)
       end
 
-      def self.convert_type(x : Term)
+      def self.convert_type(x : Term, max_depth)
         x.as(Term::Type)
       end
 
-      def self.convert_type(block : R -> R::Type)
+      def self.convert_type(block : R -> R::Type, max_depth)
         vari = {R.make_var_i}.map(&.as(Term::Type))
         vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
-        ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars))].map(&.as(Term::Type)), nil).as(Term::Type)
+        ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars), max_depth-1)].map(&.as(Term::Type)), nil).as(Term::Type)
       end
 
-      def self.convert_type(x : Int32)
+      def self.convert_type(x : Int32, max_depth)
         x.as(Term::Type)
       end
 
-      def self.convert_type(x : Int)
+      def self.convert_type(x : Int, max_depth)
         x.to_i64.as(Term::Type)
       end
 
-      def self.convert_type(x : Float)
+      def self.convert_type(x : Float, max_depth)
         x.to_f64.as(Term::Type)
       end
 
-      def self.convert_type(x : Array)
-        x.map { |y| self.convert_type(y).as(Term::Type) }.as(Term::Type)
+      def self.convert_type(x : Array, max_depth)
+        if max_depth <= 0
+          raise ReQL::DriverCompileError.new "Maximum expression depth exceeded (you can override this with `r.expr(X, MAX_DEPTH)`)"
+        end
+
+        x.map { |y| convert_type(y, max_depth-1).as(Term::Type) }.as(Term::Type)
       end
 
-      def self.convert_type(x : Hash)
+      def self.convert_type(x : Hash, max_depth)
+        if max_depth <= 0
+          raise ReQL::DriverCompileError.new "Maximum expression depth exceeded (you can override this with `r.expr(X, MAX_DEPTH)`)"
+        end
+
         h = {} of String => Term::Type
         x.each do |(k, v)|
-          h[k] = self.convert_type v
+          h[k.to_s] = convert_type v, max_depth-1
         end
         h.as(Term::Type)
       end
 
-      def self.convert_type(x : Bool | Float64 | Int64 | String | Term | Nil)
+      def self.convert_type(x : NamedTuple, max_depth)
+        convert_type x.to_h, max_depth
+      end
+
+      def self.convert_type(x : Bool | Float64 | Int64 | String | Term | Nil, max_depth)
         x.as(Term::Type)
       end
 
@@ -56,8 +68,8 @@ module ReQL
         i
       end
 
-      def self.expr(*val)
-        r(*val)
+      def self.expr(*args)
+        r(*args)
       end
 
       getter val : Term::Type
@@ -75,15 +87,19 @@ module ReQL
       R
     end
 
-    def r(val)
-      RExpr.new(val)
+    def r(val, max_depth=20)
+      unless max_depth.is_a? Int
+        raise ReQL::DriverCompileError.new "Second argument to `r.expr` must be a number"
+      end
+
+      RExpr.new(val, max_depth)
     end
 
     struct RExpr
       include R
 
-      def initialize(val)
-        @val = R.convert_type(val)
+      def initialize(val, max_depth)
+        @val = R.convert_type(val, max_depth)
       end
     end
 
@@ -92,7 +108,7 @@ module ReQL
         include R
 
         def initialize(*args)
-          @val = {{term_class}}.new(args.to_a.map { |x| R.convert_type(x).as(Term::Type) }, nil)
+          @val = {{term_class}}.new(args.to_a.map { |x| R.convert_type(x, 20).as(Term::Type) }, nil)
         end
       end
 

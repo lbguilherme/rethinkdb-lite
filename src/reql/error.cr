@@ -2,6 +2,9 @@ module ReQL
   class CompileError < Exception
   end
 
+  class DriverCompileError < CompileError
+  end
+
   class RuntimeError < Exception
   end
 
