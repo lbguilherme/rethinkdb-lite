@@ -123,6 +123,7 @@ module ReQL
     term slice, SliceTerm
     term limit, LimitTerm
     term skip, SkipTerm
+    term order_by, OrderByTerm
     term eq, EqTerm
     term ne, NeTerm
   end
