@@ -23,20 +23,29 @@ module ReQL
 
   class Evaluator
     def eval(term : TableTerm)
+      db = nil
+      table_name = nil
+
       case term.args.size
       when 1
         name = eval term.args[0]
         expect_type name, DatumString
-        Table.new(nil, name.value)
+        table_name = name.value
       when 2
         db = eval term.args[0]
         expect_type db, Db
         name = eval term.args[1]
         expect_type name, DatumString
-        Table.new(db, name.value)
+        table_name = name.value
       else
         raise "BUG: Wrong number of arguments"
       end
+
+      unless table_name =~ /\A[A-Za-z0-9_-]+\Z/
+        raise QueryLogicError.new "Table name `#{table_name}` invalid (Use A-Z, a-z, 0-9, _ and - only)."
+      end
+
+      Table.new(db, table_name)
     end
   end
 end

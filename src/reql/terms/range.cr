@@ -15,14 +15,14 @@ module ReQL
         InfiniteRange.new
       when 1
         to = eval term.args[0]
-        expect_type to, Datum
-        Range.new(0i64, to.value.as(Int32 | Int64).to_i64)
+        expect_type to, DatumNumber
+        Range.new(0i64, to.to_i64)
       when 2
         from = eval term.args[0]
-        expect_type from, Datum
+        expect_type from, DatumNumber
         to = eval term.args[1]
-        expect_type to, Datum
-        Range.new(from.value.as(Int32 | Int64).to_i64, to.value.as(Int32 | Int64).to_i64)
+        expect_type to, DatumNumber
+        Range.new(from.to_i64, to.to_i64)
       else
         raise "BUG: args should be 0..2"
       end

@@ -19,6 +19,7 @@ describe ReQL do
     r.table("test1").insert({"id" => 1, "value" => "hello"}).run.value.as(Hash)["inserted"].should eq 1
     r.table("test1").insert({"id" => 2, "value" => "bye"}).run.value.as(Hash)["inserted"].should eq 1
 
+    r.table("test1").count.run.value.should eq 2
     r.table("test1").get(2).run.value.should eq({"id" => 2, "value" => "bye"})
     r.table("test1").get(1).run.value.should eq({"id" => 1, "value" => "hello"})
     r.table("test1").get(3).run.value.should eq nil
@@ -76,5 +77,22 @@ describe ReQL do
     r.table_create("test7").run
     r.table("test7").insert({"id" => nil, "value" => "well"}).run.value.as(Hash)["inserted"].should eq 1
     r.table("test7").get(nil).run.value.should eq({"id" => nil, "value" => "well"})
+  end
+
+  it "inserts and queries by unicode" do
+    r.table_create("test8").run
+    r.table("test8").insert({"id" => "Здравствуй", "value" => "Земля!"}).run.value.as(Hash)["inserted"].should eq 1
+    r.table("test8").get("Здравствуй").run.value.should eq({"id" => "Здравствуй", "value" => "Земля!"})
+    r.table("test8").filter({"value" => "Земля!"}).run.value.should eq([{"id" => "Здравствуй", "value" => "Земля!"}])
+  end
+
+  it "validates invalid table and db names" do
+    expect_raises(ReQL::QueryLogicError, "Database name `%` invalid (Use A-Z, a-z, 0-9, _ and - only).") do
+      r.db("%").run
+    end
+
+    expect_raises(ReQL::QueryLogicError, "Table name `%` invalid (Use A-Z, a-z, 0-9, _ and - only).") do
+      r.db("test").table("%").run
+    end
   end
 end

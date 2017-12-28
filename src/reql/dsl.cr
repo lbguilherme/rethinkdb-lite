@@ -119,6 +119,7 @@ module ReQL
     term insert, InsertTerm
     term count, CountTerm
     term range, RangeTerm
+    term filter, FilterTerm
     term map, MapTerm
     term merge, MergeTerm
     term default, DefaultTerm

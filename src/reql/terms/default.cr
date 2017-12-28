@@ -10,10 +10,16 @@ module ReQL
 
   class Evaluator
     def eval(term : DefaultTerm)
-      begin
+      base = begin
         eval term.args[0]
       rescue ex
+        Datum.wrap(nil)
+      end
+
+      if base.is_a? Datum && !base.value
         eval term.args[1]
+      else
+        base
       end
     end
   end
