@@ -1,4 +1,3 @@
-
 module Storage
   abstract class AbstractTable
     def close

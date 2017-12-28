@@ -121,16 +121,16 @@ module Server
           answer = {"t" => 17, "r" => [ex.message], "b" => [] of String}.to_json
         rescue ex : ReQL::RuntimeError
           error_type = case ex
-          when ReQL::InternalError; 1000000
-          when ReQL::ResourceLimitError; 2000000
-          when ReQL::QueryLogicError; 3000000
-          when ReQL::NonExistenceError; 3100000
-          when ReQL::OpFailedError; 4100000
-          when ReQL::OpIndeterminateError; 4200000
-          when ReQL::UserError; 5000000
-          when ReQL::PermissionError; 6000000
-          else; 0
-          end
+                       when ReQL::InternalError       ; 1000000
+                       when ReQL::ResourceLimitError  ; 2000000
+                       when ReQL::QueryLogicError     ; 3000000
+                       when ReQL::NonExistenceError   ; 3100000
+                       when ReQL::OpFailedError       ; 4100000
+                       when ReQL::OpIndeterminateError; 4200000
+                       when ReQL::UserError           ; 5000000
+                       when ReQL::PermissionError     ; 6000000
+                       else                             0
+                       end
           answer = {"t" => 18, "e" => error_type, "r" => [ex.message], "b" => [] of String}.to_json
         end
         puts answer

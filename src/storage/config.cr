@@ -46,16 +46,16 @@ module Storage
     def self.save
       table = config_table
       table.replace("config") { {
-        "id" => "config",
-        "version" => VERSION,
+        "id"        => "config",
+        "version"   => VERSION,
         "databases" => @@databases.map { |db| {
-          "id" => db.id,
-          "name" => db.name,
+          "id"     => db.id,
+          "name"   => db.name,
           "tables" => db.tables.map { |tbl| {
-            "id" => tbl.id,
-            "name" => tbl.name
-          } }
-        } }
+            "id"   => tbl.id,
+            "name" => tbl.name,
+          } },
+        } },
       } }
       data = table.get("config")
       table.close
@@ -70,7 +70,7 @@ module Storage
         Database.new(
           x.as(Hash)["id"].as(String),
           x.as(Hash)["name"].as(String),
-          x.as(Hash)["tables"].as(Array).map{ |x|
+          x.as(Hash)["tables"].as(Array).map { |x|
             Table.new(
               x.as(Hash)["id"].as(String),
               x.as(Hash)["name"].as(String),

@@ -44,4 +44,3 @@ module ReQL
     end
   end
 end
-

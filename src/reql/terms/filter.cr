@@ -27,17 +27,17 @@ module ReQL
       func = eval term.args[1]
 
       block = case func
-      when Func
-        ->(val : Datum) {
-          func.as(Func).eval(self, val).datum
-        }
-      when Datum
-        ->(val : Datum) {
-          Datum.wrap(ReQL.filter_pattern_match(val.value, func.value))
-        }
-      else
-        raise QueryLogicError.new("Expected type FUNCTION but found #{func.class.reql_name}")
-      end
+              when Func
+                ->(val : Datum) {
+                  func.as(Func).eval(self, val).datum
+                }
+              when Datum
+                ->(val : Datum) {
+                  Datum.wrap(ReQL.filter_pattern_match(val.value, func.value))
+                }
+              else
+                raise QueryLogicError.new("Expected type FUNCTION but found #{func.class.reql_name}")
+              end
 
       case target
       when Stream

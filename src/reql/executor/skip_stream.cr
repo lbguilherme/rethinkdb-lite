@@ -3,7 +3,6 @@ require "./stream"
 module ReQL
   class SkipStream < Stream
     def initialize(@stream : Stream, @skip : Int64)
-
     end
 
     def count(max)

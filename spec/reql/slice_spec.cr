@@ -37,6 +37,6 @@ describe ReQL do
   end
 
   it "can take a slice of an infinite stream" do
-    r.range().skip(10).limit(2).run.value.should eq [10, 11]
+    r.range.skip(10).limit(2).run.value.should eq [10, 11]
   end
 end

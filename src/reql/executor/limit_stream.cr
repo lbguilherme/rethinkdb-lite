@@ -3,7 +3,6 @@ require "./stream"
 module ReQL
   class LimitStream < Stream
     def initialize(@stream : Stream, @size : Int64)
-
     end
 
     def count(max)

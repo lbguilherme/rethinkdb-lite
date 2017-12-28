@@ -1,4 +1,3 @@
-
 module Storage
   class VirtualTableConfigTable < AbstractTable
     def insert(obj : Hash)
@@ -17,37 +16,35 @@ module Storage
       Config.databases.each do |db|
         db.tables.each do |table|
           block.call Hash(String, ReQL::Datum::Type){
-            "db" => db.name,
-            "id" => table.id,
-            "name" => table.name,
+            "db"          => db.name,
+            "id"          => table.id,
+            "name"        => table.name,
             "raft_leader" => "",
-            "shards" => Array(ReQL::Datum::Type){
+            "shards"      => Array(ReQL::Datum::Type){
               Hash(String, ReQL::Datum::Type){
                 "primary_replicas" => Array(ReQL::Datum::Type){
-                  ""
+                  "",
                 }.as(ReQL::Datum::Type),
                 "replicas" => Array(ReQL::Datum::Type){
                   Hash(String, ReQL::Datum::Type){
-                  "server" => "",
-                  "state" => "ready"
-                  }.as(ReQL::Datum::Type)
-                }.as(ReQL::Datum::Type)
-              }.as(ReQL::Datum::Type)
+                    "server" => "",
+                    "state"  => "ready",
+                  }.as(ReQL::Datum::Type),
+                }.as(ReQL::Datum::Type),
+              }.as(ReQL::Datum::Type),
             }.as(ReQL::Datum::Type),
             "status" => Hash(String, ReQL::Datum::Type){
-              "all_replicas_ready" => true,
+              "all_replicas_ready"       => true,
               "ready_for_outdated_reads" => true,
-              "ready_for_reads" => true,
-              "ready_for_writes" => true
-            }.as(ReQL::Datum::Type)
+              "ready_for_reads"          => true,
+              "ready_for_writes"         => true,
+            }.as(ReQL::Datum::Type),
           }.as(ReQL::Datum::Type)
         end
       end
     end
   end
 end
-
-
 
 # "db":  "zig" ,
 # "id":  "056503a2-d1db-4c14-a730-f889fdcdfa87" ,
