@@ -132,6 +132,7 @@ module ReQL
     term skip, SkipTerm
     term sum, SumTerm
     term type_of, TypeOfTerm
+    term coerce_to, CoerceToTerm
     term order_by, OrderByTerm
     term eq, EqTerm
     term ne, NeTerm
