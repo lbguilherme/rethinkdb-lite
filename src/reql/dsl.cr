@@ -142,6 +142,7 @@ module ReQL
     term insert, InsertTerm
     term count, CountTerm
     term range, RangeTerm
+    term uuid, UuidTerm
     term filter, FilterTerm
     term map, MapTerm
     term merge, MergeTerm

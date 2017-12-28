@@ -8,7 +8,7 @@ describe ReQL do
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/object.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/datum/string.yaml") }}
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/typeof.yaml") }}
-  # {{ run("./reql_spec_generator", "spec/rql_test/src/datum/uuid.yaml") }}
+  {{ run("./reql_spec_generator", "spec/rql_test/src/datum/uuid.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/add.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/aliases.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/div.yaml") }}
@@ -108,7 +108,7 @@ end
 struct UUIDMatcher < Matcher
   def match(result)
     result.should be_a String
-    result.as_s.should Spec::MatchExpectation.new(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
+    result.should Spec::MatchExpectation.new(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
   end
 end
 
