@@ -21,6 +21,8 @@ module Storage
         case table_name
         when "db_config"
           return VirtualDbConfigTable.new
+        when "table_status"
+          return VirtualTableConfigTable.new
         else
           return nil
         end
