@@ -19,6 +19,10 @@ module ReQL
         return source
       end
 
+      unless source.is_a? Datum
+        source = source.datum
+      end
+
       case target_type
       when "NUMBER"
         case source

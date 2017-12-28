@@ -38,13 +38,13 @@ module ReQL
 
     macro expect_args(count)
       if @args.size != {{count}}
-        raise CompileError.new("Expected #{ {{count}}} arguments but found #{@args.size}")
+        raise CompileError.new "Expected #{ {{count}}} arguments but found #{@args.size}."
       end
     end
 
     macro expect_args(min, max)
       if @args.size < {{min}} || @args.size > {{max}}
-        raise CompileError.new("Expected between #{ {{min}}} and #{ {{max}}} arguments but found #{@args.size}")
+        raise CompileError.new "Expected between #{ {{min}}} and #{ {{max}}} arguments but found #{@args.size}."
       end
     end
 
