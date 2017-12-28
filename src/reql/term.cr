@@ -319,6 +319,12 @@ module ReQL
     POLYGON_SUB        = 171
     MINVAL             = 180
     MAXVAL             = 181
+    BIT_AND            = 191
+    BIT_OR             = 192
+    BIT_XOR            = 193
+    BIT_NOT            = 194
+    BIT_SAL            = 195
+    BIT_SAR            = 196
   end
 end
 
