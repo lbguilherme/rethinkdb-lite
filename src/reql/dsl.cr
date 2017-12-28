@@ -18,7 +18,7 @@ module ReQL
 
       def self.convert_type(block : R -> R::Type, max_depth)
         vari = {R.make_var_i}.map(&.as(Term::Type))
-        vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil)).as(R) }
+        vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil), max_depth-1).as(R) }
         ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars), max_depth-1)].map(&.as(Term::Type)), nil).as(Term::Type)
       end
 
@@ -49,6 +49,9 @@ module ReQL
 
         h = {} of String => Term::Type
         x.each do |(k, v)|
+          unless k.is_a? String || k.is_a? Symbol
+            raise ReQL::CompileError.new "Object keys must be strings or symbols."
+          end
           h[k.to_s] = convert_type v, max_depth-1
         end
         h.as(Term::Type)
@@ -89,7 +92,7 @@ module ReQL
 
     def r(val, max_depth=20)
       unless max_depth.is_a? Int
-        raise ReQL::DriverCompileError.new "Second argument to `r.expr` must be a number"
+        raise ReQL::CompileError.new "Second argument to `r.expr` must be a number."
       end
 
       RExpr.new(val, max_depth)
@@ -147,6 +150,7 @@ module ReQL
     term limit, LimitTerm
     term skip, SkipTerm
     term sum, SumTerm
+    term object, ObjectTerm
     term type_of, TypeOfTerm
     term coerce_to, CoerceToTerm
     term order_by, OrderByTerm

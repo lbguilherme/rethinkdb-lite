@@ -133,7 +133,7 @@ module ReQL
 
     macro expect_type(val, type)
       unless {{val}}.is_a? {{type.id}}
-        raise QueryLogicError.new("Expected type #{{{type}}.reql_name} but found #{{{val}}.class.reql_name}")
+        raise QueryLogicError.new("Expected type #{{{type}}.reql_name} but found #{{{val}}.class.reql_name}.")
       end
     end
   end

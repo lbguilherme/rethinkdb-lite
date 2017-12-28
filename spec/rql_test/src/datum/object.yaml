@@ -42,7 +42,7 @@ tests:
       # JavaScript auto-converts keys for us
       js:
       ot: err_regex("ReqlCompileError", "Object keys must be strings.*")
-    
+
     - cd: r.expr({'a':{12:'b'}})
       # JavaScript auto-converts keys for us
       js:
@@ -82,4 +82,4 @@ tests:
       ot: err("ReqlQueryLogicError","Duplicate key \"e\" in object.  (got 4 and 5 as values)",[])
 
     - cd: r.object('g', r.db('test'))
-      ot: err("ReqlQueryLogicError","Expected type DATUM but found DATABASE:",[])
+      ot: err("ReqlQueryLogicError","Expected type DATUM but found DATABASE",[])

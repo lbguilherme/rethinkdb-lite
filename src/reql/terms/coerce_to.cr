@@ -27,12 +27,23 @@ module ReQL
         end
       when "STRING"
         case source
+        when DatumObject
+          return Datum.wrap(source.value.to_json)
         when DatumNumber
           return Datum.wrap(source.value.to_s)
         when DatumBool
           return Datum.wrap(source.value.to_s)
         when DatumNull
           return Datum.wrap("null")
+        end
+      when "ARRAY"
+        case source
+        when DatumObject
+          arr = [] of Datum::Type
+          source.value.each do |(k, v)|
+            arr << [k, v].map &.as(Datum::Type)
+          end
+          return Datum.wrap(arr)
         end
       when "BOOL"
         case source

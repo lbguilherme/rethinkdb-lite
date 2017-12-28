@@ -5,7 +5,7 @@ module ReQL
     getter name
 
     def self.reql_name
-      "DB"
+      "DATABASE"
     end
 
     def initialize(@name : String)
