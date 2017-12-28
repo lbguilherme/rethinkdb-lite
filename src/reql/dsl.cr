@@ -56,6 +56,10 @@ module ReQL
         i
       end
 
+      def self.expr(*val)
+        r(*val)
+      end
+
       getter val : Term::Type
 
       def inspect(io)
@@ -127,6 +131,7 @@ module ReQL
     term limit, LimitTerm
     term skip, SkipTerm
     term sum, SumTerm
+    term type_of, TypeOfTerm
     term order_by, OrderByTerm
     term eq, EqTerm
     term ne, NeTerm
