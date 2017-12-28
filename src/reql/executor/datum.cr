@@ -13,7 +13,7 @@ module ReQL
       @value
     end
 
-    def self.wrap(val : Bool | Nil)
+    def self.wrap(val : Bool)
       Datum.new(val)
     end
 
