@@ -50,7 +50,7 @@ module ReQL
 
       Storage::TableManager.create_table(db_name, table_name)
 
-      Datum.new(Hash(String, Datum::Type).new)
+      Datum.wrap(Hash(String, Datum::Type).new)
     end
   end
 end

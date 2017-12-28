@@ -38,7 +38,7 @@ module ReQL
         result["errors"] = 0i64
       end
 
-      Datum.new(result)
+      Datum.wrap(result)
     end
   end
 end

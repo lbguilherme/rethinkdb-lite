@@ -1,21 +1,10 @@
 module ReQL
-  class Datum
+  abstract class Datum
     def self.reql_name
       "DATUM"
     end
 
     alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Nil
-
-    def initialize(@value : Type)
-    end
-
-    def value
-      @value
-    end
-
-    def self.wrap(val : Bool)
-      Datum.new(val)
-    end
 
     def datum
       self

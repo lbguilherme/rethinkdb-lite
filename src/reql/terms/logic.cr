@@ -13,7 +13,7 @@ module ReQL
       a = eval term.args[0]
       b = eval term.args[1]
 
-      Datum.new(a.value == b.value)
+      Datum.wrap(a.value == b.value)
     end
   end
 end
@@ -33,7 +33,7 @@ module ReQL
       a = eval term.args[0]
       b = eval term.args[1]
 
-      Datum.new(a.value != b.value)
+      Datum.wrap(a.value != b.value)
     end
   end
 end

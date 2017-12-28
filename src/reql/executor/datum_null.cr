@@ -5,7 +5,6 @@ module ReQL
     end
 
     def initialize
-      @value = nil
     end
 
     def value

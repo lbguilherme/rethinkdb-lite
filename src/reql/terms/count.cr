@@ -14,9 +14,9 @@ module ReQL
 
       case target
       when Stream
-        Datum.new(target.count(Int32::MAX.to_i64))
+        Datum.wrap(target.count(Int32::MAX.to_i64))
       when DatumArray, DatumString
-        Datum.new(target.value.size.to_i64)
+        Datum.wrap(target.value.size.to_i64)
       else
         raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end

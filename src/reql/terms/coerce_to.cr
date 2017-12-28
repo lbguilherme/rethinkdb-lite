@@ -29,8 +29,17 @@ module ReQL
         case source
         when DatumNumber
           return Datum.wrap(source.value.to_s)
+        when DatumBool
+          return Datum.wrap(source.value.to_s)
         when DatumNull
           return Datum.wrap("null")
+        end
+      when "BOOL"
+        case source
+        when DatumNull
+          return Datum.wrap(false)
+        when Datum
+          return Datum.wrap(true)
         end
       when "NULL"
       else

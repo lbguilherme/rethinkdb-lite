@@ -115,8 +115,8 @@ module ReQL
       DatumObject.new(result)
     end
 
-    def eval(primitive : Bool)
-      Datum.new(primitive)
+    def eval(bool : Bool)
+      DatumBool.new(bool)
     end
 
     def eval(str : String)

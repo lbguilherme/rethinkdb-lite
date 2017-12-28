@@ -32,7 +32,7 @@ module ReQL
         raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
       end
 
-      Datum.new(sum)
+      Datum.wrap(sum)
     end
   end
 end
