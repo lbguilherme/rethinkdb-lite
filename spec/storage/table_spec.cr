@@ -77,5 +77,5 @@ end
 # Helpers
 
 def random_file
-  "/tmp/rethinkdb-lite/storage/#{SecureRandom.hex}.db"
+  "/tmp/rethinkdb-lite/storage/#{Random::Secure.hex}.db"
 end
