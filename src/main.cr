@@ -20,7 +20,8 @@ r.db_create("foo").run
 r.db("foo").table_create("bar").run
 r.db("foo").table_create("baz").run
 
-Server.start_http
+Server::HttpServer.new(8080).start
+puts "Server #{Storage::Config.server_info.name.inspect} (#{Storage::Config.server_info.id}) ready."
 
 sleep
 
