@@ -1,3 +1,5 @@
+require "spec/*"
+
 describe ReQL do
   # {{ run("./reql_spec_generator", "spec/rql_test/src/datum/array.yaml") }}
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/bool.yaml") }}
