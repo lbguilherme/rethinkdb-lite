@@ -6,14 +6,19 @@ module Storage
     VERSION = 1
 
     class_property data_path : String = "/tmp/rethinkdb-lite/data/"
-    class_property databases = [] of Database
+    class_property databases = [] of DatabaseInfo
+    class_property server_info = ServerInfo.new("", "")
 
-    record Database,
+    record DatabaseInfo,
       id : String,
       name : String,
-      tables : Array(Table)
+      tables : Array(TableInfo)
 
-    record Table,
+    record TableInfo,
+      id : String,
+      name : String
+
+    record ServerInfo,
       id : String,
       name : String
 
@@ -56,28 +61,37 @@ module Storage
             "name" => tbl.name,
           } },
         } },
+        "server_info" => {
+          "id"   => @@server_info.id,
+          "name" => @@server_info.name,
+        },
       } }
       data = table.get("config")
       table.close
     end
 
     private def self.load_v0(data)
-      @@databases = [] of Database
+      @@databases = [] of DatabaseInfo
+      @@server_info = ServerInfo.new(UUID.random.to_s, File.read("/etc/hostname").strip)
     end
 
     private def self.load_v1(data)
       @@databases = data["databases"].as(Array).map { |x|
-        Database.new(
+        DatabaseInfo.new(
           x.as(Hash)["id"].as(String),
           x.as(Hash)["name"].as(String),
           x.as(Hash)["tables"].as(Array).map { |x|
-            Table.new(
+            TableInfo.new(
               x.as(Hash)["id"].as(String),
               x.as(Hash)["name"].as(String),
             )
           },
         )
       }
+      @@server_info = ServerInfo.new(
+        data["server_info"].as(Hash)["id"].as(String),
+        data["server_info"].as(Hash)["name"].as(String)
+      )
     end
   end
 end

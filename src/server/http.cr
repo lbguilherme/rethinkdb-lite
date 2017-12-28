@@ -111,8 +111,8 @@ module Server
           when 4 # NOREPLY_WAIT
           when 5 # SERVER_INFO
             info = {
-              "id"    => UUID.random.to_s,
-              "name"  => "Crystal Rethink",
+              "id"    => Storage::Config.server_info.name,
+              "name"  => Storage::Config.server_info.name,
               "proxy" => false,
             }
             answer = {"t" => 5, "r" => [info], "p" => [{"duration(ms)" => 0}]}.to_json

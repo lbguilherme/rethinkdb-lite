@@ -4,10 +4,6 @@ module Storage
       raise ""
     end
 
-    def get(key)
-      raise ""
-    end
-
     def replace(key, &block : ReQL::Datum::Type -> ReQL::Datum::Type)
       raise ""
     end

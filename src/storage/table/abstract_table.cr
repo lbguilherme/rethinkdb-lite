@@ -3,6 +3,16 @@ module Storage
     def close
     end
 
+    def get(key)
+      result = nil
+      scan do |obj|
+        if obj.as(Hash)["id"] == key
+          result = obj
+        end
+      end
+      result
+    end
+
     abstract def insert(obj : Hash)
     abstract def get(key)
     abstract def replace(key, &block : ReQL::Datum::Type -> ReQL::Datum::Type)

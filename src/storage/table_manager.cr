@@ -36,10 +36,10 @@ module Storage
       if db_name == "rethinkdb" || Config.databases.find { |db| db.name == db_name }
         raise ReQL::OpFailedError.new("Database `#{db_name}` already exists")
       end
-      Config.databases << Config::Database.new(
+      Config.databases << Config::DatabaseInfo.new(
         UUID.random.to_s,
         db_name,
-        [] of Config::Table
+        [] of Config::TableInfo
       )
       Config.save
     end
@@ -57,7 +57,7 @@ module Storage
       id = UUID.random.to_s
       @@tables[id] = StoredTable.create(File.join(Config.data_path, id))
 
-      Config.databases.find { |db| db.name == db_name }.not_nil!.tables << Config::Table.new(id, table_name)
+      Config.databases.find { |db| db.name == db_name }.not_nil!.tables << Config::TableInfo.new(id, table_name)
       Config.save
     end
 

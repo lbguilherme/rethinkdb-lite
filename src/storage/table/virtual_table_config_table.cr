@@ -4,10 +4,6 @@ module Storage
       raise ""
     end
 
-    def get(key)
-      raise ""
-    end
-
     def replace(key, &block : ReQL::Datum::Type -> ReQL::Datum::Type)
       raise ""
     end
@@ -19,15 +15,15 @@ module Storage
             "db"          => db.name,
             "id"          => table.id,
             "name"        => table.name,
-            "raft_leader" => "",
+            "raft_leader" => Config.server_info.name,
             "shards"      => Array(ReQL::Datum::Type){
               Hash(String, ReQL::Datum::Type){
                 "primary_replicas" => Array(ReQL::Datum::Type){
-                  "",
+                  Config.server_info.name,
                 }.as(ReQL::Datum::Type),
                 "replicas" => Array(ReQL::Datum::Type){
                   Hash(String, ReQL::Datum::Type){
-                    "server" => "",
+                    "server" => Config.server_info.name,
                     "state"  => "ready",
                   }.as(ReQL::Datum::Type),
                 }.as(ReQL::Datum::Type),
@@ -45,27 +41,3 @@ module Storage
     end
   end
 end
-
-# "db":  "zig" ,
-# "id":  "056503a2-d1db-4c14-a730-f889fdcdfa87" ,
-# "name":  "stock_interactions" ,
-# "raft_leader":  "zig_rethink99" ,
-# "shards": [
-# {
-# "primary_replicas": [
-# "zig_rethink99"
-# ] ,
-# "replicas": [
-# {
-# "server":  "zig_rethink99" ,
-# "state":  "ready"
-# }
-# ]
-# }
-# ] ,
-# "status": {
-# "all_replicas_ready": true ,
-# "ready_for_outdated_reads": true ,
-# "ready_for_reads": true ,
-# "ready_for_writes": true
-# }
