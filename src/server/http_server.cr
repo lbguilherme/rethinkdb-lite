@@ -39,8 +39,8 @@ module Server
           answer = conn.execute(query_id, message)
 
           context.response.write_bytes(query_id)
-          context.response.write_bytes(answer.size)
-          context.response.print answer
+          context.response.write_bytes(answer.bytesize)
+          context.response.write(answer.to_slice)
         else
           if context.request.path == "/"
             context.request.path = "/index.html"
