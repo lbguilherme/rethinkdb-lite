@@ -12,6 +12,7 @@ module ReQL
     end
 
     def compile
+      # subclasses might do work here
     end
 
     def self.parse(json : JSON::Type)
@@ -26,13 +27,32 @@ module ReQL
         args = json[1] ? json[1].as(Array).map { |e| Term.parse(e) } : [] of Type
         if type_id == TermType::MAKE_ARRAY
           args.as(Type)
-        elsif klass = @@types[type_id]?
+        elsif klass = @@type_to_class[type_id]?
           klass.new(args, json[2]?.as(Hash(String, JSON::Type) | Nil)).as(Type)
         else
           raise CompileError.new("Don't know how to handle #{type_id} term")
         end
       else
         return json.as(Type)
+      end
+    end
+
+    def self.encode(term : Type)
+      case term
+      when Hash
+        hash = Hash(String, JSON::Type).new
+        term.each do |(k, v)|
+          hash[k] = Term.encode(v)
+        end
+        return hash.as(JSON::Type)
+      when Array
+        [TermType::MAKE_ARRAY.to_i64.as(JSON::Type), term.map { |x| Term.encode x }.as(JSON::Type)].as(JSON::Type)
+      when Term
+        [@@class_to_type[term.class].to_i64.as(JSON::Type), term.args.map { |x| Term.encode(x).as(JSON::Type) }.as(JSON::Type)].as(JSON::Type)
+      when Int32
+        term.to_i64.as(JSON::Type)
+      else
+        term.as(JSON::Type)
       end
     end
 
@@ -83,10 +103,12 @@ module ReQL
       end
     end
 
-    @@types = {} of TermType => Term.class
+    @@type_to_class = {} of TermType => Term.class
+    @@class_to_type = {} of Term.class => TermType
 
     def self.add_type(k, v)
-      @@types[k] = v
+      @@type_to_class[k] = v
+      @@class_to_type[v] = k
     end
 
     macro register_type(const)

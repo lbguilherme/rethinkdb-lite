@@ -1,3 +1,12 @@
+require "./term"
+require "./terms/*"
+
+macro if_defined(x)
+  {% if x.resolve? %}
+    {{yield}}
+  {% end %}
+end
+
 module ReQL
   module DSL
     module R
@@ -82,6 +91,11 @@ module ReQL
       end
 
       def run
+        if_defined(Spec) do
+          # Term.encode(@val)
+          Term.encode(Term.parse(Term.encode(@val))).should ::eq Term.encode(@val)
+        end
+
         Evaluator.new.eval @val
       end
     end
