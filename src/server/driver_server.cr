@@ -151,7 +151,13 @@ module Server
         query_length = IO::ByteFormat::LittleEndian.decode(UInt32, query_length_bytes)
 
         query_bytes = Bytes.new(query_length)
-        break unless sock.read(query_bytes) == query_length
+        offset = 0
+        while offset < query_length
+          read = sock.read(query_bytes[offset, query_length - offset])
+          break if read == 0
+          offset += read
+        end
+        break unless offset == query_length
 
         spawn do
           message_json = String.new(query_bytes)
@@ -170,7 +176,8 @@ module Server
           sock.flush
         end
       end
-    rescue Errno
+    rescue err : Errno
+      err.inspect_with_backtrace
     ensure
       if io
         # puts "Disconnected from #{remote_address}."
