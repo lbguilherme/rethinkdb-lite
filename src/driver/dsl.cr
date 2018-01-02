@@ -118,6 +118,18 @@ module RethinkDB
       def %(other)
         mod(other)
       end
+
+      def ==(other)
+        eq(other)
+      end
+
+      def !=(other)
+        ne(other)
+      end
+
+      def [](arg)
+        bracket(arg)
+      end
     end
 
     def r
@@ -170,6 +182,7 @@ module RethinkDB
     term table_create, TableCreateTerm
     term get, GetTerm
     term insert, InsertTerm
+    term bracket, BracketTerm
     term "do", DoTerm
     term count, CountTerm
     term range, RangeTerm
@@ -204,7 +217,7 @@ module RethinkDB
   end
 end
 
-struct Number
+class Object
   def +(other : RethinkDB::DSL::R)
     RethinkDB::DSL::RExpr.new(self, 1).add(other)
   end
@@ -223,5 +236,13 @@ struct Number
 
   def %(other : RethinkDB::DSL::R)
     RethinkDB::DSL::RExpr.new(self, 1).mod(other)
+  end
+
+  def ==(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).eq(other)
+  end
+
+  def !=(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).ne(other)
   end
 end
