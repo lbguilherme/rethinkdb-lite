@@ -2,7 +2,7 @@ require "socket"
 require "../crypto"
 
 module RethinkDB
-  class RemoteConnection < DriverConnection
+  class RemoteConnection < Connection
     V0_1 = 0x3f61ba36_u32
     V0_2 = 0x723081e1_u32
     V0_3 = 0x5f75e83e_u32
@@ -244,6 +244,10 @@ module RethinkDB
         value = Datum.new(@response.r[@index].raw)
         @index += 1
         return value
+      end
+
+      def close
+        # TODO
       end
     end
   end

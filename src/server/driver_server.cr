@@ -1,4 +1,4 @@
-require "./connection"
+require "./client"
 require "../reql/*"
 require "json"
 require "../crypto"
@@ -11,7 +11,7 @@ module Server
     V0_4 = 0x400c2d20_u32
     V1_0 = 0x34c2bdc3_u32
 
-    def initialize(@port : Int32)
+    def initialize(@port : Int32, @conn : RethinkDB::Connection)
       @server = TCPServer.new(@port)
       @wants_close = false
     end
@@ -136,13 +136,13 @@ module Server
       }.to_json + "\0").to_slice)
 
       # puts "Accepted connection from #{remote_address}."
-      conn = ClientConnection.new
+      client = Client.new(@conn)
 
       sock = io
 
       until sock.closed?
         query_token = sock.read_bytes(UInt64, IO::ByteFormat::LittleEndian)
-        query_length_bytes = sock.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
+        query_length = sock.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
 
         query_bytes = Bytes.new(query_length)
         offset = 0
@@ -156,7 +156,7 @@ module Server
         spawn do
           message_json = String.new(query_bytes)
           message = JSON.parse(message_json).as_a
-          answer = conn.execute(query_token, message)
+          answer = client.execute(query_token, message)
 
           sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
           sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)

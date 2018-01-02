@@ -2,7 +2,7 @@ require "socket"
 require "../crypto"
 
 module RethinkDB
-  class LocalConnection < DriverConnection
+  class LocalConnection < Connection
     def initialize(data_path : String)
       @config = Storage::Config.new data_path
       @table_manager = Storage::TableManager.new(@config)
@@ -51,6 +51,13 @@ module RethinkDB
           @stream.finish_reading
           @finished = true
           stop
+        end
+      end
+
+      def close
+        unless @finished
+          @finished = true
+          @stream.finish_reading
         end
       end
     end

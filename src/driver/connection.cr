@@ -1,5 +1,5 @@
 module RethinkDB
-  abstract class DriverConnection
+  abstract class Connection
     abstract def authorize(user : String, password : String)
     abstract def use(db_name : String)
     abstract def start
@@ -8,9 +8,9 @@ module RethinkDB
   end
 
   struct Datum
-    @value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | Bytes | String | Nil
+    @value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil
 
-    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | Bytes | String | Nil)
+    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil)
       case value
       when Datum
         @value = value.@value
@@ -29,6 +29,10 @@ module RethinkDB
 
     def inspect(io)
       @value.inspect(io)
+    end
+
+    def to_json(io)
+      @value.to_json(io)
     end
 
     def datum
@@ -99,6 +103,9 @@ module RethinkDB
 
     def datum
       Datum.new to_a
+    end
+
+    def close
     end
   end
 

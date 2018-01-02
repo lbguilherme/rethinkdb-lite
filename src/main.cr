@@ -1,18 +1,13 @@
 require "./server/*"
-require "./reql/*"
+require "./driver/*"
+require "file_utils"
+include RethinkDB::DSL
 
-include ReQL::DSL
+conn = r.local_database("/tmp/rethinkdb-lite/data")
 
-r.table_create("a").run
-r.table_create("b").run
-r.table_create("c").run
-r.db_create("foo").run
-r.db("foo").table_create("bar").run
-r.db("foo").table_create("baz").run
+Server::HttpServer.new(8080, conn).start
+Server::DriverServer.new(28015, conn).start
 
-Server::HttpServer.new(8080).start
-Server::DriverServer.new(28015).start
-
-puts "Server #{Storage::Config.server_info.name.inspect} (#{Storage::Config.server_info.id}) ready."
+# puts "Server #{Storage::Config.server_info.name.inspect} (#{Storage::Config.server_info.id}) ready."
 
 sleep

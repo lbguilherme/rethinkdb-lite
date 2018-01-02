@@ -1,70 +1,71 @@
 module Server
-  class ClientConnection
-    property streams = {} of UInt64 => ReQL::Stream
+  class Client
+    property streams = {} of UInt64 => RethinkDB::Cursor
+
+    def initialize(@conn : RethinkDB::Connection)
+    end
+
+    def close
+      @streams.each_value &.close
+    end
 
     def execute(query_id : UInt64, message : Array)
       begin
-        start = Time.now
         answer = nil
         case message[0]
         when 1 # START
-          query = ReQL::Query.new(query_id, message[1], message[2]?.as(Hash(String, JSON::Type) | Nil))
-          result = query.run
-          if result.is_a? ReQL::Stream
-            result.start_reading
-            @streams[query_id] = result
-            list = [] of ReQL::Datum::Type
-            has_more = true
-            40.times do
-              tup = result.next_val
-              unless tup
-                @streams.delete query_id
-                result.finish_reading
-                has_more = false
-                break
-              end
-              list << tup[0]
+          start = Time.now
+
+          term = ReQL::Term.parse(message[1])
+          runopts = message[2]?.as(Hash(String, JSON::Type) | Nil) || {} of String => JSON::Type
+          should_profile = runopts["profile"]?.try &.as?(Bool) || false
+
+          result = @conn.run(term, runopts)
+          case result
+          when RethinkDB::Cursor
+            list = result.first(40).to_a
+            if list.size == 40
+              @streams[query_id] = result
             end
             answer = {
-              "t" => has_more ? 3 : 2,
+              "t" => list.size == 40 ? 3 : 2,
               "r" => list,
               "n" => [] of String,
             }
-          else
+          when RethinkDB::Datum
             answer = {
               "t" => 1,
-              "r" => [result.value],
+              "r" => [result],
               "n" => [] of String,
+            }
+          else
+            raise "BUG"
+          end
+
+          if should_profile
+            answer = {
+              "t" => answer["t"],
+              "r" => answer["r"],
+              "n" => answer["n"],
+              "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
             }
           end
         when 2 # CONTINUE
-          result = @streams[query_id]?
-          list = [] of ReQL::Datum::Type
-          has_more = true
-          if result
-            40.times do
-              tup = result.next_val
-              unless tup
-                @streams.delete query_id
-                result.finish_reading
-                has_more = false
-                break
-              end
-              list << tup[0]
-            end
-          else
-            has_more = false
+          result = @streams[query_id]
+          list = result.first(40).to_a
+          if list.size < 40
+            @streams.delete query_id
           end
           answer = {
-            "t" => has_more ? 3 : 2,
+            "t" => list.size == 40 ? 3 : 2,
             "r" => list,
             "n" => [] of String,
           }
         when 3 # STOP
           result = @streams[query_id]?
           if result
+            result.close
             @streams.delete query_id
-            result.finish_reading
           end
           answer = {
             "t" => 2,
@@ -74,8 +75,8 @@ module Server
         when 4 # NOREPLY_WAIT
         when 5 # SERVER_INFO
           info = {
-            "id"    => Storage::Config.server_info.name,
-            "name"  => Storage::Config.server_info.name,
+            "id"    => "aa", # Storage::Config.server_info.name,
+            "name"  => "aa", # Storage::Config.server_info.name,
             "proxy" => false,
           }
           answer = {"t" => 5, "r" => [info]}
@@ -83,15 +84,6 @@ module Server
 
         if !answer
           raise ReQL::InternalError.new "Invalid type of query."
-        end
-
-        if query && query.profile?
-          answer = {
-            "t" => answer["t"],
-            "r" => answer["r"],
-            "n" => answer["n"],
-            "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
-          }
         end
 
         return answer.to_json
