@@ -5,6 +5,16 @@ module ReQL
     end
 
     def initialize(@value : Int32 | Int64 | Float64)
+      val = @value
+      if val.is_a? Float64 && !val.finite?
+        if val == Float64::INFINITY
+          raise QueryLogicError.new "Non-finite number: inf"
+        elsif val == -Float64::INFINITY
+          raise QueryLogicError.new "Non-finite number: -inf"
+        else
+          raise QueryLogicError.new "Non-finite number: #{val}"
+        end
+      end
     end
 
     def value
@@ -35,15 +45,6 @@ module ReQL
 
   class Datum
     def self.wrap(val : Int32 | Int64 | Float64)
-      if val.is_a? Float64 && !val.finite?
-        if val == Float64::INFINITY
-          raise QueryLogicError.new "Non-finite number: inf"
-        elsif val == -Float64::INFINITY
-          raise QueryLogicError.new "Non-finite number: -inf"
-        else
-          raise QueryLogicError.new "Non-finite number: #{val}"
-        end
-      end
       DatumNumber.new(val)
     end
   end

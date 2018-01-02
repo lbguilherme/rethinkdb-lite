@@ -63,7 +63,7 @@ tests:
     - cd: r.expr([1,2,3]).insert_at(1.5, 1)
       ot: err('ReqlQueryLogicError', 'Number not an integer: 1.5', [0])
     - cd: r.expr([1,2,3]).insert_at(null, 1)
-      ot: err('ReqlNonExistenceError', 'Expected type NUMBER but found NULL.', [0])
+      ot: err('ReqlQueryLogicError', 'Expected type NUMBER but found NULL.', [0])
 
     - cd: r.expr([1,4]).splice_at(1, [2,3])
       ot: [1,2,3,4]
@@ -84,7 +84,7 @@ tests:
     - cd: r.expr([1,2,3]).splice_at(1.5, [1])
       ot: err('ReqlQueryLogicError', 'Number not an integer: 1.5', [0])
     - cd: r.expr([1,2,3]).splice_at(null, [1])
-      ot: err('ReqlNonExistenceError', 'Expected type NUMBER but found NULL.', [0])
+      ot: err('ReqlQueryLogicError', 'Expected type NUMBER but found NULL.', [0])
     - cd: r.expr([1,4]).splice_at(1, 2)
       ot: err('ReqlQueryLogicError', 'Expected type ARRAY but found NUMBER.', [0])
 
@@ -111,7 +111,7 @@ tests:
     - cd: r.expr([1,2,3]).delete_at(1.5)
       ot: err('ReqlQueryLogicError', 'Number not an integer: 1.5', [0])
     - cd: r.expr([1,2,3]).delete_at(null)
-      ot: err('ReqlNonExistenceError', 'Expected type NUMBER but found NULL.', [0])
+      ot: err('ReqlQueryLogicError', 'Expected type NUMBER but found NULL.', [0])
 
     - cd: r.expr([0,2,3]).change_at(0, 1)
       ot: [1,2,3]
@@ -130,4 +130,4 @@ tests:
     - cd: r.expr([1,2,3]).change_at(1.5, 1)
       ot: err('ReqlQueryLogicError', 'Number not an integer: 1.5', [0])
     - cd: r.expr([1,2,3]).change_at(null, 1)
-      ot: err('ReqlNonExistenceError', 'Expected type NUMBER but found NULL.', [0])
+      ot: err('ReqlQueryLogicError', 'Expected type NUMBER but found NULL.', [0])

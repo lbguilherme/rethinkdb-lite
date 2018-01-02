@@ -25,6 +25,9 @@ module ReQL
       elsif json.is_a? Array
         type_id = TermType.new(json[0].as(Int).to_i)
         args = json[1] ? json[1].as(Array).map { |e| Term.parse(e) } : [] of Type
+        if type_id == TermType::FUNCALL
+          args.rotate!(-1)
+        end
         if type_id == TermType::MAKE_ARRAY
           args.as(Type)
         elsif klass = @@type_to_class[type_id]?
@@ -48,7 +51,12 @@ module ReQL
       when Array
         [TermType::MAKE_ARRAY.to_i64.as(JSON::Type), term.map { |x| Term.encode x }.as(JSON::Type)].as(JSON::Type)
       when Term
-        [@@class_to_type[term.class].to_i64.as(JSON::Type), term.args.map { |x| Term.encode(x).as(JSON::Type) }.as(JSON::Type)].as(JSON::Type)
+        type_id = @@class_to_type[term.class].to_i64.as(JSON::Type)
+        args = term.args.map { |x| Term.encode(x).as(JSON::Type) }
+        if type_id == TermType::FUNCALL.to_i64
+          args.rotate!(1)
+        end
+        [type_id, args.as(JSON::Type)].as(JSON::Type)
       when Int32
         term.to_i64.as(JSON::Type)
       else
@@ -121,18 +129,14 @@ module ReQL
 
     def eval(arr : Array)
       DatumArray.new(arr.map do |e|
-        e = eval e
-        expect_type e, Datum
-        e.value.as(Datum::Type)
+        eval(e).value.as(Datum::Type)
       end)
     end
 
     def eval(hsh : Hash)
       result = {} of String => Datum::Type
       hsh.each do |(k, v)|
-        v = eval v
-        expect_type v, Datum
-        result[k] = v.value
+        result[k] = eval(v).value
       end
       DatumObject.new(result)
     end

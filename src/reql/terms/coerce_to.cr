@@ -28,7 +28,7 @@ module ReQL
         case source
         when DatumString
           begin
-            return Datum.wrap(source.value.to_f64)
+            return DatumNumber.new(source.value.to_f64)
           rescue ex : ArgumentError
             raise QueryLogicError.new "Could not coerce `#{source.value}` to NUMBER."
           end
@@ -36,13 +36,15 @@ module ReQL
       when "STRING"
         case source
         when DatumObject
-          return Datum.wrap(source.value.to_json)
+          return DatumString.new(source.value.to_json)
+        when DatumArray
+          return DatumString.new(source.value.to_json)
         when DatumNumber
-          return Datum.wrap(source.value.to_s)
+          return DatumString.new(source.value.to_s)
         when DatumBool
-          return Datum.wrap(source.value.to_s)
+          return DatumString.new(source.value.to_s)
         when DatumNull
-          return Datum.wrap("null")
+          return DatumString.new("null")
         end
       when "ARRAY"
         case source
@@ -51,21 +53,39 @@ module ReQL
           source.value.each do |(k, v)|
             arr << [k, v].map &.as(Datum::Type)
           end
-          return Datum.wrap(arr)
+          return DatumArray.new(arr)
+        end
+      when "OBJECT"
+        case source
+        when DatumArray
+          obj = {} of String => Datum::Type
+          source.value.each do |pair|
+            dpair = Datum.wrap(pair)
+            expect_type dpair, DatumArray
+            pair = dpair.value
+            if pair.size != 2
+              raise QueryLogicError.new "Expected array of size 2, but got size #{pair.size}."
+            end
+
+            dkey = Datum.wrap(pair[0])
+            expect_type dkey, DatumString
+            obj[dkey.value] = pair[1]
+          end
+          return DatumObject.new(obj)
         end
       when "BOOL"
         case source
         when DatumNull
-          return Datum.wrap(false)
+          return DatumBool.new(false)
         when Datum
-          return Datum.wrap(true)
+          return DatumBool.new(true)
         end
       when "NULL"
       else
         raise QueryLogicError.new "Unknown Type: #{target_type}"
       end
 
-      raise QueryLogicError.new "Cannot coerce #{source.class.reql_name} to #{target_type}"
+      raise QueryLogicError.new "Cannot coerce #{source.class.reql_name} to #{target_type}."
     end
   end
 end

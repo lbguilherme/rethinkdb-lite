@@ -121,7 +121,7 @@ module ReQL
     end
 
     macro term(name, term_class)
-      struct R{{name}}
+      struct R{{name.id}}
         include R
 
         def initialize(*args)
@@ -130,20 +130,20 @@ module ReQL
       end
 
       module R
-        def self.{{name}}(*args)
-          R{{name}}.new(*args)
+        def self.{{name.id}}(*args)
+          R{{name.id}}.new(*args)
         end
 
-        def {{name}}(*args)
-          R{{name}}.new(self, *args)
+        def {{name.id}}(*args)
+          R{{name.id}}.new(self, *args)
         end
 
-        def self.{{name}}(*args, &block : R -> R::Type)
-          R{{name}}.new(*args, block)
+        def self.{{name.id}}(*args, &block : R -> R::Type)
+          R{{name.id}}.new(*args, block)
         end
 
-        def {{name}}(*args, &block : R -> R::Type)
-          R{{name}}.new(self, *args, block)
+        def {{name.id}}(*args, &block : R -> R::Type)
+          R{{name.id}}.new(self, *args, block)
         end
       end
     end
@@ -154,6 +154,7 @@ module ReQL
     term table_create, TableCreateTerm
     term get, GetTerm
     term insert, InsertTerm
+    term "do", DoTerm
     term count, CountTerm
     term range, RangeTerm
     term uuid, UuidTerm
@@ -173,6 +174,10 @@ module ReQL
     term split, SplitTerm
     term upcase, UpCaseTerm
     term downcase, DownCaseTerm
+    term insert_at, InsertAtTerm
+    term change_at, ChangeAtTerm
+    term splice_at, SpliceAtTerm
+    term delete_at, DeleteAtTerm
     term eq, EqTerm
     term ne, NeTerm
   end
