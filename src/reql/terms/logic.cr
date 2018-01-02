@@ -8,17 +8,6 @@ module ReQL
     end
   end
 
-  class Evaluator
-    def eval(term : EqTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
-
-      Datum.wrap(a.value == b.value)
-    end
-  end
-end
-
-module ReQL
   class NeTerm < Term
     register_type NE
     infix_inspect "ne"
@@ -29,6 +18,13 @@ module ReQL
   end
 
   class Evaluator
+    def eval(term : EqTerm)
+      a = eval term.args[0]
+      b = eval term.args[1]
+
+      Datum.wrap(a.value == b.value)
+    end
+
     def eval(term : NeTerm)
       a = eval term.args[0]
       b = eval term.args[1]

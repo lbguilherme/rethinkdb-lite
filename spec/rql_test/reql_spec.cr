@@ -12,12 +12,12 @@ describe ReQL do
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/uuid.yaml") }}
   {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/add.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/aliases.yaml") }}
-  # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/div.yaml") }}
+  {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/div.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/floor_ceil_round.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/logic.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/math.yaml") }}
-  # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mod.yaml") }}
-  # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mul.yaml") }}
+  {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mod.yaml") }}
+  {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mul.yaml") }}
   {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/sub.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/aggregation.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/control.yaml") }}

@@ -106,6 +106,18 @@ module ReQL
       def -(other)
         sub(other)
       end
+
+      def *(other)
+        mul(other)
+      end
+
+      def /(other)
+        div(other)
+      end
+
+      def %(other)
+        mod(other)
+      end
     end
 
     def r
@@ -188,6 +200,9 @@ module ReQL
     term delete_at, DeleteAtTerm
     term add, AddTerm
     term sub, SubTerm
+    term mul, MulTerm
+    term div, DivTerm
+    term mod, ModTerm
     term eq, EqTerm
     term ne, NeTerm
   end
@@ -200,5 +215,17 @@ struct Number
 
   def -(other : ReQL::DSL::R)
     ReQL::DSL::RExpr.new(self, 1).sub(other)
+  end
+
+  def *(other : ReQL::DSL::R)
+    ReQL::DSL::RExpr.new(self, 1).mul(other)
+  end
+
+  def /(other : ReQL::DSL::R)
+    ReQL::DSL::RExpr.new(self, 1).div(other)
+
+  end
+  def %(other : ReQL::DSL::R)
+    ReQL::DSL::RExpr.new(self, 1).mod(other)
   end
 end
