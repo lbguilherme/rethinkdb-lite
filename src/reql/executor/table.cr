@@ -9,7 +9,7 @@ module ReQL
       "TABLE"
     end
 
-    def initialize(@db : Db?, @name : String)
+    def initialize(@db : Db?, @name : String, @table_manager : Storage::TableManager)
     end
 
     private def storage
@@ -18,7 +18,7 @@ module ReQL
         return x
       end
       db_name = @db.try &.name || "test"
-      x = @storage = Storage::TableManager.find_table(db_name, @name)
+      x = @storage = @table_manager.find_table(db_name, @name)
       if x.nil?
         raise OpFailedError.new("Table `#{db_name}.#{@name}` does not exist")
       end

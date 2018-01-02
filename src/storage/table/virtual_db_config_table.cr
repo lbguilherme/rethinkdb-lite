@@ -1,5 +1,8 @@
 module Storage
   class VirtualDbConfigTable < AbstractTable
+    def initialize(@config : Config)
+    end
+
     def insert(obj : Hash)
       raise ""
     end
@@ -9,7 +12,7 @@ module Storage
     end
 
     def scan(&block : ReQL::Datum::Type ->)
-      Config.databases.each do |db|
+      @config.databases.each do |db|
         block.call Hash(String, ReQL::Datum::Type){
           "id"   => db.id,
           "name" => db.name,

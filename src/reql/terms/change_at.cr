@@ -15,7 +15,9 @@ module ReQL
       arr = arr.value
 
       idx = eval term.args[1]
-      expect_type idx, DatumNumber
+      unless idx.is_a? DatumNumber
+        raise NonExistenceError.new("Expected type #{DatumNumber.reql_name} but found #{idx.class.reql_name}.")
+      end
       idx = idx.to_i64
 
       if idx >= arr.size

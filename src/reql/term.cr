@@ -133,6 +133,9 @@ module ReQL
   class Evaluator
     property vars = {} of Int64 => Datum
 
+    def initialize(@table_manager : Storage::TableManager)
+    end
+
     def eval(arr : Array)
       DatumArray.new(arr.map do |e|
         eval(e).value.as(Datum::Type)

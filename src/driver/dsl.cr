@@ -1,5 +1,5 @@
-require "./term"
-require "./terms/*"
+require "../reql/term"
+require "../reql/terms/*"
 
 macro if_defined(x)
   {% if x.resolve? %}
@@ -7,7 +7,7 @@ macro if_defined(x)
   {% end %}
 end
 
-module ReQL
+module RethinkDB
   module DSL
     module R
       @@next_var_i = 1i64
@@ -18,29 +18,29 @@ module ReQL
       end
 
       def self.convert_type(x : R, max_depth)
-        x.val.as(Term::Type)
+        x.val.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : Term, max_depth)
-        x.as(Term::Type)
+      def self.convert_type(x : ReQL::Term, max_depth)
+        x.as(ReQL::Term::Type)
       end
 
       def self.convert_type(block : R -> R::Type, max_depth)
-        vari = {R.make_var_i}.map(&.as(Term::Type))
-        vars = vari.map { |i| RExpr.new(VarTerm.new([i], nil), max_depth - 1).as(R) }
-        ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars), max_depth - 1)].map(&.as(Term::Type)), nil).as(Term::Type)
+        vari = {R.make_var_i}.map(&.as(ReQL::Term::Type))
+        vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i], nil), max_depth - 1).as(R) }
+        ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars), max_depth - 1)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Int32, max_depth)
-        x.as(Term::Type)
+        x.as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Int, max_depth)
-        x.to_i64.as(Term::Type)
+        x.to_i64.as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Float, max_depth)
-        x.to_f64.as(Term::Type)
+        x.to_f64.as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Array, max_depth)
@@ -48,7 +48,7 @@ module ReQL
           raise ReQL::DriverCompileError.new "Maximum expression depth exceeded (you can override this with `r.expr(X, MAX_DEPTH)`)"
         end
 
-        x.map { |y| convert_type(y, max_depth - 1).as(Term::Type) }.as(Term::Type)
+        x.map { |y| convert_type(y, max_depth - 1).as(ReQL::Term::Type) }.as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Hash, max_depth)
@@ -56,22 +56,22 @@ module ReQL
           raise ReQL::DriverCompileError.new "Maximum expression depth exceeded (you can override this with `r.expr(X, MAX_DEPTH)`)"
         end
 
-        h = {} of String => Term::Type
+        h = {} of String => ReQL::Term::Type
         x.each do |(k, v)|
           unless k.is_a? String || k.is_a? Symbol
             raise ReQL::CompileError.new "Object keys must be strings or symbols."
           end
           h[k.to_s] = convert_type v, max_depth - 1
         end
-        h.as(Term::Type)
+        h.as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : NamedTuple, max_depth)
         convert_type x.to_h, max_depth
       end
 
-      def self.convert_type(x : Bool | Float64 | Int64 | String | Term | Nil, max_depth)
-        x.as(Term::Type)
+      def self.convert_type(x : Bool | Float64 | Int64 | String | ReQL::Term | Nil, max_depth)
+        x.as(ReQL::Term::Type)
       end
 
       def self.make_var_i
@@ -84,19 +84,19 @@ module ReQL
         r(*args)
       end
 
-      getter val : Term::Type
+      getter val : ReQL::Term::Type
 
       def inspect(io)
         @val.inspect io
       end
 
-      def run
+      def run(conn)
         if_defined(Spec) do
-          # Term.encode(@val)
-          Term.encode(Term.parse(Term.encode(@val))).should ::eq Term.encode(@val)
+          ReQL::Term.encode(ReQL::Term.parse(ReQL::Term.encode(@val))).should ::eq ReQL::Term.encode(@val)
         end
 
-        Evaluator.new.eval @val
+        conn.run(@val, {} of String => Nil)
+        # Evaluator.new.eval @val
       end
 
       def +(other)
@@ -124,11 +124,7 @@ module ReQL
       R
     end
 
-    def r(val, max_depth = 20)
-      unless max_depth.is_a? Int
-        raise ReQL::CompileError.new "Second argument to `r.expr` must be a number."
-      end
-
+    def r(val, max_depth : Int = 20)
       RExpr.new(val, max_depth)
     end
 
@@ -145,7 +141,7 @@ module ReQL
         include R
 
         def initialize(*args)
-          @val = {{term_class}}.new(args.to_a.map { |x| R.convert_type(x, 20).as(Term::Type) }, nil)
+          @val = ReQL::{{term_class}}.new(args.to_a.map { |x| R.convert_type(x, 20).as(ReQL::Term::Type) }, nil)
         end
       end
 
@@ -209,23 +205,23 @@ module ReQL
 end
 
 struct Number
-  def +(other : ReQL::DSL::R)
-    ReQL::DSL::RExpr.new(self, 1).add(other)
+  def +(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).add(other)
   end
 
-  def -(other : ReQL::DSL::R)
-    ReQL::DSL::RExpr.new(self, 1).sub(other)
+  def -(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).sub(other)
   end
 
-  def *(other : ReQL::DSL::R)
-    ReQL::DSL::RExpr.new(self, 1).mul(other)
+  def *(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).mul(other)
   end
 
-  def /(other : ReQL::DSL::R)
-    ReQL::DSL::RExpr.new(self, 1).div(other)
-
+  def /(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).div(other)
   end
-  def %(other : ReQL::DSL::R)
-    ReQL::DSL::RExpr.new(self, 1).mod(other)
+
+  def %(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).mod(other)
   end
 end

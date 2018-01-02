@@ -44,11 +44,11 @@ module ReQL
         raise QueryLogicError.new "Table name `#{table_name}` invalid (Use A-Z, a-z, 0-9, _ and - only)."
       end
 
-      if Storage::TableManager.find_table(db_name, table_name)
+      if @table_manager.find_table(db_name, table_name)
         raise OpFailedError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
-      Storage::TableManager.create_table(db_name, table_name)
+      @table_manager.create_table(db_name, table_name)
 
       Datum.wrap(Hash(String, Datum::Type).new)
     end

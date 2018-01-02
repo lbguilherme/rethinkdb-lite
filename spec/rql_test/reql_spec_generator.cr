@@ -48,7 +48,7 @@ if tables = data["table_variable_name"]?
   puts
   tables.as_s.split(", ").map(&.split(" ")).flatten.each_with_index do |tablevar, i|
     random_name = "test_#{Time.now.epoch}_#{rand(10000)}_#{i + 1}"
-    puts "  r.db(\"test\").table_create(#{random_name.inspect}).run"
+    puts "  r.db(\"test\").table_create(#{random_name.inspect}).run(conn)"
     puts "  #{tablevar} = r.db(\"test\").table(#{random_name.inspect})"
   end
 end
@@ -65,7 +65,7 @@ data["tests"].each_with_index do |test, i|
     assign = (language_fixes (test["rb"]? || test["cd"]).as_s).split("=")
     var = assign[0].strip
     value = assign[1].strip
-    puts "  #{var} = #{value}.run.value.as(Int)"
+    puts "  #{var} = #{value}.run(conn).datum.int32"
   else
     test["ot"]?
     subtests = test["rb"]? || test["cd"]?
@@ -96,15 +96,15 @@ data["tests"].each_with_index do |test, i|
       if output =~ /err\("(\w+)",\s?"(.+?)"[,)]/
         err = $1.gsub("Reql", "ReQL::")
         puts "    expect_raises(#{err}, \"#{$2.gsub("\\\\", "\\")}\") do"
-        puts "      (#{subtest}).run.value"
+        puts "      (#{subtest}).run(conn).datum"
         puts "    end"
       elsif output =~ /err_regex\("(\w+)",\s?"(.+?)"[,)]/
         err = $1.gsub("Reql", "ReQL::")
         puts "    expect_raises(#{err}, /#{$2.gsub("\\\\", "\\")}/) do"
-        puts "      (#{subtest}).run.value"
+        puts "      (#{subtest}).run(conn).datum"
         puts "    end"
       else
-        puts "    result = (#{subtest}).run.value"
+        puts "    result = (#{subtest}).run(conn).datum"
         puts "    match_reql_output(result) { (#{language_fixes output}) }"
       end
       puts "  end"

@@ -1,8 +1,7 @@
 require "./connection"
 require "../reql/*"
-require "http/server"
 require "json"
-require "http/server/handlers/static_file_handler"
+require "../crypto"
 
 module Server
   class DriverServer
@@ -142,13 +141,8 @@ module Server
       sock = io
 
       until sock.closed?
-        query_token_bytes = Bytes.new(8)
-        break unless sock.read(query_token_bytes) == 8
-        query_token = IO::ByteFormat::LittleEndian.decode(UInt64, query_token_bytes)
-
-        query_length_bytes = Bytes.new(4)
-        break unless sock.read(query_length_bytes) == 4
-        query_length = IO::ByteFormat::LittleEndian.decode(UInt32, query_length_bytes)
+        query_token = sock.read_bytes(UInt64, IO::ByteFormat::LittleEndian)
+        query_length_bytes = sock.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
 
         query_bytes = Bytes.new(query_length)
         offset = 0
@@ -164,13 +158,8 @@ module Server
           message = JSON.parse(message_json).as_a
           answer = conn.execute(query_token, message)
 
-          IO::ByteFormat::LittleEndian.encode(query_token, query_token_bytes)
-          sock.write(query_token_bytes)
-
-          answer_length_bytes = Bytes.new(4)
-          IO::ByteFormat::LittleEndian.encode(answer.to_slice.size.to_u32, answer_length_bytes)
-          sock.write(answer_length_bytes)
-
+          sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
+          sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
           sock.write(answer.to_slice)
 
           sock.flush

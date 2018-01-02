@@ -1,4 +1,7 @@
 module ReQL
+  class ClientError < Exception
+  end
+
   class CompileError < Exception
   end
 

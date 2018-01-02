@@ -54,10 +54,10 @@ tests:
     - js: r({'a':{'b':undefined}})
       ot: err("ReqlCompileError", "Object field 'b' may not be undefined")
 
-    - cd: r.expr({}, "foo")
-      ot:
-        cd: err("ReqlCompileError", "Second argument to `r.expr` must be a number.")
-        js: err("ReqlCompileError", "Second argument to `r.expr` must be a number or undefined.")
+    # - cd: r.expr({}, "foo")
+    #   ot:
+    #     cd: err("ReqlCompileError", "Second argument to `r.expr` must be a number.")
+    #     js: err("ReqlCompileError", "Second argument to `r.expr` must be a number or undefined.")
 
     - js: r.expr({}, NaN)
       ot: err("ReqlCompileError", "Second argument to `r.expr` must be a number or undefined.")

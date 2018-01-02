@@ -1,13 +1,13 @@
 require "spec"
-require "../../src/reql/*"
+require "../../src/driver/*"
 
-include ReQL::DSL
+include RethinkDB::DSL
 
 macro inspect_check(expr)
   {{expr.id}}.inspect.should eq {{expr}}
 end
 
-describe ReQL do
+describe RethinkDB do
   it "inspects r.table().get()" do
     inspect_check %{r.table("test").get(nil)}
     inspect_check %{r.table("test").get(123)}

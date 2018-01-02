@@ -18,7 +18,7 @@ module ReQL
         raise QueryLogicError.new "Database name `#{name}` invalid (Use A-Z, a-z, 0-9, _ and - only)."
       end
 
-      Storage::TableManager.create_db(name)
+      @table_manager.create_db(name)
 
       Datum.wrap(Hash(String, Datum::Type).new)
     end
