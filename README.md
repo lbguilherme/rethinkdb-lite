@@ -46,7 +46,21 @@ r.table("users").insert({name: "John", username: "john", password: "123"}).run(c
 
 That local database from the second use case can also be run as a multi user full database, listening for RethinkDB driver connections and serving an Web UI for administration. It can receive connection from any other driver from https://rethinkdb.com/docs/install-drivers/.
 
-TODO: code sample
+```cr
+require "rethinkdb-lite/src/server/*"
+require "rethinkdb-lite/src/driver/*"
+include RethinkDB::DSL
+
+conn = r.local_database("/tmp/rethinkdb-lite/data")
+
+Server::HttpServer.new(8080, conn).start
+Server::DriverServer.new(28015, conn).start
+
+# http://localhost:8080 will bring the Web UI
+# localhost:28015 will be ready for driver connections
+
+sleep
+```
 
 ---
 
