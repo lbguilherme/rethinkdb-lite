@@ -53,8 +53,8 @@ include RethinkDB::DSL
 
 conn = r.local_database("/tmp/rethinkdb-lite/data")
 
-Server::HttpServer.new(8080, conn).start
-Server::DriverServer.new(28015, conn).start
+RethinkDB::Server::HttpServer.new(8080, conn).start
+RethinkDB::Server::DriverServer.new(28015, conn).start
 
 # http://localhost:8080 will bring the Web UI
 # localhost:28015 will be ready for driver connections
