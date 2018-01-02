@@ -102,6 +102,10 @@ module ReQL
       def +(other)
         add(other)
       end
+
+      def -(other)
+        sub(other)
+      end
     end
 
     def r
@@ -183,7 +187,18 @@ module ReQL
     term splice_at, SpliceAtTerm
     term delete_at, DeleteAtTerm
     term add, AddTerm
+    term sub, SubTerm
     term eq, EqTerm
     term ne, NeTerm
+  end
+end
+
+struct Number
+  def +(other : ReQL::DSL::R)
+    ReQL::DSL::RExpr.new(self, 1).add(other)
+  end
+
+  def -(other : ReQL::DSL::R)
+    ReQL::DSL::RExpr.new(self, 1).sub(other)
   end
 end

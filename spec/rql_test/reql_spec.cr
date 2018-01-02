@@ -18,7 +18,7 @@ describe ReQL do
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/math.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mod.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mul.yaml") }}
-  # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/sub.yaml") }}
+  {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/sub.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/aggregation.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/control.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/default.yaml") }}
