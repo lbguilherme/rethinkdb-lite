@@ -4,9 +4,7 @@ module ReQL
     infix_inspect "do"
 
     def compile
-      if @args.size == 0
-        raise CompileError.new "Expected 1 or more arguments but found 0."
-      end
+      expect_args_at_least 1
     end
   end
 

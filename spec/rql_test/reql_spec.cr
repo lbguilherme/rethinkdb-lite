@@ -10,7 +10,7 @@ describe ReQL do
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/string.yaml") }}
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/typeof.yaml") }}
   {{ run("./reql_spec_generator", "spec/rql_test/src/datum/uuid.yaml") }}
-  # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/add.yaml") }}
+  {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/add.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/aliases.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/div.yaml") }}
   # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/floor_ceil_round.yaml") }}

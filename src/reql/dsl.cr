@@ -98,6 +98,10 @@ module ReQL
 
         Evaluator.new.eval @val
       end
+
+      def +(other)
+        add(other)
+      end
     end
 
     def r
@@ -178,6 +182,7 @@ module ReQL
     term change_at, ChangeAtTerm
     term splice_at, SpliceAtTerm
     term delete_at, DeleteAtTerm
+    term add, AddTerm
     term eq, EqTerm
     term ne, NeTerm
   end

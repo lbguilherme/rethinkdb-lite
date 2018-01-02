@@ -76,6 +76,12 @@ module ReQL
       end
     end
 
+    macro expect_args_at_least(count)
+      if @args.size < {{count}}
+        raise CompileError.new "Expected #{ {{count}} } or more arguments but found #{@args.size}."
+      end
+    end
+
     macro infix_inspect(name)
       def inspect(io)
         if @args.size == 0
