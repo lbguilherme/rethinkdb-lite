@@ -19,7 +19,7 @@ def run_reql_spec(conn)
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/div.yaml") }}
     # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/floor_ceil_round.yaml") }}
     # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/logic.yaml") }}
-    # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/math.yaml") }}
+    {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/math.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mod.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mul.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/sub.yaml") }}
@@ -36,12 +36,12 @@ run_reql_spec(conn)
 conn.close
 
 conn = begin
-  r.connect("127.0.0.1")
+  r.connect("172.17.0.2")
 rescue
   begin
-    r.connect("172.17.0.2")
+    r.connect("localhost")
   rescue
-    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at 127.0.0.1 or 172.17.0.2."
+    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
     nil
   end
 end
