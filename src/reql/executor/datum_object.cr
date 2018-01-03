@@ -11,10 +11,4 @@ module ReQL
       @value.as(Hash)
     end
   end
-
-  class Datum
-    def self.wrap(val : Hash(String, Datum::Type))
-      DatumObject.new(val)
-    end
-  end
 end

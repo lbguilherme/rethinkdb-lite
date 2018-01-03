@@ -7,11 +7,11 @@ module Storage
       raise ""
     end
 
-    def replace(key, &block : ReQL::Datum::Type -> ReQL::Datum::Type)
+    def replace(key, &block : Hash(String, ReQL::Datum::Type) -> Hash(String, ReQL::Datum::Type))
       raise ""
     end
 
-    def scan(&block : ReQL::Datum::Type ->)
+    def scan(&block : Hash(String, ReQL::Datum::Type) ->)
       @config.databases.each do |db|
         db.tables.each do |table|
           block.call Hash(String, ReQL::Datum::Type){
@@ -38,7 +38,7 @@ module Storage
               "ready_for_reads"          => true,
               "ready_for_writes"         => true,
             }.as(ReQL::Datum::Type),
-          }.as(ReQL::Datum::Type)
+          }
         end
       end
     end

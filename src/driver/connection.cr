@@ -8,9 +8,9 @@ module RethinkDB
   end
 
   struct Datum
-    @value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil
+    @value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil | Bytes
 
-    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | ReQL::Maxval | ReQL::Minval)
+    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval)
       case value
       when Datum
         @value = value.@value

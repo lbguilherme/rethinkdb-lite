@@ -27,6 +27,7 @@ def language_fixes(str)
     "#{$1}#{lang_replaces[$2]}#{$3}"
   end
   str = quotes_fixes(str)
+  str = str.gsub(".force_encoding(\"BINARY\")", "")
   str = str.gsub("[]", "[] of Int32")
   # str = str.gsub(/([^\)\s]\s*){}([^"])/) { "#{$1}{} of String => Int32#{$2}" }
   # str = str.gsub(/^{}$/, "{} of String => Int32")

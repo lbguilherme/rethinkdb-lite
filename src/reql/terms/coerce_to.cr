@@ -36,9 +36,9 @@ module ReQL
       when "STRING"
         case source
         when DatumObject
-          return DatumString.new(source.value.to_json)
+          return DatumString.new(source.to_json)
         when DatumArray
-          return DatumString.new(source.value.to_json)
+          return DatumString.new(source.to_json)
         when DatumNumber
           return DatumString.new(source.value.to_s)
         when DatumBool

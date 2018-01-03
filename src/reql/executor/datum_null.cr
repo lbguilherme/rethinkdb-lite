@@ -11,10 +11,4 @@ module ReQL
       nil
     end
   end
-
-  class Datum
-    def self.wrap(val : Nil)
-      DatumNull.new
-    end
-  end
 end

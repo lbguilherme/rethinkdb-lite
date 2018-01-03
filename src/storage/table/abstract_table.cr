@@ -3,7 +3,7 @@ module Storage
     def close
     end
 
-    def get(key)
+    def get(key : ReQL::Datum::Type)
       result = nil
       scan do |obj|
         if obj.as(Hash)["id"] == key
@@ -13,9 +13,9 @@ module Storage
       result
     end
 
-    abstract def insert(obj : Hash)
-    abstract def replace(key, &block : ReQL::Datum::Type -> ReQL::Datum::Type)
-    abstract def scan(&block : ReQL::Datum::Type ->)
+    abstract def insert(obj : Hash(String, ReQL::Datum::Type))
+    abstract def replace(key : ReQL::Datum::Type, &block : Hash(String, ReQL::Datum::Type) -> Hash(String, ReQL::Datum::Type))
+    abstract def scan(&block : Hash(String, ReQL::Datum::Type) ->)
 
     def count
       count = 0i64

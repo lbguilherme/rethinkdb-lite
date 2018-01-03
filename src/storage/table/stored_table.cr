@@ -38,14 +38,14 @@ module Storage
     def initialize(@file : DatabaseFile, @btree : BTree)
     end
 
-    def insert(obj : Hash)
+    def insert(obj : Hash(String, ReQL::Datum::Type))
       k = BTree.make_key obj["id"]
       @file.write do |w|
         pos = @btree.query(w.reader, k)
         if pos != 0
-          row = Data.new(w.get(pos)).read(w.reader).as(Hash)
-          pretty_row = JSON.build(4) { |builder| row.to_json(builder) }
-          pretty_obj = JSON.build(4) { |builder| obj.to_json(builder) }
+          row = Data.new(w.get(pos)).read(w.reader)
+          pretty_row = JSON.build(4) { |builder| ReQL::Datum.wrap(row).to_json(builder) }
+          pretty_obj = JSON.build(4) { |builder| ReQL::Datum.wrap(obj).to_json(builder) }
           raise ReQL::OpFailedError.new("Duplicate primary key `id`:\n#{pretty_row}\n#{pretty_obj}")
         end
         data = Data.create(w, obj)
@@ -59,26 +59,26 @@ module Storage
       end
     end
 
-    def get(key)
+    def get(key : ReQL::Datum::Type)
       k = BTree.make_key key
       row = nil
       @file.read do |r|
         pos = @btree.query(r, k)
         if pos != 0u32
-          row = Data.new(r.get(pos)).read(r).as(Hash)
+          row = Data.new(r.get(pos)).read(r).as(Hash(String, ReQL::Datum::Type))
         end
       end
       row
     end
 
-    def replace(key)
+    def replace(key : ReQL::Datum::Type)
       k = BTree.make_key key
       row = nil
       @file.write do |w|
         pos = @btree.query(w.reader, k)
         if pos == 0u32
           new_row = yield nil
-          data = Data.create(w, new_row.as(Hash))
+          data = Data.create(w, new_row)
           old_pos = @btree.pos
           @btree.insert(w, k, data.pos)
           if @btree.pos != old_pos
@@ -96,10 +96,10 @@ module Storage
       row
     end
 
-    def scan(&block : ReQL::Datum::Type ->)
+    def scan(&block : Hash(String, ReQL::Datum::Type) ->)
       @file.read do |r|
         @btree.scan(r) do |pos|
-          row = Data.new(r.get(pos)).read(r).as(Hash)
+          row = Data.new(r.get(pos)).read(r).as(Hash(String, ReQL::Datum::Type))
           block.call row
         end
       end

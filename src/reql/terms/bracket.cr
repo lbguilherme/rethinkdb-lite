@@ -40,7 +40,7 @@ module ReQL
             if val.has_key? field
               Datum.wrap(val[field])
             else
-              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| val.to_json(builder) }}")
+              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| Datum.wrap(val).to_json(builder) }}")
             end
           else
             raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
@@ -55,7 +55,7 @@ module ReQL
             if val.has_key? field
               val[field]
             else
-              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| val.to_json(builder) }}")
+              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| Datum.wrap(val).to_json(builder) }}")
             end
           else
             raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
@@ -66,7 +66,7 @@ module ReQL
         if target.has_key? field
           Datum.wrap(target[field])
         else
-          raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| target.to_json(builder) }}")
+          raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| Datum.wrap(target).to_json(builder) }}")
         end
       else
         raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")

@@ -1,16 +1,4 @@
 module ReQL
-  struct Maxval
-    def to_json(io)
-      raise QueryLogicError.new "Cannot convert `r.maxval` to JSON"
-    end
-  end
-
-  struct Minval
-    def to_json(io)
-      raise QueryLogicError.new "Cannot convert `r.minval` to JSON"
-    end
-  end
-
   class DatumMinval < Datum
     def self.reql_name
       "MINVAL"
@@ -34,16 +22,6 @@ module ReQL
 
     def value
       Maxval.new
-    end
-  end
-
-  class Datum
-    def self.wrap(val : Maxval)
-      DatumMaxval.new
-    end
-
-    def self.wrap(val : Minval)
-      DatumMinval.new
     end
   end
 end

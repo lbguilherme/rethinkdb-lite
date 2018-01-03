@@ -11,10 +11,4 @@ module ReQL
       @value.as(Bool)
     end
   end
-
-  class Datum
-    def self.wrap(val : Bool)
-      DatumBool.new(val)
-    end
-  end
 end

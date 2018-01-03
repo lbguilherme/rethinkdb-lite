@@ -42,10 +42,4 @@ module ReQL
       end
     end
   end
-
-  class Datum
-    def self.wrap(val : Int32 | Int64 | Float64)
-      DatumNumber.new(val)
-    end
-  end
 end

@@ -1,6 +1,5 @@
 require "./database_file"
 require "../reql/executor/datum"
-require "msgpack"
 
 module Storage
   def self.data_offset
@@ -16,8 +15,7 @@ module Storage
 
     def read(r : DatabaseFile::Reader)
       io = DataIO.new(r, @page)
-      # unpacker = MessagePack::Unpacker.new(io)
-      value_to_datum_type JSON.parse(io).raw # unpacker.read_value
+      ReQL::Datum.unserialize(io).value
     end
 
     def value_to_datum_type(arr : Array)
@@ -51,10 +49,7 @@ module Storage
     end
 
     def write(w : DatabaseFile::Writter, obj)
-      # packer = MessagePack::Packer.new
-      # packer.write(obj)
-      # slice = packer.to_slice
-      slice = obj.to_json.to_slice
+      slice = ReQL::Datum.wrap(obj).serialize
       pos = 0
       max_size_per_page = page.size - Storage.data_offset
       page = @page
