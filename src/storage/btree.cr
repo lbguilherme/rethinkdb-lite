@@ -1,6 +1,4 @@
 require "./database_file"
-
-require "msgpack"
 require "digest"
 
 struct StaticArray(T, N)
