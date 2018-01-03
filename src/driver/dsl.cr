@@ -130,6 +130,22 @@ module RethinkDB
       def [](arg)
         bracket(arg)
       end
+
+      def >(arg)
+        gt(arg)
+      end
+
+      def >=(arg)
+        ge(arg)
+      end
+
+      def <(arg)
+        lt(arg)
+      end
+
+      def <=(arg)
+        le(arg)
+      end
     end
 
     def r
@@ -214,6 +230,12 @@ module RethinkDB
     term mod, ModTerm
     term eq, EqTerm
     term ne, NeTerm
+    term gt, GtTerm
+    term ge, GeTerm
+    term lt, LtTerm
+    term le, LeTerm
+    term minval, MinvalTerm
+    term maxval, MaxvalTerm
   end
 end
 
@@ -244,5 +266,21 @@ class Object
 
   def !=(other : RethinkDB::DSL::R)
     RethinkDB::DSL::RExpr.new(self, 1).ne(other)
+  end
+
+  def >(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).gt(other)
+  end
+
+  def >=(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).ge(other)
+  end
+
+  def <(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).lt(other)
+  end
+
+  def <=(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).le(other)
   end
 end

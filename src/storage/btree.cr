@@ -31,10 +31,10 @@ module Storage
     end
 
     def self.make_key(obj)
-      packer = MessagePack::Packer.new
-      packer.write(obj)
+      # packer = MessagePack::Packer.new
+      # packer.write(obj)
 
-      return Digest::SHA1.digest(packer.to_slice)
+      return Digest::SHA1.digest(obj.to_json.to_slice)
     end
 
     def list_offset

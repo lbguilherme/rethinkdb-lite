@@ -10,7 +10,7 @@ module RethinkDB
   struct Datum
     @value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil
 
-    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil)
+    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | ReQL::Maxval | ReQL::Minval)
       case value
       when Datum
         @value = value.@value
@@ -22,6 +22,8 @@ module RethinkDB
           obj[k.to_s] = Datum.new(v)
         end
         @value = obj
+      when ReQL::Maxval, ReQL::Minval
+        raise "BUG: Maxval, Minval"
       else
         @value = value
       end

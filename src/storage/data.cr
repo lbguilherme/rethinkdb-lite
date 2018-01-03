@@ -16,8 +16,8 @@ module Storage
 
     def read(r : DatabaseFile::Reader)
       io = DataIO.new(r, @page)
-      unpacker = MessagePack::Unpacker.new(io)
-      value_to_datum_type unpacker.read_value
+      # unpacker = MessagePack::Unpacker.new(io)
+      value_to_datum_type JSON.parse(io).raw # unpacker.read_value
     end
 
     def value_to_datum_type(arr : Array)
@@ -51,9 +51,10 @@ module Storage
     end
 
     def write(w : DatabaseFile::Writter, obj)
-      packer = MessagePack::Packer.new
-      packer.write(obj)
-      slice = packer.to_slice
+      # packer = MessagePack::Packer.new
+      # packer.write(obj)
+      # slice = packer.to_slice
+      slice = obj.to_json.to_slice
       pos = 0
       max_size_per_page = page.size - Storage.data_offset
       page = @page

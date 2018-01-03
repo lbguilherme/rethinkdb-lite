@@ -28,8 +28,9 @@ def language_fixes(str)
   end
   str = quotes_fixes(str)
   str = str.gsub("[]", "[] of Int32")
-  str = str.gsub(/([^\)\s]\s*){}([^"])/) { "#{$1}{} of String => Int32#{$2}" }
-  str = str.gsub(/^{}$/, "{} of String => Int32")
+  # str = str.gsub(/([^\)\s]\s*){}([^"])/) { "#{$1}{} of String => Int32#{$2}" }
+  # str = str.gsub(/^{}$/, "{} of String => Int32")
+  str = str.gsub("{}", "{} of String => Int32")
   str = str.gsub(/([^\\\d])\":/) { "#{$1}\" => " }
   str = str.gsub(/(\s|\{|,)(\d+):/) { "#{$1}#{$2} => " }
   str = str.gsub(/(\}):/) { "#{$1} => " }
