@@ -4,7 +4,7 @@
 
 This is a personal project aiming at reimplementing everything [RethinkDB](https://rethinkdb.com) currently does. At the same time, it is also a driver capable to connecting to the database to send queries.
 
-### First use case: Database driver
+## First use case: Database driver
 
 You can connect to a running RethinkDB instance and send queries for data. Methods are pretty much equal to the official Ruby driver, for which you can find documentation here: https://rethinkdb.com/api/ruby/. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
 
