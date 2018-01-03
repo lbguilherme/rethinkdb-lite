@@ -59,7 +59,7 @@ module RethinkDB
         client_proof[i] = client_key[i] ^ client_signature[i]
       end
 
-      message3 = "c=biws,r=#{nonce_c}#{nonce_s},p=#{Base64.encode(client_proof).strip}"
+      message3 = "c=biws,r=#{nonce_c}#{nonce_s},p=#{Base64.strict_encode(client_proof)}"
 
       @socket.write(({
         authentication: message3,
@@ -86,15 +86,15 @@ module RethinkDB
       end
     end
 
-    def run(term : ReQL::Term::Type, runopts : Hash)
+    def run(term : ReQL::Term::Type, runopts : RunOpts)
       query = Query.new(self, runopts)
       response = query.start(term)
 
       case response.t
       when ResponseType::SUCCESS_ATOM
-        return Datum.new(response.r[0].raw)
+        return Datum.new(response.r[0].raw, runopts)
       when ResponseType::SUCCESS_SEQUENCE, ResponseType::SUCCESS_PARTIAL
-        return Cursor.new(query, response)
+        return Cursor.new(query, response, runopts)
       else
         raise "TODO"
       end
@@ -150,16 +150,10 @@ module RethinkDB
     class Query
       getter id : UInt64
       @channel : Channel::Unbuffered(String)
-      @runopts : Hash(String, JSON::Type)
 
-      def initialize(@conn : RemoteConnection, runopts)
+      def initialize(@conn : RemoteConnection, @runopts : RunOpts)
         @id = @conn.next_query_id
         @channel = @conn.@channels[id] = Channel(String).new
-        @runopts = {} of String => JSON::Type
-        runopts.each do |key, val|
-          @runopts[key] = val
-        end
-        # @runopts["db"] = RethinkDB.db(@conn.@db).to_reql
       end
 
       def start(term)
@@ -222,7 +216,7 @@ module RethinkDB
     end
 
     class Cursor < RethinkDB::Cursor
-      def initialize(@query : Query, @response : Response)
+      def initialize(@query : Query, @response : Response, @runopts : RunOpts)
         @index = 0
       end
 
@@ -241,7 +235,7 @@ module RethinkDB
           fetch_next
         end
 
-        value = Datum.new(@response.r[@index].raw)
+        value = Datum.new @response.r[@index].raw, @runopts
         @index += 1
         return value
       end

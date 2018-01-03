@@ -27,7 +27,7 @@ def language_fixes(str)
     "#{$1}#{lang_replaces[$2]}#{$3}"
   end
   str = quotes_fixes(str)
-  str = str.gsub(".force_encoding(\"BINARY\")", "")
+  str = str.gsub(".force_encoding(\"BINARY\")", ".to_slice")
   str = str.gsub("[]", "[] of Int32")
   # str = str.gsub(/([^\)\s]\s*){}([^"])/) { "#{$1}{} of String => Int32#{$2}" }
   # str = str.gsub(/^{}$/, "{} of String => Int32")
@@ -86,7 +86,18 @@ data["tests"].each_with_index do |test, i|
     end
     output = quotes_fixes output.as_s
 
-    runopts = test["runopts"]? || "{} of String => String"
+    runopts = if test["runopts"]?
+      String.build do |io|
+        io << ", {"
+        test["runopts"].raw.as(Hash).each do |(k, v)|
+          io << k.inspect << " => " << v
+          io << ","
+        end
+        io << "}"
+      end
+    else
+      ""
+    end
 
     puts unless i == 0
     subtests.each_with_index do |subtest, j|
@@ -98,15 +109,15 @@ data["tests"].each_with_index do |test, i|
       if output =~ /err\("(\w+)",\s?"(.+?)"[,)]/
         err = $1.gsub("Reql", "ReQL::")
         puts "    expect_raises(#{err}, \"#{$2.gsub("\\\\", "\\")}\") do"
-        puts "      (#{subtest}).run(conn).datum"
+        puts "      (#{subtest}).run(conn#{runopts}).datum"
         puts "    end"
       elsif output =~ /err_regex\("(\w+)",\s?"(.+?)"[,)]/
         err = $1.gsub("Reql", "ReQL::")
         puts "    expect_raises(#{err}, /#{$2.gsub("\\\\", "\\")}/) do"
-        puts "      (#{subtest}).run(conn).datum"
+        puts "      (#{subtest}).run(conn#{runopts}).datum"
         puts "    end"
       else
-        puts "    result = (#{subtest}).run(conn).datum"
+        puts "    result = (#{subtest}).run(conn#{runopts}).datum"
         puts "    match_reql_output(result) { (#{language_fixes output}) }"
       end
       puts "  end"

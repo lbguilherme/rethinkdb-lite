@@ -8,7 +8,7 @@ include RethinkDB::DSL
 def run_reql_spec(conn)
   describe RethinkDB do
     {{ run("./reql_spec_generator", "spec/rql_test/src/datum/array.yaml") }}
-    # {{ run("./reql_spec_generator", "spec/rql_test/src/datum/binary.yaml") }}
+    {{ run("./reql_spec_generator", "spec/rql_test/src/datum/binary.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/datum/bool.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/datum/null.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/datum/number.yaml") }}
@@ -48,16 +48,16 @@ conn.close
 # conn.close
 # real_conn.close
 
-# conn = begin
-#   r.connect("172.17.0.2")
-# rescue
-#   begin
-#     r.connect("localhost")
-#   rescue
-#     puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
-#     nil
-#   end
-# end
+conn = begin
+  r.connect("172.17.0.2")
+rescue
+  begin
+    r.connect("localhost")
+  rescue
+    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
+    nil
+  end
+end
 
 if conn
   run_reql_spec(conn)
@@ -70,17 +70,20 @@ def match_reql_output(result)
 end
 
 def recursive_match(result, target)
+  if result.bytes? && target.is_a? String
+    target = target.to_slice
+  end
   case target
   when Matcher
     target.match(result)
   when Array
-    result.array?.should be_a Array(RethinkDB::Datum)
+    result.value.should be_a Array(RethinkDB::Datum)
     result.array.size.should eq target.size
     result.array.size.times do |i|
       recursive_match result.array[i], target[i]
     end
   when Hash
-    result.hash?.should be_a Hash(String, RethinkDB::Datum)
+    result.value.should be_a Hash(String, RethinkDB::Datum)
     (result.hash.keys - target.keys).size.should eq 0
     result.hash.keys.each do |key|
       recursive_match result.hash[key], target[key]

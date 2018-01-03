@@ -3,27 +3,56 @@ module RethinkDB
     abstract def authorize(user : String, password : String)
     abstract def use(db_name : String)
     abstract def start
-    abstract def run(term : ReQL::Term::Type, runopts : Hash) : Datum | Cursor
+    abstract def run(term : ReQL::Term::Type, runopts : RunOpts) : Datum | Cursor
     abstract def close
   end
 
-  struct Datum
-    @value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil | Bytes
+  struct RunOpts
+    getter native_binary : Bool
 
-    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval)
+    def initialize(hash : Hash = {} of String => Nil)
+      @native_binary = (hash["binaryFormat"]? || hash["binary_format"]?) != "raw"
+    end
+
+    def to_json(io)
+      runopts = Hash(String, JSON::Type).new
+      if !@native_binary
+        runopts["binary_format"] = "raw"
+      end
+      runopts.to_json(io)
+    end
+  end
+
+  struct Datum
+    getter value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil | Bytes
+
+    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
       case value
       when Datum
         @value = value.@value
       when Array
-        @value = value.map { |x| Datum.new(x).as Datum }
+        @value = value.map { |x| Datum.new(x, runopts).as Datum }
       when Hash
         obj = {} of String => Datum
         value.each do |(k, v)|
-          obj[k.to_s] = Datum.new(v)
+          obj[k.to_s] = Datum.new(v, runopts)
         end
-        @value = obj
+        if runopts.native_binary && obj["$reql_type$"]? == "BINARY"
+          @value = Base64.decode(obj["data"].string)
+        else
+          @value = obj
+        end
       when ReQL::Maxval, ReQL::Minval
         raise "BUG: Maxval, Minval"
+      when Bytes
+        if runopts.native_binary
+          @value = value
+        else
+          @value = Hash(String, Datum){
+            "$reql_type$" => Datum.new("BINARY", runopts),
+            "data" => Datum.new(Base64.strict_encode(value), runopts)
+          }
+        end
       else
         @value = value
       end
@@ -42,11 +71,11 @@ module RethinkDB
     end
 
     def ==(other)
-      @value == Datum.new(other).@value
+      @value == Datum.new(other, RunOpts.new).@value
     end
 
     def !=(other)
-      @value != Datum.new(other).@value
+      @value != Datum.new(other, RunOpts.new).@value
     end
 
     def array
@@ -63,6 +92,10 @@ module RethinkDB
 
     def string
       @value.as String
+    end
+
+    def bytes
+      @value.as Bytes
     end
 
     def float
@@ -89,6 +122,10 @@ module RethinkDB
       @value.as? String
     end
 
+    def bytes?
+      @value.as? Bytes
+    end
+
     def float?
       @value.as?(Float64 | Int64 | Int32).try &.to_f64
     end
@@ -104,7 +141,7 @@ module RethinkDB
     abstract def next
 
     def datum
-      Datum.new to_a
+      Datum.new to_a, @runopts
     end
 
     def close

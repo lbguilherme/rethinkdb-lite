@@ -86,7 +86,7 @@ module RethinkDB
         nonce_s = Random::Secure.base64(18)
         password_hash = pbkdf2_hmac_sha256(password.to_slice, salt, iter)
 
-        message2 = "r=#{nonce_c}#{nonce_s},s=#{Base64.encode(salt)},i=#{iter}"
+        message2 = "r=#{nonce_c}#{nonce_s},s=#{Base64.strict_encode(salt)},i=#{iter}"
 
         io.write(({
           success:        true,
@@ -128,7 +128,7 @@ module RethinkDB
         server_key = hmac_sha256(password_hash, "Server Key")
         server_signature = hmac_sha256(server_key, auth_message)
 
-        message4 = "v=#{Base64.encode server_signature}"
+        message4 = "v=#{Base64.strict_encode server_signature}"
 
         io.write(({
           success:        true,

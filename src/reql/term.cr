@@ -3,7 +3,7 @@ require "./error"
 
 module ReQL
   abstract class Term
-    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil
+    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes
 
     getter args
 
@@ -21,10 +21,14 @@ module ReQL
         json.each do |(k, v)|
           hash[k] = Term.parse(v)
         end
-        return hash.as(Type)
+        if hash["$reql_type$"]? == "BINARY" && hash["data"]?.is_a? String
+          Base64.decode(hash["data"].as(String)).as(Type)
+        else
+          hash.as(Type)
+        end
       elsif json.is_a? Array
         type_id = TermType.new(json[0].as(Int).to_i)
-        args = json[1] ? json[1].as(Array).map { |e| Term.parse(e) } : [] of Type
+        args = json[1] ? json[1].as(Array).map { |e| Term.parse(e).as(Type) } : [] of Type
         if type_id == TermType::FUNCALL
           args.rotate!(-1)
         end
@@ -36,7 +40,7 @@ module ReQL
           raise CompileError.new("Don't know how to handle #{type_id} term")
         end
       else
-        return json.as(Type)
+        json.as(Type)
       end
     end
 
@@ -59,6 +63,11 @@ module ReQL
         [type_id, args.as(JSON::Type)].as(JSON::Type)
       when Int32
         term.to_i64.as(JSON::Type)
+      when Bytes
+        Hash(String, JSON::Type){
+          "$reql_type$" => "BINARY",
+          "data"        => Base64.strict_encode(term),
+        }.as(JSON::Type)
       else
         term.as(JSON::Type)
       end
@@ -147,7 +156,20 @@ module ReQL
       hsh.each do |(k, v)|
         result[k] = eval(v).value
       end
-      DatumObject.new(result)
+      if result["$reql_type$"]? == "BINARY"
+        unless result.has_key? "data"
+          raise QueryLogicError.new "Invalid binary pseudotype: lacking `data` key."
+        end
+        extra_keys = result.keys - ["$reql_type$", "data"]
+        if extra_keys.size > 0
+          raise QueryLogicError.new "Invalid binary pseudotype: illegal `#{extra_keys[0]}` key."
+        end
+        data = Datum.wrap(result["data"])
+        expect_type data, DatumString
+        DatumBinary.new(Base64.decode(data.value))
+      else
+        DatumObject.new(result)
+      end
     end
 
     def eval(bool : Bool)
@@ -156,6 +178,10 @@ module ReQL
 
     def eval(str : String)
       DatumString.new(str)
+    end
+
+    def eval(bytes : Bytes)
+      DatumBinary.new(bytes)
     end
 
     def eval(num : Float64 | Int64 | Int32)

@@ -35,6 +35,10 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
+      def self.convert_type(x : Bytes, max_depth)
+        x.as(ReQL::Term::Type)
+      end
+
       def self.convert_type(x : Int, max_depth)
         x.to_i64.as(ReQL::Term::Type)
       end
@@ -90,12 +94,12 @@ module RethinkDB
         @val.inspect io
       end
 
-      def run(conn)
+      def run(conn, runopts : Hash = {} of String => Nil)
         if_defined(Spec) do
           ReQL::Term.encode(ReQL::Term.parse(ReQL::Term.encode(@val))).should ::eq ReQL::Term.encode(@val)
         end
 
-        conn.run(@val, {} of String => Nil)
+        conn.run(@val, RunOpts.new(runopts))
         # Evaluator.new.eval @val
       end
 
@@ -236,6 +240,7 @@ module RethinkDB
     term le, LeTerm
     term minval, MinvalTerm
     term maxval, MaxvalTerm
+    term binary, BinaryTerm
   end
 end
 

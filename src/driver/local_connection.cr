@@ -22,20 +22,20 @@ module RethinkDB
     def start
     end
 
-    def run(term : ReQL::Term::Type, runopts : Hash)
+    def run(term : ReQL::Term::Type, runopts : RunOpts)
       evaluator = ReQL::Evaluator.new(@table_manager)
       result = evaluator.eval term
 
       case result
       when ReQL::Stream
-        Cursor.new result
+        Cursor.new result, runopts
       else
-        Datum.new result.value
+        Datum.new result.value, runopts
       end
     end
 
     class Cursor < RethinkDB::Cursor
-      def initialize(@stream : ReQL::Stream)
+      def initialize(@stream : ReQL::Stream, @runopts : RunOpts)
         @finished = false
         @stream.start_reading
       end
@@ -46,7 +46,7 @@ module RethinkDB
         val = @stream.next_val
 
         if val
-          Datum.new(val[0])
+          Datum.new val[0], @runopts
         else
           @stream.finish_reading
           @finished = true

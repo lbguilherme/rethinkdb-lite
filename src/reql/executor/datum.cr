@@ -64,6 +64,15 @@ module ReQL
           return cmp if cmp != 0
         end
         return a.size <=> b.size
+      when Bytes
+        b = b.as(Bytes)
+        a.each_with_index do |a_val, i|
+          return 1 if i >= b.size
+          cmp = a_val <=> b[i]
+          return cmp if cmp != 0
+        end
+        return -1 if b.size > a.size
+        return 0
       else
         raise "BUG: Missing cmp for #{value.class}"
       end
@@ -73,11 +82,11 @@ module ReQL
       case value
       when Minval               ; 1
       when Array                ; 2
-      when Bytes                ; 3
-      when Bool                 ; 4
-      when Nil                  ; 5
-      when Float64, Int32, Int64; 6
-      when Hash                 ; 7
+      when Bool                 ; 3
+      when Nil                  ; 4
+      when Float64, Int32, Int64; 5
+      when Hash                 ; 6
+      when Bytes                ; 7
       when String               ; 8
       when Maxval               ; 9
       else
@@ -138,7 +147,7 @@ module ReQL
       when Bytes
         Hash(String, JSON::Type){
           "$reql_type$" => "BINARY",
-          "data"        => Base64.encode(val),
+          "data"        => Base64.strict_encode(val),
         }
       else
         raise "BUG: encode_json_type"
