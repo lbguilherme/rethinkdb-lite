@@ -138,7 +138,7 @@ module ReQL
       when Bytes
         Hash(String, JSON::Type){
           "$reql_type$" => "BINARY",
-          "data" => Base64.encode(val)
+          "data"        => Base64.encode(val),
         }
       else
         raise "BUG: encode_json_type"
