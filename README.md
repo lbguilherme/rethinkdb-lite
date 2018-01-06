@@ -90,7 +90,7 @@ cd vendor/rethinkdb-webui
 npm install
 npm run build
 cd ../..
-crystal deps
+shards
 crystal src/main.cr
 ```
 
