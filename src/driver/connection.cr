@@ -63,7 +63,15 @@ module RethinkDB
     end
 
     def to_json(io)
-      @value.to_json(io)
+      case value = @value
+      when Bytes
+        Hash(String, Datum){
+          "$reql_type$" => Datum.new("BINARY", RunOpts.new),
+          "data"        => Datum.new(Base64.strict_encode(value), RunOpts.new),
+        }.to_json(io)
+      else
+        value.to_json(io)
+      end
     end
 
     def datum

@@ -21,7 +21,7 @@ module RethinkDB
             runopts = message[2]?.as(Hash(String, JSON::Type) | Nil) || {} of String => JSON::Type
             should_profile = runopts["profile"]?.try &.as?(Bool) || false
 
-            result = @conn.run(term, runopts)
+            result = @conn.run(term, RunOpts.new(runopts))
             case result
             when RethinkDB::Cursor
               list = result.first(40).to_a

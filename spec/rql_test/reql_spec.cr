@@ -39,14 +39,13 @@ conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
 run_reql_spec(conn)
 conn.close
 
-# TODO: Enable this
-# FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
-# real_conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
-# Server::DriverServer.new(28016, real_conn).start
-# conn = r.connect({"host" => "localhost", "port" => 28016})
-# run_reql_spec(conn)
-# conn.close
-# real_conn.close
+FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
+real_conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
+RethinkDB::Server::DriverServer.new(28016, real_conn).start
+conn = r.connect({"host" => "localhost", "port" => 28016})
+run_reql_spec(conn)
+conn.close
+real_conn.close
 
 conn = begin
   r.connect("172.17.0.2")
