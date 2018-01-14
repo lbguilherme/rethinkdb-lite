@@ -17,7 +17,7 @@ module ReQL
         cond = eval term.args[2*i]
         expect_type cond, Datum
         if cond.value
-          return eval term.args[2*i+1]
+          return eval term.args[2*i + 1]
         end
       end
 

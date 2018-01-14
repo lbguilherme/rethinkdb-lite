@@ -86,17 +86,17 @@ data["tests"].each_with_index do |test, i|
     output = quotes_fixes output.as_s
 
     runopts = if test["runopts"]?
-      String.build do |io|
-        io << ", {"
-        test["runopts"].raw.as(Hash).each do |(k, v)|
-          io << k.inspect << " => " << v
-          io << ","
-        end
-        io << "}"
-      end
-    else
-      ""
-    end
+                String.build do |io|
+                  io << ", {"
+                  test["runopts"].raw.as(Hash).each do |(k, v)|
+                    io << k.inspect << " => " << v
+                    io << ","
+                  end
+                  io << "}"
+                end
+              else
+                ""
+              end
 
     puts unless i == 0
     subtests.each_with_index do |subtest, j|

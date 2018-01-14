@@ -31,17 +31,17 @@ module ReQL
       @args[0] = args
     end
 
-    def self.visit_variables(term, &block : Int64->)
+    def self.visit_variables(term, &block : Int64 ->)
       case term
       when Term
-        term.args.each {|arg| visit_variables arg, &block }
+        term.args.each { |arg| visit_variables arg, &block }
         if term.is_a? VarTerm
           block.call term.args[0].as(Int64)
         end
       when Array
-        term.each {|e| visit_variables e, &block }
+        term.each { |e| visit_variables e, &block }
       when Hash
-        term.each {|(_, v)| visit_variables v, &block }
+        term.each { |(_, v)| visit_variables v, &block }
       end
     end
   end

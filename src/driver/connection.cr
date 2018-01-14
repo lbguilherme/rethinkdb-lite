@@ -50,7 +50,7 @@ module RethinkDB
         else
           @value = Hash(String, Datum){
             "$reql_type$" => Datum.new("BINARY", runopts),
-            "data" => Datum.new(Base64.strict_encode(value), runopts)
+            "data"        => Datum.new(Base64.strict_encode(value), runopts),
           }
         end
       else

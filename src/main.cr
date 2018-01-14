@@ -8,7 +8,7 @@ conn = r.local_database("/tmp/rethinkdb-lite/data")
 
 # p r.js("1+2").run(conn)
 
-p ReQL::Term.encode R.convert_type r.do(1, 2) {}, 10
+p ReQL::Term.encode R.convert_type r.do(1, 2) { }, 10
 p ReQL::Term.encode R.convert_type r.do(1, 2, r.js("(function(a, b, c) { return c; })")), 10
 # p r.add.do{1}.run(conn)
 # p r(1).add(2).run(conn)
