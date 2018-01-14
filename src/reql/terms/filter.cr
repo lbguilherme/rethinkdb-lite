@@ -10,8 +10,8 @@ module ReQL
 
   def self.filter_pattern_match(obj, pattern)
     return true if obj == pattern
+    return !!pattern unless pattern.is_a? Hash
     return false unless obj.is_a? Hash
-    return false unless pattern.is_a? Hash
 
     pattern.each do |(k, v)|
       return false unless obj.has_key? k

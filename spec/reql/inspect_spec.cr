@@ -31,8 +31,8 @@ describe RethinkDB do
     inspect_check %{r.range(5, 30)}
   end
 
-  it "inspects r.map()" do
-    R.reset_next_var_i
-    r.range(10).map { |x| x }.inspect.should eq "r.range(10).map(var_1 => var_1)"
-  end
+  # it "inspects r.map()" do
+  #   R.reset_next_var_i
+  #   r.range(10).map { |x| x }.inspect.should eq "r.range(10).map(var_1 => var_1)"
+  # end
 end

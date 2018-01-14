@@ -30,7 +30,7 @@ module ReQL
         type_id = TermType.new(json[0].as(Int).to_i)
         args = json[1] ? json[1].as(Array).map { |e| Term.parse(e).as(Type) } : [] of Type
         if type_id == TermType::FUNCALL
-          args.rotate!(-1)
+          args.rotate!(1)
         end
         if type_id == TermType::MAKE_ARRAY
           args.as(Type)
@@ -58,7 +58,7 @@ module ReQL
         type_id = @@class_to_type[term.class].to_i64.as(JSON::Type)
         args = term.args.map { |x| Term.encode(x).as(JSON::Type) }
         if type_id == TermType::FUNCALL.to_i64
-          args.rotate!(1)
+          args.rotate!(-1)
         end
         [type_id, args.as(JSON::Type)].as(JSON::Type)
       when Int32
@@ -194,7 +194,7 @@ module ReQL
 
     macro expect_type(val, type)
       unless {{val}}.is_a? {{type.id}}
-        raise QueryLogicError.new("Expected type #{{{type}}.reql_name} but found #{{{val}}.class.reql_name}.")
+        raise QueryLogicError.new("Expected type #{{{type}}.reql_name} but found #{{{type}}.reql_name == "FUNCTION" && {{val}}.is_a?(Datum) ? "DATUM" :  {{val}}.class.reql_name}.")
       end
     end
   end

@@ -129,7 +129,7 @@ module ReQL
           if val.value == 0
             raise QueryLogicError.new("Cannot divide by zero.")
           end
-          result /= val.value.to_f64
+          result /= val.to_f64
         else
           raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
         end
@@ -150,7 +150,7 @@ module ReQL
           if val.value == 0
             raise QueryLogicError.new("Cannot divide by zero.")
           end
-          result = result.to_f64 % val.value.to_f64
+          result = result.to_f64 % val.to_f64
         else
           raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
         end

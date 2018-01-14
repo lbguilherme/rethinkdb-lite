@@ -25,10 +25,10 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(block : R -> R::Type, max_depth)
-        vari = {R.make_var_i}.map(&.as(ReQL::Term::Type))
-        vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i], nil), max_depth - 1).as(R) }
-        ReQL::FuncTerm.new([vari.to_a, R.convert_type(block.call(*vars), max_depth - 1)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
+      def self.convert_type(block : R, R, R, R, R -> R::Type, max_depth)
+        vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
+        vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)], nil), max_depth - 1).as(R) }
+        ReQL::FuncTerm.new([vari.to_a.map(&.as(ReQL::Term::Type)).as(ReQL::Term::Type), R.convert_type(block.call(*vars), max_depth - 1).as(ReQL::Term::Type)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Int32, max_depth)
@@ -186,11 +186,11 @@ module RethinkDB
           R{{name.id}}.new(self, *args)
         end
 
-        def self.{{name.id}}(*args, &block : R -> R::Type)
+        def self.{{name.id}}(*args, &block : R, R, R, R, R -> R::Type)
           R{{name.id}}.new(*args, block)
         end
 
-        def {{name.id}}(*args, &block : R -> R::Type)
+        def {{name.id}}(*args, &block : R, R, R, R, R -> R::Type)
           R{{name.id}}.new(self, *args, block)
         end
       end
@@ -241,9 +241,13 @@ module RethinkDB
     term floor, FloorTerm
     term ceil, CeilTerm
     term round, RoundTerm
+    term append, AppendTerm
     term minval, MinvalTerm
     term maxval, MaxvalTerm
     term binary, BinaryTerm
+    term branch, BranchTerm
+    term error, ErrorTerm
+    term js, JsTerm
   end
 end
 

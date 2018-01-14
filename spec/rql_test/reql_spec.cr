@@ -28,7 +28,7 @@ def run_reql_spec(conn)
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mul.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/sub.yaml") }}
     # {{ run("./reql_spec_generator", "spec/rql_test/src/aggregation.yaml") }}
-    # {{ run("./reql_spec_generator", "spec/rql_test/src/control.yaml") }}
+    {{ run("./reql_spec_generator", "spec/rql_test/src/control.yaml") }}
     # {{ run("./reql_spec_generator", "spec/rql_test/src/default.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/range.yaml") }}
   end

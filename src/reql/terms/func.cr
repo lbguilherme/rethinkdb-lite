@@ -9,7 +9,7 @@ module ReQL
         io << "var_" << vars[0] << " => "
       else
         io << "("
-        vars.map { |i| "var_#{i}" }.join(", ")
+        io << vars.map { |i| "var_#{i}" }.join(", ")
         io << ") => "
       end
       body.inspect(io)
@@ -17,12 +17,38 @@ module ReQL
 
     def compile
       expect_args 2
+
+      mentioned_variables = Set(Int64).new
+      FuncTerm.visit_variables(self) do |var|
+        mentioned_variables.add(var)
+      end
+
+      args = @args[0].as(Array)
+      until args.size == 0 || mentioned_variables.includes? args.last
+        args.pop
+      end
+
+      @args[0] = args
+    end
+
+    def self.visit_variables(term, &block : Int64->)
+      case term
+      when Term
+        term.args.each {|arg| visit_variables arg, &block }
+        if term.is_a? VarTerm
+          block.call term.args[0].as(Int64)
+        end
+      when Array
+        term.each {|e| visit_variables e, &block }
+      when Hash
+        term.each {|(_, v)| visit_variables v, &block }
+      end
     end
   end
 
   class Evaluator
     def eval(term : FuncTerm)
-      Func.new(term.args[0].as(Array).map { |x| x.as(Int64) }, term.args[1])
+      ReqlFunc.new(term.args[0].as(Array).map { |x| x.as(Int64) }, term.args[1])
     end
   end
 end

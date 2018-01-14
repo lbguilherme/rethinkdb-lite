@@ -41,5 +41,9 @@ module ReQL
         raise ReQL::QueryLogicError.new "Number not an integer: #{v}"
       end
     end
+
+    def to_f64
+      value.to_f64
+    end
   end
 end
