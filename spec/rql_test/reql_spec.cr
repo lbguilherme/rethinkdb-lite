@@ -21,7 +21,7 @@ def run_reql_spec(conn)
     # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/bit.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/comparison.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/div.yaml") }}
-    # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/floor_ceil_round.yaml") }}
+    {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/floor_ceil_round.yaml") }}
     # {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/logic.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/math.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/math_logic/mod.yaml") }}
@@ -48,21 +48,21 @@ conn.close
 # conn.close
 # real_conn.close
 
-conn = begin
-  r.connect("172.17.0.2")
-rescue
-  begin
-    r.connect("localhost")
-  rescue
-    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
-    nil
-  end
-end
+# conn = begin
+#   r.connect("172.17.0.2")
+# rescue
+#   begin
+#     r.connect("localhost")
+#   rescue
+#     puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
+#     nil
+#   end
+# end
 
-if conn
-  run_reql_spec(conn)
-  conn.close
-end
+# if conn
+#   run_reql_spec(conn)
+#   conn.close
+# end
 
 def match_reql_output(result)
   matcher = with ReqlMatchers.new yield

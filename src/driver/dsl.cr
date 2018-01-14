@@ -238,6 +238,9 @@ module RethinkDB
     term ge, GeTerm
     term lt, LtTerm
     term le, LeTerm
+    term floor, FloorTerm
+    term ceil, CeilTerm
+    term round, RoundTerm
     term minval, MinvalTerm
     term maxval, MaxvalTerm
     term binary, BinaryTerm

@@ -4,3 +4,4 @@
 /.shards/
 test.db*
 /.crystal/
+*.rb

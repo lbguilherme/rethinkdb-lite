@@ -8,17 +8,6 @@ module ReQL
     end
   end
 
-  class Evaluator
-    def eval(term : UpCaseTerm)
-      target = eval term.args[0]
-      expect_type target, DatumString
-
-      Datum.wrap(target.value.upcase)
-    end
-  end
-end
-
-module ReQL
   class DownCaseTerm < Term
     register_type DOWNCASE
     infix_inspect "downcase"
@@ -29,6 +18,13 @@ module ReQL
   end
 
   class Evaluator
+    def eval(term : UpCaseTerm)
+      target = eval term.args[0]
+      expect_type target, DatumString
+
+      Datum.wrap(target.value.upcase)
+    end
+
     def eval(term : DownCaseTerm)
       target = eval term.args[0]
       expect_type target, DatumString
