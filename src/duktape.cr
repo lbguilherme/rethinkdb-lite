@@ -31,7 +31,7 @@ lib LibDuktape
   DUK_BUF_FLAG_EXTERNAL = 1 << 1 # internal flag: external buffer
   DUK_BUF_FLAG_NOZERO = 1 << 2 # internal flag: don't zero allocated buffer
 
-  fun duk_create_heap(alloc_func : Void*, realloc_func : Void*, free_func : Void*, heap_udata : Void*, fatal_handler : (Void*, UInt8*)->) : Void*
+  fun duk_create_heap(alloc_func : (Void*, LibC::SizeT)->, realloc_func : (Void*, Void*, LibC::SizeT)->, free_func : (Void*, Void*)->, heap_udata : Void*, fatal_handler : (Void*, UInt8*)->) : Void*
   fun duk_eval_raw(ctx : Void*, src_buffer : UInt8*, src_length : LibC::SizeT, flags : UInt32) : Int32
   fun duk_destroy_heap(ctx : Void*)
   fun duk_dump_function(ctx : Void*)
@@ -51,45 +51,67 @@ lib LibDuktape
 end
 
 module Duktape
-  def self.get_value(ctx)
-    result = ReQL::DatumNull.new
+  struct Context
+    @ctx : Void*
 
-    case LibDuktape.duk_get_type(ctx, -1)
-    when LibDuktape::DUK_TYPE_UNDEFINED
-      raise ReQL::QueryLogicError.new "Cannot convert javascript `undefined` to DATUM."
-    when LibDuktape::DUK_TYPE_NULL
-      result = ReQL::DatumNull.new
-    when LibDuktape::DUK_TYPE_BOOLEAN
-      result = ReQL::DatumBool.new LibDuktape.duk_get_boolean(ctx, -1)
-    when LibDuktape::DUK_TYPE_NUMBER
-      result = ReQL::DatumNumber.new LibDuktape.duk_get_number(ctx, -1)
-    when LibDuktape::DUK_TYPE_STRING
-      result = ReQL::DatumString.new String.new(LibDuktape.duk_get_string(ctx, -1))
-    when LibDuktape::DUK_TYPE_OBJECT
-      if LibDuktape.duk_is_ecmascript_function(ctx, -1)
-        LibDuktape.duk_dump_function(ctx)
-        bytes = LibDuktape.duk_get_buffer(ctx, -1, out bytesize)
-        bytecode = Bytes.new(bytesize)
-        bytecode.copy_from(Bytes.new(bytes, bytesize))
-        result = ReQL::JsFunc.new bytecode
-      else
-        raise "TODO: duktape array/object type"
-      end
-    else
-      raise "BUG: Unexpected duktape type: #{LibDuktape.duk_get_type(ctx, -1)}"
+    def to_unsafe
+      @ctx
     end
 
-    return result
-  end
+    def initialize
+      @ctx = LibDuktape.duk_create_heap(
+        ->(udata, size) { GC.malloc(size) },
+        ->(udata, ptr, size) { GC.realloc(ptr, size) },
+        ->(udata, ptr) { GC.free(ptr) },
+        nil,
+        ->(udata, msg) { raise "DUKTAPE FATAL: " + String.new(msg) }
+      )
+    end
 
-  def self.push_value(ctx, value)
-    case value
-    when ReQL::DatumString
-      LibDuktape.duk_push_lstring(ctx, value.value, value.value.bytesize)
-    when ReQL::DatumNumber
-      LibDuktape.duk_push_number(ctx, value.to_f64)
-    else
-      raise "BUG: Unexpected type to push into duktape: #{value.class}"
+    def finialize
+      LibDuktape.duk_destroy_heap(@ctx)
+    end
+
+    def get_datum
+      result = ReQL::DatumNull.new
+
+      case LibDuktape.duk_get_type(@ctx, -1)
+      when LibDuktape::DUK_TYPE_UNDEFINED
+        raise ReQL::QueryLogicError.new "Cannot convert javascript `undefined` to DATUM."
+      when LibDuktape::DUK_TYPE_NULL
+        result = ReQL::DatumNull.new
+      when LibDuktape::DUK_TYPE_BOOLEAN
+        result = ReQL::DatumBool.new LibDuktape.duk_get_boolean(@ctx, -1)
+      when LibDuktape::DUK_TYPE_NUMBER
+        result = ReQL::DatumNumber.new LibDuktape.duk_get_number(@ctx, -1)
+      when LibDuktape::DUK_TYPE_STRING
+        result = ReQL::DatumString.new String.new(LibDuktape.duk_get_string(@ctx, -1))
+      when LibDuktape::DUK_TYPE_OBJECT
+        if LibDuktape.duk_is_ecmascript_function(@ctx, -1)
+          LibDuktape.duk_dump_function(@ctx)
+          bytes = LibDuktape.duk_get_buffer(@ctx, -1, out bytesize)
+          bytecode = Bytes.new(bytesize)
+          bytecode.copy_from(Bytes.new(bytes, bytesize))
+          result = ReQL::JsFunc.new bytecode
+        else
+          raise "TODO: duktape array/object type"
+        end
+      else
+        raise "BUG: Unexpected duktape type: #{LibDuktape.duk_get_type(@ctx, -1)}"
+      end
+
+      return result
+    end
+
+    def push_datum(value)
+      case value
+      when ReQL::DatumString
+        LibDuktape.duk_push_lstring(@ctx, value.value, value.value.bytesize)
+      when ReQL::DatumNumber
+        LibDuktape.duk_push_number(@ctx, value.to_f64)
+      else
+        raise "BUG: Unexpected type to push into duktape: #{value.class}"
+      end
     end
   end
 end
