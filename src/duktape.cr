@@ -50,7 +50,7 @@ lib LibDuktape
 end
 
 module Duktape
-  struct Context
+  class Context
     @ctx : Void*
 
     def to_unsafe
