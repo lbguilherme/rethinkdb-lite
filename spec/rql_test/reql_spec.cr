@@ -48,21 +48,21 @@ conn.close
 # conn.close
 # real_conn.close
 
-# conn = begin
-#   r.connect("172.17.0.2")
-# rescue
-#   begin
-#     r.connect("localhost")
-#   rescue
-#     puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
-#     nil
-#   end
-# end
+conn = begin
+  r.connect("172.17.0.2")
+rescue
+  begin
+    r.connect("localhost")
+  rescue
+    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
+    nil
+  end
+end
 
-# if conn
-#   run_reql_spec(conn)
-#   conn.close
-# end
+if conn
+  run_reql_spec(conn)
+  conn.close
+end
 
 def match_reql_output(result)
   matcher = with ReqlMatchers.new yield
