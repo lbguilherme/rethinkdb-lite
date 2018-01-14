@@ -67,7 +67,7 @@ module Duktape
       )
     end
 
-    def finialize
+    def finalize
       LibDuktape.duk_destroy_heap(@ctx)
     end
 
