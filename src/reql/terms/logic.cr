@@ -53,6 +53,33 @@ module ReQL
     end
   end
 
+  class AndTerm < Term
+    register_type AND
+    infix_inspect "and"
+
+    def compile
+      expect_args_at_least 1
+    end
+  end
+
+  class OrTerm < Term
+    register_type OR
+    infix_inspect "or"
+
+    def compile
+      expect_args_at_least 1
+    end
+  end
+
+  class NotTerm < Term
+    register_type NOT
+    infix_inspect "not"
+
+    def compile
+      expect_args 1
+    end
+  end
+
   class Evaluator
     def eval(term : EqTerm)
       a = eval term.args[0]
@@ -94,6 +121,28 @@ module ReQL
       b = eval term.args[1]
 
       Datum.wrap(a.datum <= b.datum)
+    end
+
+    def eval(term : AndTerm)
+      last = DatumNull.new
+      term.args.each do |arg|
+        last = eval(arg)
+        return last unless last.value
+      end
+      return last
+    end
+
+    def eval(term : OrTerm)
+      last = DatumNull.new
+      term.args.each do |arg|
+        last = eval(arg)
+        return last if last.value
+      end
+      return last
+    end
+
+    def eval(term : NotTerm)
+      DatumBool.new(!eval(term.args[0]).value)
     end
   end
 end

@@ -150,6 +150,18 @@ module RethinkDB
       def <=(arg)
         le(arg)
       end
+
+      def &(arg)
+        and(arg)
+      end
+
+      def |(arg)
+        or(arg)
+      end
+
+      def ~
+        not()
+      end
     end
 
     def r
@@ -238,6 +250,9 @@ module RethinkDB
     term ge, GeTerm
     term lt, LtTerm
     term le, LeTerm
+    term and, AndTerm
+    term or, OrTerm
+    term not, NotTerm
     term floor, FloorTerm
     term ceil, CeilTerm
     term round, RoundTerm
@@ -294,5 +309,13 @@ class Object
 
   def <=(other : RethinkDB::DSL::R)
     RethinkDB::DSL::RExpr.new(self, 1).le(other)
+  end
+
+  def &(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).and(other)
+  end
+
+  def |(other : RethinkDB::DSL::R)
+    RethinkDB::DSL::RExpr.new(self, 1).or(other)
   end
 end

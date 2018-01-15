@@ -20,7 +20,7 @@ module ReQL
           case func
           when DatumString
             unless val.is_a? Array
-              raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
+              raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
             end
             val.map { |val|
               case val
@@ -29,7 +29,7 @@ module ReQL
               when Hash
                 val[func.value]
               else
-                raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence")
+                raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
               end
             }
           when Func

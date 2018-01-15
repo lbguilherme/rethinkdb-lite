@@ -12,7 +12,7 @@ module ReQL
     def eval(term : DefaultTerm)
       base = begin
         eval term.args[0]
-      rescue ex
+      rescue ex : NonExistenceError | UserError
         Datum.wrap(nil)
       end
 
