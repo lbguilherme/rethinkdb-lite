@@ -165,6 +165,8 @@ module RethinkDB
             sock.flush
           end
         end
+      rescue IO::EOFError
+        # This is expected when client closes the connection
       rescue err : Errno
         err.inspect_with_backtrace
       ensure
