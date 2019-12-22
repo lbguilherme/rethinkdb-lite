@@ -2,14 +2,19 @@ require "./stream"
 require "../../storage/*"
 
 module ReQL
-  class Table < Stream
+  struct Table < Stream
     @storage : Storage::AbstractTable?
 
-    def self.reql_name
+    class InternalData
+      property channel : Channel(Datum)?
+    end
+
+    def reql_type
       "TABLE"
     end
 
     def initialize(@db : Db?, @name : String, @table_manager : Storage::TableManager)
+      @internal = InternalData.new
     end
 
     private def storage
@@ -27,14 +32,15 @@ module ReQL
 
     def check
       storage
+      nil
     end
 
-    def get(key : Datum::Type)
+    def get(key : Datum)
       Row.new(storage, key)
     end
 
-    def insert(obj : Datum::Type)
-      storage.insert(obj.as(Hash))
+    def insert(obj : Hash)
+      storage.insert(obj)
     end
 
     def count(max)
@@ -42,25 +48,25 @@ module ReQL
     end
 
     def start_reading
-      @channel = Channel(Datum::Type).new
+      @internal.channel = Channel(Datum).new
       s = storage
       spawn do
         s.scan do |row|
-          if ch = @channel
-            ch.send row
+          if ch = @internal.channel
+            ch.send Datum.new(row)
           end
         end
-        if ch = @channel
+        if ch = @internal.channel
           ch.close
         end
-        @channel = nil
+        @internal.channel = nil
       end
     end
 
     def next_val
       begin
-        if ch = @channel
-          return {ch.receive}
+        if ch = @internal.channel
+          return ch.receive
         else
           return nil
         end
@@ -70,10 +76,14 @@ module ReQL
     end
 
     def finish_reading
-      if ch = @channel
+      if ch = @internal.channel
         ch.close
       end
-      @channel = nil
+      @internal.channel = nil
+    end
+
+    def as_table
+      self
     end
   end
 end

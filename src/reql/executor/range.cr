@@ -1,7 +1,7 @@
 require "./stream"
 
 module ReQL
-  class Range < Stream
+  struct Range < Stream
     def initialize(@from : Int64, @to : Int64)
       @value = 0i64
     end
@@ -24,7 +24,7 @@ module ReQL
       else
         v = @value
         @value += 1
-        return {v}
+        return Datum.new(v)
       end
     end
 

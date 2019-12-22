@@ -10,15 +10,13 @@ module ReQL
 
   class Evaluator
     def eval(term : DeleteAtTerm)
-      arr = eval term.args[0]
-      expect_type arr, DatumArray
-      arr = arr.value
+      arr = eval(term.args[0]).array_value
 
-      idx = eval term.args[1]
-      unless idx.is_a? DatumNumber
-        raise NonExistenceError.new("Expected type #{DatumNumber.reql_name} but found #{idx.class.reql_name}.")
+      idx_datum = eval(term.args[1])
+      unless idx_datum.value.is_a? Number
+        raise NonExistenceError.new("Expected type NUMBER but found #{idx_datum.reql_type}.")
       end
-      idx = idx.to_i64
+      idx = idx_datum.int64_value
 
       if term.args.size == 2
         if idx >= arr.size
@@ -36,11 +34,9 @@ module ReQL
 
         arr = arr.dup
         arr.delete_at idx
-        DatumArray.new(arr)
+        Datum.new(arr)
       else
-        end_idx = eval term.args[2]
-        expect_type end_idx, DatumNumber
-        end_idx = end_idx.to_i64
+        end_idx = eval(term.args[2]).int64_value
 
         if idx >= arr.size && idx != end_idx
           raise NonExistenceError.new "Index `#{idx}` out of bounds for array of size: `#{arr.size}`."
@@ -70,7 +66,7 @@ module ReQL
 
         arr = arr.dup
         arr.delete_at idx...end_idx
-        DatumArray.new(arr)
+        Datum.new(arr)
       end
     end
   end

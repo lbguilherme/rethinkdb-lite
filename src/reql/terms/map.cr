@@ -10,21 +10,20 @@ module ReQL
 
   class Evaluator
     def eval(term : MapTerm)
-      target = eval term.args[0]
-      func = eval term.args[1]
-      expect_type func, Func
+      target = eval(term.args[0])
+      func = eval(term.args[1]).as_function
 
-      case target
-      when Stream
+      case
+      when target.is_a? Stream
         MapStream.new(target, ->(val : Datum) {
-          return func.as(Func).eval(self, val).datum
+          return func.as(Func).eval(self, val).as_datum
         })
-      when DatumArray
-        DatumArray.new(target.value.map do |val|
-          func.as(Func).eval(self, Datum.wrap(val)).value.as(Datum::Type)
+      when array = target.array_value?
+        Datum.new(array.map do |val|
+          func.as(Func).eval(self, val).value
         end)
       else
-        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
       end
     end
   end

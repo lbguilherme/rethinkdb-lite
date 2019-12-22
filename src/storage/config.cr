@@ -38,7 +38,7 @@ module Storage
     def load
       table = config_table
       data = table.get("config")
-      version = data.try &.["version"].try &.as(Int32)
+      version = data.try &.["version"].try &.int64_value.to_i32
       table.close
       case version
       when nil
@@ -80,21 +80,21 @@ module Storage
     end
 
     private def load_v1(data)
-      @databases = data["databases"].as(Array).map { |x|
+      @databases = data["databases"].array_value.map { |x|
         DatabaseInfo.new(
-          x.as(Hash)["id"].as(String),
-          x.as(Hash)["name"].as(String),
-          x.as(Hash)["tables"].as(Array).map { |x|
+          x.hash_value["id"].string_value,
+          x.hash_value["name"].string_value,
+          x.hash_value["tables"].array_value.map { |x|
             TableInfo.new(
-              x.as(Hash)["id"].as(String),
-              x.as(Hash)["name"].as(String),
+              x.hash_value["id"].string_value,
+              x.hash_value["name"].string_value,
             )
           },
         )
       }
       @server_info = ServerInfo.new(
-        data["server_info"].as(Hash)["id"].as(String),
-        data["server_info"].as(Hash)["name"].as(String)
+        data["server_info"].hash_value["id"].string_value,
+        data["server_info"].hash_value["name"].string_value
       )
     end
 

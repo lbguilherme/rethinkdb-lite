@@ -11,13 +11,13 @@ module ReQL
   class Evaluator
     def eval(term : DefaultTerm)
       base = begin
-        eval term.args[0]
+        eval(term.args[0])
       rescue ex : NonExistenceError | UserError
-        Datum.wrap(nil)
+        Datum.new(nil)
       end
 
       if base.is_a? Datum && !base.value
-        eval term.args[1]
+        eval(term.args[1])
       else
         base
       end

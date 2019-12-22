@@ -12,9 +12,7 @@ module ReQL
 
   class Evaluator
     def eval(term : JsTerm)
-      code = eval term.args[0]
-      expect_type code, DatumString
-      code = code.value
+      code = eval(term.args[0]).string_value
 
       ctx = Duktape::Context.new
 

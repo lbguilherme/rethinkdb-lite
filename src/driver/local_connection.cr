@@ -22,7 +22,7 @@ module RethinkDB
     def start
     end
 
-    def run(term : ReQL::Term::Type, runopts : RunOpts)
+    def run(term : ReQL::Term::Type, runopts : RunOpts) : RethinkDB::Cursor | RethinkDB::Datum
       evaluator = ReQL::Evaluator.new(@table_manager)
       result = evaluator.eval term
 
@@ -46,7 +46,7 @@ module RethinkDB
         val = @stream.next_val
 
         if val
-          Datum.new val[0], @runopts
+          Datum.new val, @runopts
         else
           @stream.finish_reading
           @finished = true

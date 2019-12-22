@@ -10,10 +10,8 @@ module ReQL
 
   class Evaluator
     def eval(term : ErrorTerm)
-      message = eval term.args[0]
-      expect_type message, DatumString
-
-      raise UserError.new message.value
+      message = eval(term.args[0])
+      raise UserError.new message.string_value
     end
   end
 end

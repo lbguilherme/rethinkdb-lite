@@ -10,14 +10,13 @@ module ReQL
 
   class Evaluator
     def eval(term : BinaryTerm)
-      data = eval term.args[0]
+      data = eval(term.args[0])
 
-      if data.is_a? DatumBinary
+      if data.is_bytes?
         return data
       end
 
-      expect_type data, DatumString
-      Datum.wrap(data.value.to_slice)
+      Datum.new(data.string_value.to_slice)
     end
   end
 end

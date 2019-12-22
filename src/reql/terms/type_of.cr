@@ -10,8 +10,8 @@ module ReQL
 
   class Evaluator
     def eval(term : TypeOfTerm)
-      target = eval term.args[0]
-      Datum.wrap(target.class.reql_name)
+      target = eval(term.args[0])
+      Datum.new(target.reql_type)
     end
   end
 end

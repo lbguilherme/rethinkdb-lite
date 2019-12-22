@@ -8,20 +8,24 @@ module ReQL
 
   class Evaluator
     def eval(term : InsertTerm)
-      table = eval term.args[0]
-      expect_type table, Table
+      table = eval(term.args[0]).as_table
       table.check
 
-      datum = eval term.args[1]
+      datum = eval(term.args[1])
 
-      docs = [] of Datum::Type
-      case datum
-      when DatumArray
-        docs = datum.value
-      when DatumObject
-        docs = [datum.value] of Datum::Type
+      docs = case
+      when array = datum.array_value?
+        array.map do |e|
+          if hash = datum.hash_value?
+            hash
+          else
+            raise QueryLogicError.new("Expected type OBJECT but found #{e.reql_type}")
+          end
+        end
+      when hash = datum.hash_value?
+        [hash]
       else
-        raise QueryLogicError.new("Expected type OBJECT but found #{datum.class.reql_name}")
+        raise QueryLogicError.new("Expected type OBJECT but found #{datum.reql_type}")
       end
 
       inserted = 0i64
@@ -31,12 +35,9 @@ module ReQL
 
       docs.each do |obj|
         begin
-          unless obj.is_a? Hash
-            raise QueryLogicError.new("Expected type OBJECT but found #{Datum.wrap(obj).class.reql_name}")
-          end
           unless obj.has_key? "id"
             id = UUID.random.to_s
-            obj["id"] = id
+            obj["id"] = Datum.new(id)
             generated_keys = [] of Datum::Type unless generated_keys
             generated_keys << id
           end
@@ -49,21 +50,21 @@ module ReQL
         end
       end
 
-      result = Hash(String, Datum::Type).new
-      result["deleted"] = 0i64
-      result["replaced"] = 0i64
-      result["skipped"] = 0i64
-      result["unchanged"] = 0i64
-      result["inserted"] = inserted
-      result["errors"] = errors
+      result = Hash(String, Datum).new
+      result["deleted"] = Datum.new(0)
+      result["replaced"] = Datum.new(0)
+      result["skipped"] = Datum.new(0)
+      result["unchanged"] = Datum.new(0)
+      result["inserted"] = Datum.new(inserted)
+      result["errors"] = Datum.new(errors)
       if first_error
-        result["first_error"] = first_error
+        result["first_error"] = Datum.new(first_error)
       end
       if generated_keys
-        result["generated_keys"] = generated_keys
+        result["generated_keys"] = Datum.new(generated_keys)
       end
 
-      Datum.wrap(result)
+      Datum.new(result)
     end
   end
 end

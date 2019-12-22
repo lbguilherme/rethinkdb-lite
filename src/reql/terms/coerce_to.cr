@@ -10,82 +10,63 @@ module ReQL
 
   class Evaluator
     def eval(term : CoerceToTerm)
-      source = eval term.args[0]
-      target_type = eval term.args[1]
-      expect_type target_type, DatumString
-      target_type = target_type.value.upcase
+      source = eval(term.args[0])
+      target_type = eval(term.args[1]).string_value.upcase
 
-      if source.class.reql_name == target_type
+      if source.reql_type == target_type
         return source
       end
 
-      unless source.is_a? Datum
-        source = source.datum
-      end
+      source = source.as_datum
 
       case target_type
       when "NUMBER"
-        case source
-        when DatumString
+        if string = source.string_value?
           begin
-            return DatumNumber.new(source.value.to_f64)
+            return Datum.new(string.to_f64)
           rescue ex : ArgumentError
             raise QueryLogicError.new "Could not coerce `#{source.value}` to NUMBER."
           end
         end
       when "STRING"
-        case source
-        when DatumObject
-          return DatumString.new(source.to_json)
-        when DatumArray
-          return DatumString.new(source.to_json)
-        when DatumNumber
-          return DatumString.new(source.value.to_s)
-        when DatumBool
-          return DatumString.new(source.value.to_s)
-        when DatumNull
-          return DatumString.new("null")
+        case
+        when hash = source.hash_value?
+          return Datum.new(hash.to_json)
+        when array = source.array_value?
+          return Datum.new(array.to_json)
+        when number = source.number_value?
+          return Datum.new(number.to_s)
+        when (bool = source.bool_value?) != nil
+          return Datum.new(bool.to_s)
+        when source.value == nil
+          return Datum.new("null")
         end
       when "ARRAY"
-        case source
-        when DatumObject
-          arr = [] of Datum::Type
-          source.value.each do |(k, v)|
-            arr << [k, v].map &.as(Datum::Type)
-          end
-          return DatumArray.new(arr)
+        if hash = source.hash_value?
+          return Datum.new(hash.each.to_a)
         end
       when "OBJECT"
-        case source
-        when DatumArray
-          obj = {} of String => Datum::Type
-          source.value.each do |pair|
-            dpair = Datum.wrap(pair)
-            expect_type dpair, DatumArray
-            pair = dpair.value
+        case
+        when array = source.array_value?
+          obj = {} of String => Datum
+          array.each do |pair|
+            pair = pair.array_value
             if pair.size != 2
               raise QueryLogicError.new "Expected array of size 2, but got size #{pair.size}."
             end
 
-            dkey = Datum.wrap(pair[0])
-            expect_type dkey, DatumString
-            obj[dkey.value] = pair[1]
+            obj[pair[0].string_value] = pair[1]
           end
-          return DatumObject.new(obj)
+          return Datum.new(obj)
         end
       when "BOOL"
-        case source
-        when DatumNull
-          return DatumBool.new(false)
-        when Datum
-          return DatumBool.new(true)
-        end
+        return Datum.new(source.value != nil)
       when "NULL"
       else
         raise QueryLogicError.new "Unknown Type: #{target_type}"
       end
 
-      raise QueryLogicError.new "Cannot coerce #{source.class.reql_name} to #{target_type}."
+      raise QueryLogicError.new "Cannot coerce #{source.reql_type} to #{target_type}."
     end
   end
 end

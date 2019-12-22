@@ -1,10 +1,10 @@
 require "./stream"
 
 module ReQL
-  class Db
+  struct Db < AbstractValue
     getter name
 
-    def self.reql_name
+    def reql_type
       "DATABASE"
     end
 
@@ -15,8 +15,12 @@ module ReQL
       raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
     end
 
-    def datum
-      raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
+    def as_database
+      self
+    end
+
+    def as_datum
+      raise QueryLogicError.new("Expected type DATUM but found DATABASE.")
     end
   end
 end

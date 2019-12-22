@@ -1,7 +1,7 @@
 require "./infinite_stream"
 
 module ReQL
-  class InfiniteRange < InfiniteStream
+  struct InfiniteRange < InfiniteStream
     def initialize
       @value = 0i64
     end
@@ -13,7 +13,7 @@ module ReQL
     def next_val
       v = @value
       @value += 1
-      return {v}
+      return Datum.new(v)
     end
 
     def finish_reading

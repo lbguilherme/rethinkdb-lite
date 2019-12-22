@@ -65,7 +65,7 @@ describe Storage::StoredTable do
 
         table.replace(i) do |old_obj|
           old_obj.should eq obj
-          {"id" => old_obj.not_nil!["id"], "v" => old_obj.not_nil!["v"].as(Int).to_i + 1}
+          {"id" => old_obj.not_nil!["id"], "v" => old_obj.not_nil!["v"].value.as(Int).to_i + 1}
         end
 
         table.get(i).not_nil!["v"].should eq j + 1

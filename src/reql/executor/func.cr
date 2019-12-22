@@ -1,6 +1,6 @@
 module ReQL
-  abstract class Func
-    def self.reql_name
+  abstract struct Func < AbstractValue
+    def reql_type
       "FUNCTION"
     end
 
@@ -10,8 +10,8 @@ module ReQL
       raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)."
     end
 
-    def datum
-      raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)."
+    def as_function
+      self
     end
   end
 end

@@ -10,11 +10,9 @@ module ReQL
 
   class Evaluator
     def eval(term : GetTerm)
-      table = eval term.args[0]
-      expect_type table, Table
-      key = eval term.args[1]
-      expect_type key, Datum
-      table.get(key.value)
+      table = eval(term.args[0]).as_table
+      key = eval(term.args[1]).as_datum
+      table.get(key)
     end
   end
 end

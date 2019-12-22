@@ -13,15 +13,14 @@ module ReQL
 
   class Evaluator
     def eval(term : BranchTerm)
-      (term.args.size/2).times do |i|
-        cond = eval term.args[2*i]
-        expect_type cond, Datum
+      (term.args.size//2).times do |i|
+        cond = eval(term.args[2*i]).as_datum
         if cond.value
-          return eval term.args[2*i + 1]
+          return eval(term.args[2*i + 1])
         end
       end
 
-      return eval term.args.last
+      return eval(term.args.last)
     end
   end
 end

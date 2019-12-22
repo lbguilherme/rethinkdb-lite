@@ -1,5 +1,5 @@
 require "spec"
-require "../../src/reql/*"
+require "../../src/driver/*"
 
 include RethinkDB::DSL
 
@@ -69,11 +69,11 @@ describe RethinkDB do
 
   it "handles inserting and reading many rows" do
     r.table_create("test6").run(conn)
-    1000.times do |i|
+    400.times do |i|
       r.table("test6").insert({"value" => i}).run(conn)
     end
 
-    r.table("test6").run(conn).datum.array.map { |x| x.hash["value"].int64 }.sort.should eq (0...1000).to_a
+    r.table("test6").run(conn).datum.array.map { |x| x.hash["value"].int64 }.sort.should eq (0...400).to_a
   end
 
   it "accepts nil as a key" do

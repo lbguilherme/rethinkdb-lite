@@ -46,117 +46,105 @@ module ReQL
 
   class Evaluator
     def eval(term : AddTerm)
-      first = eval term.args[0]
+      first = eval(term.args[0])
 
       result = first.value
       term.args[1..-1].each do |arg|
         case result
         when Number
-          val = eval arg
-          expect_type val, DatumNumber
-          result += val.value
+          result += eval(arg).number_value
         when String
-          val = eval arg
-          expect_type val, DatumString
-          result += val.value
+          result += eval(arg).string_value
         when Array
-          val = eval arg
-          expect_type val, DatumArray
-          result += val.value
+          result += eval(arg).array_value
         else
-          raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
+          raise QueryLogicError.new("Expected type NUMBER but found #{first.reql_type}.")
         end
       end
 
-      return Datum.wrap(result)
+      return Datum.new(result)
     end
 
     def eval(term : SubTerm)
-      first = eval term.args[0]
+      first = eval(term.args[0])
 
       result = first.value
       term.args[1..-1].each do |arg|
         case result
         when Number
-          val = eval arg
-          expect_type val, DatumNumber
-          result -= val.value
+          result -= eval(arg).number_value
         else
-          raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
+          raise QueryLogicError.new("Expected type NUMBER but found #{first.reql_type}.")
         end
       end
 
-      return Datum.wrap(result)
+      return Datum.new(result)
     end
 
     def eval(term : MulTerm)
-      first = eval term.args[0]
+      first = eval(term.args[0])
 
       result = first.value
       term.args[1..-1].each do |arg|
         case result
         when Number
-          val = eval arg
-          case val
-          when DatumNumber
-            result *= val.value
-          when DatumArray
-            result = val.value * DatumNumber.new(result).to_i64
+          val = eval(arg)
+          case
+          when number = val.number_value?
+            result *= number
+          when array = val.array_value?
+            result = array * Datum.new(result).int64_value
           else
-            raise QueryLogicError.new("Expected type NUMBER but found #{val.class.reql_name}.")
+            raise QueryLogicError.new("Expected type NUMBER but found #{val.reql_type}.")
           end
         when Array
-          val = eval arg
-          expect_type val, DatumNumber
-          result *= val.to_i64
+          result *= eval(arg).int64_value
         else
-          raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
+          raise QueryLogicError.new("Expected type NUMBER but found #{first.reql_type}.")
         end
       end
 
-      return Datum.wrap(result)
+      return Datum.new(result)
     end
 
     def eval(term : DivTerm)
-      first = eval term.args[0]
+      first = eval(term.args[0])
 
       result = first.value
       term.args[1..-1].each do |arg|
         case result
         when Number
-          val = eval arg
-          expect_type val, DatumNumber
-          if val.value == 0
+          val = eval(arg).number_value
+          if val == 0
             raise QueryLogicError.new("Cannot divide by zero.")
           end
           result /= val.to_f64
         else
-          raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
+          raise QueryLogicError.new("Expected type NUMBER but found #{first.reql_type}.")
         end
       end
 
-      return Datum.wrap(result)
+      return Datum.new(result)
     end
 
     def eval(term : ModTerm)
-      first = eval term.args[0]
+      first = eval(term.args[0])
 
       result = first.value
       term.args[1..-1].each do |arg|
         case result
         when Number
-          val = eval arg
-          expect_type val, DatumNumber
-          if val.value == 0
+          val = eval(arg).number_value
+          if val == 0
             raise QueryLogicError.new("Cannot divide by zero.")
           end
           result = result.to_f64 % val.to_f64
         else
-          raise QueryLogicError.new("Expected type NUMBER but found #{first.class.reql_name}.")
+          raise QueryLogicError.new("Expected type NUMBER but found #{first.reql_type}.")
         end
       end
 
-      return Datum.wrap(result)
+      return Datum.new(result)
     end
   end
 end

@@ -1,5 +1,5 @@
 require "spec"
-require "../../src/reql/*"
+require "../../src/driver/*"
 
 include RethinkDB::DSL
 

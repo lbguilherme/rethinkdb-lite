@@ -10,16 +10,10 @@ module ReQL
 
   class Evaluator
     def eval(term : AppendTerm)
-      arr = eval term.args[0]
-      expect_type arr, DatumArray
-      arr = arr.value.dup
-
-      val = eval term.args[1]
-      val = val.value
-
+      arr = eval(term.args[0]).array_value.dup
+      val = eval(term.args[1]).as_datum
       arr.push(val)
-
-      DatumArray.new(arr)
+      Datum.new(arr)
     end
   end
 end

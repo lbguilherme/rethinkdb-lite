@@ -29,7 +29,7 @@ module Storage
     end
 
     def self.make_key(obj)
-      return Digest::SHA1.digest(ReQL::Datum.wrap(obj).serialize)
+      return Digest::SHA1.digest(ReQL::Datum.new(obj).serialize)
     end
 
     def list_offset
@@ -76,7 +76,7 @@ module Storage
           new_leaf.value.prev = page.pos
           leaf.value.succ = new_page.pos
 
-          size1 = arr.size/2
+          size1 = arr.size//2
           arr.each_with_index do |e, i|
             if i < size1
               leaf.value.list.to_unsafe[i] = e
@@ -130,7 +130,7 @@ module Storage
             new_page = w.alloc('B')
             new_node = new_page.as_node
 
-            size1 = arr.size/2
+            size1 = arr.size//2
             arr.each_with_index do |e, i|
               if i < size1
                 node.value.list.to_unsafe[i] = e

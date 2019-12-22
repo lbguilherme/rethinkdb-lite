@@ -38,14 +38,14 @@ module Storage
     def initialize(@file : DatabaseFile, @btree : BTree)
     end
 
-    def insert(obj : Hash(String, ReQL::Datum::Type))
+    def insert(obj : Hash)
       k = BTree.make_key obj["id"]
       @file.write do |w|
         pos = @btree.query(w.reader, k)
         if pos != 0
           row = Data.new(w.get(pos)).read(w.reader)
-          pretty_row = JSON.build(4) { |builder| ReQL::Datum.wrap(row).to_json(builder) }
-          pretty_obj = JSON.build(4) { |builder| ReQL::Datum.wrap(obj).to_json(builder) }
+          pretty_row = JSON.build(4) { |builder| ReQL::Datum.new(row).to_json(builder) }
+          pretty_obj = JSON.build(4) { |builder| ReQL::Datum.new(obj).to_json(builder) }
           raise ReQL::OpFailedError.new("Duplicate primary key `id`:\n#{pretty_row}\n#{pretty_obj}")
         end
         data = Data.create(w, obj)
@@ -59,19 +59,19 @@ module Storage
       end
     end
 
-    def get(key : ReQL::Datum::Type)
+    def get(key)
       k = BTree.make_key key
       row = nil
       @file.read do |r|
         pos = @btree.query(r, k)
         if pos != 0u32
-          row = Data.new(r.get(pos)).read(r).as(Hash(String, ReQL::Datum::Type))
+          row = Data.new(r.get(pos)).read(r).value.as(Hash)
         end
       end
       row
     end
 
-    def replace(key : ReQL::Datum::Type)
+    def replace(key)
       k = BTree.make_key key
       row = nil
       @file.write do |w|
@@ -88,7 +88,7 @@ module Storage
           end
         else
           data = Data.new(w.get(pos))
-          old_row = data.read(w.reader).as?(Hash)
+          old_row = data.read(w.reader).hash_value?
           new_row = yield old_row
           data.write(w, new_row)
         end
@@ -96,10 +96,10 @@ module Storage
       row
     end
 
-    def scan(&block : Hash(String, ReQL::Datum::Type) ->)
+    def scan(&block : Hash(String, ReQL::Datum) ->)
       @file.read do |r|
         @btree.scan(r) do |pos|
-          row = Data.new(r.get(pos)).read(r).as(Hash(String, ReQL::Datum::Type))
+          row = Data.new(r.get(pos)).read(r).hash_value
           block.call row
         end
       end

@@ -7,7 +7,7 @@ module ReQL
 
     getter args
 
-    def initialize(@args : Array(Type), options : Hash(String, JSON::Type)?)
+    def initialize(@args : Array(Type), options : Hash(String, JSON::Any)?)
       compile
     end
 
@@ -15,10 +15,11 @@ module ReQL
       # subclasses might do work here
     end
 
-    def self.parse(json : JSON::Type)
-      if json.is_a? Hash
+    def self.parse(json : JSON::Any)
+      raw = json.raw
+      if raw.is_a? Hash
         hash = Hash(String, Type).new
-        json.each do |(k, v)|
+        raw.each do |(k, v)|
           hash[k] = Term.parse(v)
         end
         if hash["$reql_type$"]? == "BINARY" && hash["data"]?.is_a? String
@@ -26,50 +27,50 @@ module ReQL
         else
           hash.as(Type)
         end
-      elsif json.is_a? Array
-        type_id = TermType.new(json[0].as(Int).to_i)
-        args = json[1] ? json[1].as(Array).map { |e| Term.parse(e).as(Type) } : [] of Type
+      elsif raw.is_a? Array
+        type_id = TermType.new(json[0].as_i)
+        args = json[1] ? json[1].as_a.map { |e| Term.parse(e).as(Type) } : [] of Type
         if type_id == TermType::FUNCALL
           args.rotate!(1)
         end
         if type_id == TermType::MAKE_ARRAY
           args.as(Type)
         elsif klass = @@type_to_class[type_id]?
-          klass.new(args, json[2]?.as(Hash(String, JSON::Type) | Nil)).as(Type)
+          klass.new(args, json[2]?.try &.as_h?).as(Type)
         else
           raise CompileError.new("Don't know how to handle #{type_id} term")
         end
       else
-        json.as(Type)
+        raw.as(Type)
       end
     end
 
     def self.encode(term : Type)
       case term
       when Hash
-        hash = Hash(String, JSON::Type).new
+        hash = Hash(String, JSON::Any).new
         term.each do |(k, v)|
           hash[k] = Term.encode(v)
         end
-        return hash.as(JSON::Type)
+        return JSON::Any.new(hash)
       when Array
-        [TermType::MAKE_ARRAY.to_i64.as(JSON::Type), term.map { |x| Term.encode x }.as(JSON::Type)].as(JSON::Type)
+        JSON::Any.new([TermType::MAKE_ARRAY.to_i64, term.map { |x| Term.encode x }].map { |x| JSON::Any.new(x) })
       when Term
-        type_id = @@class_to_type[term.class].to_i64.as(JSON::Type)
-        args = term.args.map { |x| Term.encode(x).as(JSON::Type) }
+        type_id = @@class_to_type[term.class].to_i64
+        args = term.args.map { |x| Term.encode(x) }
         if type_id == TermType::FUNCALL.to_i64
           args.rotate!(-1)
         end
-        [type_id, args.as(JSON::Type)].as(JSON::Type)
+        JSON::Any.new([type_id, args].map { |x| JSON::Any.new(x) })
       when Int32
-        term.to_i64.as(JSON::Type)
+        JSON::Any.new(term.to_i64)
       when Bytes
-        Hash(String, JSON::Type){
-          "$reql_type$" => "BINARY",
-          "data"        => Base64.strict_encode(term),
-        }.as(JSON::Type)
+        JSON::Any.new(Hash(String, JSON::Any){
+          "$reql_type$" => JSON::Any.new("BINARY"),
+          "data"        => JSON::Any.new(Base64.strict_encode(term)),
+        })
       else
-        term.as(JSON::Type)
+        JSON::Any.new(term)
       end
     end
 
@@ -146,57 +147,28 @@ module ReQL
     end
 
     def eval(arr : Array)
-      DatumArray.new(arr.map do |e|
-        eval(e).value.as(Datum::Type)
+      Datum.new(arr.map do |e|
+        Datum.new(eval(e).value)
       end)
     end
 
     def eval(hsh : Hash)
-      result = {} of String => Datum::Type
+      result = {} of String => Datum
       hsh.each do |(k, v)|
-        result[k] = eval(v).value
+        result[k] = Datum.new(eval(v).value)
       end
-      if result["$reql_type$"]? == "BINARY"
-        unless result.has_key? "data"
-          raise QueryLogicError.new "Invalid binary pseudotype: lacking `data` key."
-        end
-        extra_keys = result.keys - ["$reql_type$", "data"]
-        if extra_keys.size > 0
-          raise QueryLogicError.new "Invalid binary pseudotype: illegal `#{extra_keys[0]}` key."
-        end
-        data = Datum.wrap(result["data"])
-        expect_type data, DatumString
-        DatumBinary.new(Base64.decode(data.value))
-      else
-        DatumObject.new(result)
-      end
+      Datum.new(result)
     end
 
-    def eval(bool : Bool)
-      DatumBool.new(bool)
+    def eval(val : Bool | String | String | Bytes | Float64 | Int64 | Int32 | Nil)
+      Datum.new(val)
     end
 
-    def eval(str : String)
-      DatumString.new(str)
-    end
-
-    def eval(bytes : Bytes)
-      DatumBinary.new(bytes)
-    end
-
-    def eval(num : Float64 | Int64 | Int32)
-      DatumNumber.new(num)
-    end
-
-    def eval(x : Nil)
-      DatumNull.new
-    end
-
-    macro expect_type(val, type)
-      unless {{val}}.is_a? {{type.id}}
-        raise QueryLogicError.new("Expected type #{{{type}}.reql_name} but found #{{{type}}.reql_name == "FUNCTION" && {{val}}.is_a?(Datum) ? "DATUM" :  {{val}}.class.reql_name}.")
-      end
-    end
+    # macro expect_type(val, type)
+    #   unless {{val}}.is_a? {{type.id}}
+    #     raise QueryLogicError.new("Expected type #{{{type}}.reql_type} but found #{{{type}}.reql_type == "FUNCTION" && {{val}}.is_a?(Datum) ? "DATUM" : {{val}}.reql_type}.")
+    #   end
+    # end
   end
 
   enum TermType

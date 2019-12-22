@@ -23,33 +23,33 @@ module ReQL
 
   class Evaluator
     def eval(term : FilterTerm)
-      target = eval term.args[0]
-      func = eval term.args[1]
+      target = eval(term.args[0])
+      func = eval(term.args[1])
 
       block = case func
               when Func
                 ->(val : Datum) {
-                  func.as(Func).eval(self, val).datum
+                  func.as(Func).eval(self, val).as_datum
                 }
               when Datum
                 ->(val : Datum) {
-                  Datum.wrap(ReQL.filter_pattern_match(val.value, func.value))
+                  Datum.new(ReQL.filter_pattern_match(val.value, func.value))
                 }
               else
-                raise QueryLogicError.new("Expected type FUNCTION but found #{func.class.reql_name}")
+                raise QueryLogicError.new("Expected type FUNCTION but found #{func.reql_type}")
               end
 
-      case target
-      when Stream
+      case
+      when target.is_a? Stream
         FilterStream.new(target, ->(val : Datum) {
           block.call(val)
         })
-      when DatumArray
-        DatumArray.new(target.value.select do |val|
-          block.call(Datum.wrap(val)).value.as(Datum::Type)
+      when array = target.array_value
+        Datum.new(array.select do |val|
+          block.call(val).value
         end)
       else
-        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
       end
     end
   end

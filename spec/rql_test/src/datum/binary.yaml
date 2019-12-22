@@ -4,120 +4,120 @@ tests:
     # Short binary data from 0 to 12 characters
     # Not fully implemented for JS as comparing Buffer objects is non-trivial
     - def:
-         rb: s = "".force_encoding('BINARY')
-         py: s = b''
-         js: s = Buffer("", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s0 = "".force_encoding('BINARY')
+         py: s0 = b''
+         js: s0 = Buffer("", 'binary')
+    - cd: r.binary(s0)
+      ot: s0
+    - cd: r.binary(s0).count()
       ot: 0
 
     - def:
-         rb: s = "\x00".force_encoding('BINARY')
-         py: s = b'\x00'
-         js: s = Buffer("\x00", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s1 = "\x00".force_encoding('BINARY')
+         py: s1 = b'\x00'
+         js: s1 = Buffer("\x00", 'binary')
+    - cd: r.binary(s1)
+      ot: s1
+    - cd: r.binary(s1).count()
       ot: 1
 
     - def:
-         rb: s = "\x00\x42".force_encoding('BINARY')
-         py: s = b'\x00\x42'
-         js: s = Buffer("\x00\x42", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s2 = "\x00\x42".force_encoding('BINARY')
+         py: s2 = b'\x00\x42'
+         js: s2 = Buffer("\x00\x42", 'binary')
+    - cd: r.binary(s2)
+      ot: s2
+    - cd: r.binary(s2).count()
       ot: 2
 
     - def:
-         rb: s = "\x00\xfe\x7a".force_encoding('BINARY')
-         py: s = b'\x00\xfe\x7a'
-         js: s = Buffer("\x00\xfe\x7a", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s3 = "\x00\xfe\x7a".force_encoding('BINARY')
+         py: s3 = b'\x00\xfe\x7a'
+         js: s3 = Buffer("\x00\xfe\x7a", 'binary')
+    - cd: r.binary(s3)
+      ot: s3
+    - cd: r.binary(s3).count()
       ot: 3
 
     - def:
-         rb: s = "\xed\xfe\x00\xba".force_encoding('BINARY')
-         py: s = b'\xed\xfe\x00\xba'
-         js: s = Buffer("\xed\xfe\x00\xba", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s4 = "\xed\xfe\x00\xba".force_encoding('BINARY')
+         py: s4 = b'\xed\xfe\x00\xba'
+         js: s4 = Buffer("\xed\xfe\x00\xba", 'binary')
+    - cd: r.binary(s4)
+      ot: s4
+    - cd: r.binary(s4).count()
       ot: 4
 
     - def:
-         rb: s = "\x50\xf9\x00\x77\xf9".force_encoding('BINARY')
-         py: s = b'\x50\xf9\x00\x77\xf9'
-         js: s = Buffer("\x50\xf9\x00\x77\xf9", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s5 = "\x50\xf9\x00\x77\xf9".force_encoding('BINARY')
+         py: s5 = b'\x50\xf9\x00\x77\xf9'
+         js: s5 = Buffer("\x50\xf9\x00\x77\xf9", 'binary')
+    - cd: r.binary(s5)
+      ot: s5
+    - cd: r.binary(s5).count()
       ot: 5
 
     - def:
-         rb: s = "\x2f\xe3\xb5\x57\x00\x92".force_encoding('BINARY')
-         py: s = b'\x2f\xe3\xb5\x57\x00\x92'
-         js: s = Buffer("\x2f\xe3\xb5\x57\x00\x92", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s6 = "\x2f\xe3\xb5\x57\x00\x92".force_encoding('BINARY')
+         py: s6 = b'\x2f\xe3\xb5\x57\x00\x92'
+         js: s6 = Buffer("\x2f\xe3\xb5\x57\x00\x92", 'binary')
+    - cd: r.binary(s6)
+      ot: s6
+    - cd: r.binary(s6).count()
       ot: 6
 
     - def:
-         rb: s = "\xa9\x43\x54\xe9\x00\xf8\xfb".force_encoding('BINARY')
-         py: s = b'\xa9\x43\x54\xe9\x00\xf8\xfb'
-         js: s = Buffer("\xa9\x43\x54\xe9\x00\xf8\xfb", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s7 = "\xa9\x43\x54\xe9\x00\xf8\xfb".force_encoding('BINARY')
+         py: s7 = b'\xa9\x43\x54\xe9\x00\xf8\xfb'
+         js: s7 = Buffer("\xa9\x43\x54\xe9\x00\xf8\xfb", 'binary')
+    - cd: r.binary(s7)
+      ot: s7
+    - cd: r.binary(s7).count()
       ot: 7
 
     - def:
-         rb: s = "\x57\xbb\xe5\x82\x8b\xd3\x00\xf9".force_encoding('BINARY')
-         py: s = b'\x57\xbb\xe5\x82\x8b\xd3\x00\xf9'
-         js: s = Buffer("\x57\xbb\xe5\x82\x8b\xd3\x00\xf9", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s8 = "\x57\xbb\xe5\x82\x8b\xd3\x00\xf9".force_encoding('BINARY')
+         py: s8 = b'\x57\xbb\xe5\x82\x8b\xd3\x00\xf9'
+         js: s8 = Buffer("\x57\xbb\xe5\x82\x8b\xd3\x00\xf9", 'binary')
+    - cd: r.binary(s8)
+      ot: s8
+    - cd: r.binary(s8).count()
       ot: 8
 
     - def:
-         rb: s = "\x44\x1b\x3e\x00\x13\x19\x29\x2a\xbf".force_encoding('BINARY')
-         py: s = b'\x44\x1b\x3e\x00\x13\x19\x29\x2a\xbf'
-         js: s = Buffer("\x44\x1b\x3e\x00\x13\x19\x29\x2a\xbf", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s9 = "\x44\x1b\x3e\x00\x13\x19\x29\x2a\xbf".force_encoding('BINARY')
+         py: s9 = b'\x44\x1b\x3e\x00\x13\x19\x29\x2a\xbf'
+         js: s9 = Buffer("\x44\x1b\x3e\x00\x13\x19\x29\x2a\xbf", 'binary')
+    - cd: r.binary(s9)
+      ot: s9
+    - cd: r.binary(s9).count()
       ot: 9
 
     - def:
-         rb: s = "\x8a\x1d\x09\x00\x5d\x60\x6b\x2e\x70\xd9".force_encoding('BINARY')
-         py: s = b'\x8a\x1d\x09\x00\x5d\x60\x6b\x2e\x70\xd9'
-         js: s = Buffer("\x8a\x1d\x09\x00\x5d\x60\x6b\x2e\x70\xd9", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s10 = "\x8a\x1d\x09\x00\x5d\x60\x6b\x2e\x70\xd9".force_encoding('BINARY')
+         py: s10 = b'\x8a\x1d\x09\x00\x5d\x60\x6b\x2e\x70\xd9'
+         js: s10 = Buffer("\x8a\x1d\x09\x00\x5d\x60\x6b\x2e\x70\xd9", 'binary')
+    - cd: r.binary(s10)
+      ot: s10
+    - cd: r.binary(s10).count()
       ot: 10
 
     - def:
-         rb: s = "\x00\xaf\x47\x4b\x38\x99\x14\x8d\x8f\x10\x51".force_encoding('BINARY')
-         py: s = b'\x00\xaf\x47\x4b\x38\x99\x14\x8d\x8f\x10\x51'
-         js: s = Buffer("\x00\xaf\x47\x4b\x38\x99\x14\x8d\x8f\x10\x51", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         rb: s11 = "\x00\xaf\x47\x4b\x38\x99\x14\x8d\x8f\x10\x51".force_encoding('BINARY')
+         py: s11 = b'\x00\xaf\x47\x4b\x38\x99\x14\x8d\x8f\x10\x51'
+         js: s11 = Buffer("\x00\xaf\x47\x4b\x38\x99\x14\x8d\x8f\x10\x51", 'binary')
+    - cd: r.binary(s11)
+      ot: s11
+    - cd: r.binary(s11).count()
       ot: 11
 
     - def:
-         cd: s = "\x45\x39\x00\xf7\xc2\x37\xfd\xe0\x38\x82\x40\xa9".force_encoding('BINARY')
-         py: s = b'\x45\x39\x00\xf7\xc2\x37\xfd\xe0\x38\x82\x40\xa9'
-         js: s = Buffer("\x45\x39\x00\xf7\xc2\x37\xfd\xe0\x38\x82\x40\xa9", 'binary')
-    - cd: r.binary(s)
-      ot: s
-    - cd: r.binary(s).count()
+         cd: s12 = "\x45\x39\x00\xf7\xc2\x37\xfd\xe0\x38\x82\x40\xa9".force_encoding('BINARY')
+         py: s12 = b'\x45\x39\x00\xf7\xc2\x37\xfd\xe0\x38\x82\x40\xa9'
+         js: s12 = Buffer("\x45\x39\x00\xf7\xc2\x37\xfd\xe0\x38\x82\x40\xa9", 'binary')
+    - cd: r.binary(s12)
+      ot: s12
+    - cd: r.binary(s12).count()
       ot: 12
 
     # Test comparisons

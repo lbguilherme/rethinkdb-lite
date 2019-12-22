@@ -14,15 +14,12 @@ module ReQL
       when 0
         InfiniteRange.new
       when 1
-        to = eval term.args[0]
-        expect_type to, DatumNumber
-        Range.new(0i64, to.to_i64)
+        to = eval(term.args[0]).int64_value
+        Range.new(0i64, to)
       when 2
-        from = eval term.args[0]
-        expect_type from, DatumNumber
-        to = eval term.args[1]
-        expect_type to, DatumNumber
-        Range.new(from.to_i64, to.to_i64)
+        from = eval(term.args[0]).int64_value
+        to = eval(term.args[1]).int64_value
+        Range.new(from, to)
       else
         raise "BUG: args should be 0..2"
       end

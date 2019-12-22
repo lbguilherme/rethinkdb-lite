@@ -72,44 +72,40 @@ module Duktape
     end
 
     def get_datum
-      result = ReQL::DatumNull.new
-
       case LibDuktape.duk_get_type(@ctx, -1)
       when LibDuktape::DUK_TYPE_UNDEFINED
         raise ReQL::QueryLogicError.new "Cannot convert javascript `undefined` to DATUM."
       when LibDuktape::DUK_TYPE_NULL
-        result = ReQL::DatumNull.new
+        ReQL::Datum.new(nil)
       when LibDuktape::DUK_TYPE_BOOLEAN
-        result = ReQL::DatumBool.new LibDuktape.duk_get_boolean(@ctx, -1)
+        ReQL::Datum.new LibDuktape.duk_get_boolean(@ctx, -1)
       when LibDuktape::DUK_TYPE_NUMBER
-        result = ReQL::DatumNumber.new LibDuktape.duk_get_number(@ctx, -1)
+        ReQL::Datum.new LibDuktape.duk_get_number(@ctx, -1)
       when LibDuktape::DUK_TYPE_STRING
-        result = ReQL::DatumString.new String.new(LibDuktape.duk_get_string(@ctx, -1))
+        ReQL::Datum.new String.new(LibDuktape.duk_get_string(@ctx, -1))
       when LibDuktape::DUK_TYPE_OBJECT
         if LibDuktape.duk_is_ecmascript_function(@ctx, -1)
           LibDuktape.duk_dump_function(@ctx)
           bytes = LibDuktape.duk_get_buffer(@ctx, -1, out bytesize)
           bytecode = Bytes.new(bytesize)
           bytecode.copy_from(Bytes.new(bytes, bytesize))
-          result = ReQL::JsFunc.new bytecode
+          ReQL::JsFunc.new bytecode
         else
           raise "TODO: duktape array/object type"
         end
       else
         raise "BUG: Unexpected duktape type: #{LibDuktape.duk_get_type(@ctx, -1)}"
       end
-
-      return result
     end
 
-    def push_datum(value)
-      case value
-      when ReQL::DatumString
-        LibDuktape.duk_push_lstring(@ctx, value.value, value.value.bytesize)
-      when ReQL::DatumNumber
-        LibDuktape.duk_push_number(@ctx, value.to_f64)
+    def push_datum(datum)
+      case
+      when string = datum.string_value?
+        LibDuktape.duk_push_lstring(@ctx, string, string.bytesize)
+      when number = datum.number_value?
+        LibDuktape.duk_push_number(@ctx, number.to_f64)
       else
-        raise "BUG: Unexpected type to push into duktape: #{value.class}"
+        raise "BUG: Unexpected type to push into duktape: #{datum.reql_type}"
       end
     end
   end

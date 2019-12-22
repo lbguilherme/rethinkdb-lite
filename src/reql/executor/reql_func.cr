@@ -1,6 +1,6 @@
 module ReQL
-  class ReqlFunc < Func
-    def self.reql_name
+  struct ReqlFunc < Func
+    def reql_type
       "FUNCTION"
     end
 

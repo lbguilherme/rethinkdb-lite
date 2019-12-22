@@ -19,42 +19,38 @@ module ReQL
         obj[k] = v
       end
     end
-    obj.as(Datum::Type)
+    obj
   end
 
   class Evaluator
     def eval(term : MergeTerm)
-      target = eval term.args[0]
-      func = eval term.args[1]
+      target = eval(term.args[0])
+      func = eval(term.args[1])
 
       block = case func
               when Func
                 ->(val : Datum) {
-                  func.as(Func).eval(self, val).datum
+                  func.as(Func).eval(self, val)
                 }
               when Datum
                 ->(val : Datum) {
                   func
                 }
               else
-                raise QueryLogicError.new("Expected type FUNCTION but found #{func.class.reql_name}")
+                raise QueryLogicError.new("Expected type FUNCTION but found #{func.reql_type}")
               end
 
-      case target
-      when Stream
+      case
+      when target.is_a? Stream
         MapStream.new(target, ->(val : Datum) {
-          expect_type val, DatumObject
-          Datum.wrap(ReQL.merge_objects(val.value, block.call(val).value))
+          Datum.new(ReQL.merge_objects(val.hash_value, block.call(val).value))
         })
-      when DatumArray
-        DatumArray.new(target.value.map do |val|
-          val = Datum.wrap(val)
-          expect_type val, DatumObject
-          ReQL.merge_objects(val.value, block.call(val).value).as(Datum::Type)
+      when array = target.array_value?
+        Datum.new(array.map do |val|
+          ReQL.merge_objects(val.hash_value, block.call(val).value)
         end)
-      when DatumObject
-        obj1 = target.value
-        Datum.wrap(ReQL.merge_objects(obj1, block.call(Datum.wrap(obj1)).value))
+      when hash = target.hash_value?
+        Datum.new(ReQL.merge_objects(hash, block.call(target.as_datum).value))
       else
         raise QueryLogicError.new("Cannot perform merge on a non-object non-sequence")
       end

@@ -1,21 +1,17 @@
 module ReQL
-  abstract class Stream
-    def self.reql_name
+  abstract struct Stream < AbstractValue
+    def reql_type
       "STREAM"
     end
 
-    def to_datum_array
+    def value
       start_reading
-      list = [] of ReQL::Datum::Type
-      while tup = next_val
-        list << tup[0]
+      arr = [] of Datum
+      while val = next_val
+        arr << val
       end
       finish_reading
-      DatumArray.new(list)
-    end
-
-    def value
-      to_datum_array.value
+      arr
     end
 
     def count(max)
@@ -32,8 +28,12 @@ module ReQL
       count.times { next_val }
     end
 
-    def datum
-      Datum.wrap(value)
+    def each
+      start_reading
+      while val = next_val
+        yield val
+      end
+      finish_reading
     end
   end
 end

@@ -13,7 +13,7 @@ module Storage
     end
 
     def pointer
-      @slice.pointer(@slice.size)
+      @slice.to_unsafe
     end
 
     def size

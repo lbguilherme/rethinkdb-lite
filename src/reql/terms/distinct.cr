@@ -10,13 +10,12 @@ module ReQL
 
   class Evaluator
     def eval(term : DistinctTerm)
-      target = eval term.args[0]
+      target = eval(term.args[0])
 
-      case target
-      when Stream, DatumArray
-        Datum.wrap(target.value.uniq)
+      if array = target.array_value?
+        Datum.new(array.uniq)
       else
-        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
       end
     end
   end

@@ -23,53 +23,48 @@ module ReQL
 
   class Evaluator
     def eval(term : BracketTerm)
-      target = eval term.args[0]
-      field = eval term.args[1]
-      expect_type field, DatumString
+      target = eval(term.args[0])
+      field = eval(term.args[1]).string_value
 
-      field = field.value
-
-      case target
-      when Stream
+      case
+      when target.is_a? Stream
         MapStream.new(target, ->(val : Datum) {
-          case val
-          when DatumArray
+          case
+          when val.is_array?
             raise QueryLogicError.new("Cannot perform bracket on a sequence of sequences")
-          when DatumObject
-            val = val.value
-            if val.has_key? field
-              Datum.wrap(val[field])
+          when inner_hash = val.hash_value?
+            if inner_hash.has_key? field
+              inner_hash[field]
             else
-              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| Datum.wrap(val).to_json(builder) }}")
+              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| inner_hash.to_json(builder) }}")
             end
           else
             raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.value.inspect}`.")
           end
         })
-      when DatumArray
-        DatumArray.new(target.value.map { |val|
-          case val
-          when Array
+      when array = target.array_value?
+        Datum.new(array.map { |val|
+          case
+          when val.is_array?
             raise QueryLogicError.new("Cannot perform bracket on a sequence of sequences")
-          when Hash
-            if val.has_key? field
-              val[field]
+          when inner_hash = val.hash_value?
+            if inner_hash.has_key? field
+              inner_hash[field]
             else
-              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| Datum.wrap(val).to_json(builder) }}")
+              raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| inner_hash.to_json(builder) }}")
             end
           else
-            raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
+            raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.value.inspect}`.")
           end
-        }.map(&.as(ReQL::Datum::Type)))
-      when DatumObject
-        target = target.value
-        if target.has_key? field
-          Datum.wrap(target[field])
+        }.map(&.as(ReQL::Datum)))
+      when hash = target.hash_value?
+        if hash.has_key? field
+          Datum.new(hash[field])
         else
-          raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| Datum.wrap(target).to_json(builder) }}")
+          raise NonExistenceError.new("No attribute `#{field}` in object: #{JSON.build(4) { |builder| hash.to_json(builder) }}")
         end
       else
-        raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{target.value.inspect}`.")
+        raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{target.inspect}`.")
       end
     end
   end

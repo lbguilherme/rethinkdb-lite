@@ -12,24 +12,20 @@ module ReQL
 
   class Evaluator
     def eval(term : ObjectTerm)
-      obj = Hash(String, Datum::Type).new
+      obj = Hash(String, Datum).new
 
-      (term.args.size / 2).times do |i|
-        k = eval term.args[2*i]
-        expect_type k, DatumString
-        k = k.value
+      (term.args.size // 2).times do |i|
+        key = eval(term.args[2 * i]).string_value
+        value = eval(term.args[2 * i + 1]).as_datum
 
-        v = eval term.args[2*i + 1]
-        expect_type v, Datum
-
-        if obj.has_key? k
-          raise QueryLogicError.new "Duplicate key \"#{k}\" in object.  (got #{obj[k]} and #{v.value} as values)"
+        if obj.has_key? key
+          raise QueryLogicError.new "Duplicate key \"#{key}\" in object.  (got #{obj[key]} and #{value} as values)"
         end
 
-        obj[k] = v.value
+        obj[key] = value
       end
 
-      Datum.wrap(obj)
+      Datum.new(obj)
     end
   end
 end

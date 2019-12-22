@@ -15,7 +15,7 @@ module RethinkDB
     end
 
     def to_json(io)
-      runopts = Hash(String, JSON::Type).new
+      runopts = Hash(String, JSON::Any::Type).new
       if !@native_binary
         runopts["binary_format"] = "raw"
       end
@@ -26,16 +26,18 @@ module RethinkDB
   struct Datum
     getter value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil | Bytes
 
-    def initialize(value : Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
+    def initialize(value : ReQL::Datum | Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
       case value
+      when ReQL::Datum
+        initialize(value.value, runopts)
       when Datum
         @value = value.@value
       when Array
-        @value = value.map { |x| Datum.new(x, runopts).as Datum }
+        @value = value.map { |x| Datum.new(x.is_a?(JSON::Any) ? x.raw : x, runopts).as Datum }
       when Hash
         obj = {} of String => Datum
         value.each do |(k, v)|
-          obj[k.to_s] = Datum.new(v, runopts)
+          obj[k.to_s] = Datum.new(v.is_a?(JSON::Any) ? v.raw : v, runopts)
         end
         if runopts.native_binary && obj["$reql_type$"]? == "BINARY"
           @value = Base64.decode(obj["data"].string)
@@ -145,6 +147,10 @@ module RethinkDB
 
   abstract class Cursor
     include Iterator(Datum)
+
+    def initialize
+      @runopts = RunOpts.new
+    end
 
     abstract def next
 

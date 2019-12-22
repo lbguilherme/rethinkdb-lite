@@ -15,10 +15,10 @@ module RethinkDB
           answer = nil
           case message[0]
           when 1 # START
-            start = Time.now
+            start = Time.utc
 
             term = ReQL::Term.parse(message[1])
-            runopts = message[2]?.as(Hash(String, JSON::Type) | Nil) || {} of String => JSON::Type
+            runopts = message[2]?.try &.as_h? || {} of String => JSON::Any::Type
             should_profile = runopts["profile"]?.try &.as?(Bool) || false
 
             result = @conn.run(term, RunOpts.new(runopts))
@@ -48,7 +48,7 @@ module RethinkDB
                 "t" => answer["t"],
                 "r" => answer["r"],
                 "n" => answer["n"],
-                "p" => [{"duration(ms)" => (Time.now - start).to_f * 1000}],
+                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
               }
             end
           when 2 # CONTINUE

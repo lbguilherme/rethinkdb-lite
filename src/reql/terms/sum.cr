@@ -10,29 +10,14 @@ module ReQL
 
   class Evaluator
     def eval(term : SumTerm)
-      target = eval term.args[0]
+      target = eval(term.args[0])
 
       sum = 0i64
-      case target
-      when Stream
-        target.start_reading
-        while tup = target.next_val
-          x = Datum.wrap(tup[0])
-          expect_type x, DatumNumber
-          sum += x.value
-        end
-        target.finish_reading
-      when DatumArray
-        target.value.each do |x|
-          x = Datum.wrap(x)
-          expect_type x, DatumNumber
-          sum += x.value
-        end
-      else
-        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+      target.each do |e|
+        sum += e.number_value
       end
 
-      Datum.wrap(sum)
+      Datum.new(sum)
     end
   end
 end

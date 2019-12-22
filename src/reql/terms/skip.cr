@@ -10,20 +10,16 @@ module ReQL
 
   class Evaluator
     def eval(term : SkipTerm)
-      target = eval term.args[0]
-      skip = eval term.args[1]
-      expect_type skip, Datum
+      target = eval(term.args[0])
+      skip = eval(term.args[1]).int64_value
 
-      skip = skip.value.as(Int32 | Int64).to_i64
-
-      case target
-      when Stream
+      case
+      when target.is_a? Stream
         SkipStream.new(target, skip)
-      when DatumArray
-        array = target.value
-        DatumArray.new(array.size > skip ? array[skip..-1] : [] of Datum::Type)
+      when array = target.array_value?
+        Datum.new(array.size > skip ? array[skip..-1] : [] of Datum)
       else
-        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
+        raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
       end
     end
   end

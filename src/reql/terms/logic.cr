@@ -82,49 +82,49 @@ module ReQL
 
   class Evaluator
     def eval(term : EqTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
+      a = eval(term.args[0])
+      b = eval(term.args[1])
 
-      Datum.wrap(a.datum == b.datum)
+      Datum.new(a.as_datum == b.as_datum)
     end
 
     def eval(term : NeTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
+      a = eval(term.args[0])
+      b = eval(term.args[1])
 
-      Datum.wrap(a.datum != b.datum)
+      Datum.new(a.as_datum != b.as_datum)
     end
 
     def eval(term : GtTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
+      a = eval(term.args[0])
+      b = eval(term.args[1])
 
-      Datum.wrap(a.datum > b.datum)
+      Datum.new(a.as_datum > b.as_datum)
     end
 
     def eval(term : GeTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
+      a = eval(term.args[0])
+      b = eval(term.args[1])
 
-      Datum.wrap(a.datum >= b.datum)
+      Datum.new(a.as_datum >= b.as_datum)
     end
 
     def eval(term : LtTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
+      a = eval(term.args[0])
+      b = eval(term.args[1])
 
-      Datum.wrap(a.datum < b.datum)
+      Datum.new(a.as_datum < b.as_datum)
     end
 
     def eval(term : LeTerm)
-      a = eval term.args[0]
-      b = eval term.args[1]
+      a = eval(term.args[0])
+      b = eval(term.args[1])
 
-      Datum.wrap(a.datum <= b.datum)
+      Datum.new(a.as_datum <= b.as_datum)
     end
 
     def eval(term : AndTerm)
-      last = DatumNull.new
+      last = Datum.new(nil)
       term.args.each do |arg|
         last = eval(arg)
         return last unless last.value
@@ -133,7 +133,7 @@ module ReQL
     end
 
     def eval(term : OrTerm)
-      last = DatumNull.new
+      last = Datum.new(nil)
       term.args.each do |arg|
         last = eval(arg)
         return last if last.value
@@ -142,7 +142,7 @@ module ReQL
     end
 
     def eval(term : NotTerm)
-      DatumBool.new(!eval(term.args[0]).value)
+      Datum.new(!eval(term.args[0]).value)
     end
   end
 end

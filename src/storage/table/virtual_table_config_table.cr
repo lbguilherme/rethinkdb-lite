@@ -4,41 +4,41 @@ module Storage
     end
 
     def insert(obj : Hash)
-      raise ""
+      raise "TODO"
     end
 
-    def replace(key, &block : Hash(String, ReQL::Datum::Type) -> Hash(String, ReQL::Datum::Type))
-      raise ""
+    def replace(key, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
+      raise "TODO"
     end
 
-    def scan(&block : Hash(String, ReQL::Datum::Type) ->)
+    def scan(&block : Hash(String, ReQL::Datum) ->)
       @config.databases.each do |db|
         db.tables.each do |table|
-          block.call Hash(String, ReQL::Datum::Type){
+          block.call ReQL::Datum.new({
             "db"          => db.name,
             "id"          => table.id,
             "name"        => table.name,
             "raft_leader" => @config.server_info.name,
-            "shards"      => Array(ReQL::Datum::Type){
-              Hash(String, ReQL::Datum::Type){
-                "primary_replicas" => Array(ReQL::Datum::Type){
+            "shards"      => [
+              {
+                "primary_replicas" => [
                   @config.server_info.name,
-                }.as(ReQL::Datum::Type),
-                "replicas" => Array(ReQL::Datum::Type){
-                  Hash(String, ReQL::Datum::Type){
+                ],
+                "replicas" => [
+                  {
                     "server" => @config.server_info.name,
                     "state"  => "ready",
-                  }.as(ReQL::Datum::Type),
-                }.as(ReQL::Datum::Type),
-              }.as(ReQL::Datum::Type),
-            }.as(ReQL::Datum::Type),
-            "status" => Hash(String, ReQL::Datum::Type){
+                  },
+                ],
+              },
+            ],
+            "status" => {
               "all_replicas_ready"       => true,
               "ready_for_outdated_reads" => true,
               "ready_for_reads"          => true,
               "ready_for_writes"         => true,
-            }.as(ReQL::Datum::Type),
-          }
+            },
+          }).hash_value
         end
       end
     end

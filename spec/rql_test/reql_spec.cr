@@ -34,33 +34,49 @@ def run_reql_spec(conn)
   end
 end
 
-FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
-conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
-run_reql_spec(conn)
-conn.close
+test_local_database
+test_remote_connection_over_local_database
+test_remote_connection_over_rethinkdb
 
-FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
-real_conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
-RethinkDB::Server::DriverServer.new(28016, real_conn).start
-conn = r.connect({"host" => "localhost", "port" => 28016})
-run_reql_spec(conn)
-conn.close
-real_conn.close
-
-conn = begin
-  r.connect("172.17.0.2")
-rescue
-  begin
-    r.connect("localhost")
-  rescue
-    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
-    nil
+def test_local_database
+  FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
+  conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
+  run_reql_spec(conn)
+  Spec.after_suite do
+    conn.close
   end
 end
 
-if conn
+def test_remote_connection_over_local_database
+  FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
+  real_conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
+  server = RethinkDB::Server::DriverServer.new(28016, real_conn)
+  server.start
+  conn = r.connect({"host" => "localhost", "port" => 28016})
   run_reql_spec(conn)
-  conn.close
+  Spec.after_suite do
+    conn.close
+    server.close
+    real_conn.close
+  end
+end
+
+def test_remote_connection_over_rethinkdb
+  conn = begin
+    r.connect("172.17.0.2")
+  rescue
+    begin
+      r.connect("localhost")
+    rescue
+      puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
+      return
+    end
+  end
+
+  run_reql_spec(conn)
+  Spec.after_suite do
+    conn.close
+  end
 end
 
 def match_reql_output(result)
@@ -93,7 +109,7 @@ def recursive_match(result, target)
 end
 
 # def recursive_match(result : Array, target : Array)
-#   result.should be_a Array(ReQL::Datum::Type)
+#   result.should be_a Array(ReQL::Datum)
 #   result.size.should eq target.size
 #   result.size.times do |i|
 #     recursive_match result[i], target[i]

@@ -9,7 +9,7 @@ module RethinkDB
     V0_4 = 0x400c2d20_u32
     V1_0 = 0x34c2bdc3_u32
 
-    @channels = {} of UInt64 => Channel::Unbuffered(String)
+    @channels = {} of UInt64 => Channel(String)
     @next_query_id = 1_u64
 
     def initialize(host : String, port : Int)
@@ -86,7 +86,7 @@ module RethinkDB
       end
     end
 
-    def run(term : ReQL::Term::Type, runopts : RunOpts)
+    def run(term : ReQL::Term::Type, runopts : RunOpts) : RethinkDB::Cursor | RethinkDB::Datum
       query = Query.new(self, runopts)
       response = query.start(term)
 
@@ -149,7 +149,7 @@ module RethinkDB
 
     class Query
       getter id : UInt64
-      @channel : Channel::Unbuffered(String)
+      @channel : Channel(String)
 
       def initialize(@conn : RemoteConnection, @runopts : RunOpts)
         @id = @conn.next_query_id

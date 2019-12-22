@@ -1,21 +1,24 @@
 require "./stream"
 
 module ReQL
-  class LimitStream < Stream
-    def initialize(@stream : Stream, @size : Int64)
+  struct LimitStream < Stream
+    @stream : Box(Stream)
+
+    def initialize(stream : Stream, @size : Int64)
+      @stream = Box(Stream).new(stream)
     end
 
     def count(max)
-      @stream.count(Math.min(max, @size))
+      @stream.object.count(Math.min(max, @size))
     end
 
     def skip(count)
-      @stream.skip(count)
+      @stream.object.skip(count)
       @size -= count
     end
 
     def start_reading
-      @stream.start_reading
+      @stream.object.start_reading
     end
 
     def next_val
@@ -23,12 +26,12 @@ module ReQL
         return nil
       else
         @size -= 1i64
-        @stream.next_val
+        @stream.object.next_val
       end
     end
 
     def finish_reading
-      @stream.finish_reading
+      @stream.object.finish_reading
     end
   end
 end

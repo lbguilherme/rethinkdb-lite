@@ -27,17 +27,11 @@ module ReQL
       table_name = ""
       case term.args.size
       when 1
-        name = eval term.args[0]
-        expect_type name, DatumString
         db_name = "test"
-        table_name = name.value
+        table_name = eval(term.args[0]).string_value
       when 2
-        db = eval term.args[0]
-        expect_type db, Db
-        name = eval term.args[1]
-        expect_type name, DatumString
-        db_name = db.name
-        table_name = name.value
+        db_name = eval(term.args[0]).as_database.name
+        table_name = eval(term.args[1]).string_value
       end
 
       unless table_name =~ /\A[A-Za-z0-9_-]+\Z/
@@ -50,7 +44,7 @@ module ReQL
 
       @table_manager.create_table(db_name, table_name)
 
-      Datum.wrap(Hash(String, Datum::Type).new)
+      Datum.new(Hash(String, Datum::Type).new)
     end
   end
 end

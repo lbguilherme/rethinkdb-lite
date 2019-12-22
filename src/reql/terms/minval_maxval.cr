@@ -19,11 +19,11 @@ module ReQL
 
   class Evaluator
     def eval(term : MinvalTerm)
-      DatumMinval.new
+      Datum.new(Minval.new)
     end
 
     def eval(term : MaxvalTerm)
-      DatumMaxval.new
+      Datum.new(Maxval.new)
     end
   end
 end

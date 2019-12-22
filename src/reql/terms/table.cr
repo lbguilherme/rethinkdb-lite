@@ -28,15 +28,10 @@ module ReQL
 
       case term.args.size
       when 1
-        name = eval term.args[0]
-        expect_type name, DatumString
-        table_name = name.value
+        table_name = eval(term.args[0]).string_value
       when 2
-        db = eval term.args[0]
-        expect_type db, Db
-        name = eval term.args[1]
-        expect_type name, DatumString
-        table_name = name.value
+        db = eval(term.args[0]).as_database
+        table_name = eval(term.args[1]).string_value
       else
         raise "BUG: Wrong number of arguments"
       end

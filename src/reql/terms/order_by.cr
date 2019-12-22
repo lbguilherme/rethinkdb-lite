@@ -10,37 +10,32 @@ module ReQL
 
   class Evaluator
     def eval(term : OrderByTerm)
-      target = eval term.args[0]
-      func = eval term.args[1]
+      target = eval(term.args[0])
+      func = eval(term.args[1])
 
-      case target
-      when Stream, DatumArray
-        a = target.value.map &.as(Array(Datum::Type) | Bool | Float64 | Hash(String, Datum::Type) | Int64 | Int32 | String | Nil)
-        DatumArray.new(a.sort_by { |val|
-          case func
-          when DatumString
-            unless val.is_a? Array
-              raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
-            end
-            val.map { |val|
-              case val
-              when Array
-                raise QueryLogicError.new("Cannot perform bracket on a sequence of sequences")
-              when Hash
-                val[func.value]
+      array = if target.is_a? Stream || target.reql_type == "ARRAY"
+                target.array_value
               else
-                raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
+                raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
               end
-            }
-          when Func
-            func.eval(self, Datum.wrap(val)).value
+
+      Datum.new(array.sort_by do |val|
+        case
+        when key = func.string_value?
+          case val
+          when Array
+            raise QueryLogicError.new("Cannot perform bracket on a sequence of sequences")
+          when Hash
+            val[key]
           else
-            raise QueryLogicError.new("Expected type STRING but found #{func.class.reql_name}")
-          end.as(String)
-        }.map &.as(Datum::Type))
-      else
-        raise QueryLogicError.new("Cannot convert #{target.class.reql_name} to SEQUENCE")
-      end
+            raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
+          end
+        when func.is_a? Func
+          func.eval(self, val)
+        else
+          raise QueryLogicError.new("Expected type STRING but found #{func.reql_type}")
+        end
+      end)
     end
   end
 end

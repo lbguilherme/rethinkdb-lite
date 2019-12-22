@@ -10,26 +10,16 @@ module ReQL
 
   class Evaluator
     def eval(term : SplitTerm)
-      str = eval term.args[0]
-      expect_type str, DatumString
-      str = str.value
+      str = eval(term.args[0]).string_value
 
       sep = nil
       if term.args.size >= 2
-        sep = eval term.args[1]
-        if sep.is_a? DatumNull
-          sep = nil
-        else
-          expect_type sep, DatumString
-          sep = sep.value
-        end
+        sep = eval(term.args[1]).string_or_nil_value
       end
 
       max = nil
       if term.args.size >= 3
-        max = eval term.args[2]
-        expect_type max, DatumNumber
-        max = max.to_i64.to_i32
+        max = eval(term.args[2]).int64_value.to_i32
       end
 
       if sep == ""
@@ -64,7 +54,7 @@ module ReQL
 
       # p [str, sep, max, arr] if sep == /\s+/ && max == 3
 
-      Datum.wrap(arr.map &.as(Datum::Type))
+      Datum.new(arr.map &.as(Datum::Type))
     end
   end
 end

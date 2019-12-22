@@ -28,24 +28,18 @@ module ReQL
 
   class Evaluator
     def eval(term : FloorTerm)
-      target = eval term.args[0]
-      expect_type target, DatumNumber
-
-      Datum.wrap(target.value.floor)
+      target = eval(term.args[0])
+      Datum.new(target.number_value.floor)
     end
 
     def eval(term : CeilTerm)
-      target = eval term.args[0]
-      expect_type target, DatumNumber
-
-      Datum.wrap(target.value.ceil)
+      target = eval(term.args[0])
+      Datum.new(target.number_value.ceil)
     end
 
     def eval(term : RoundTerm)
-      target = eval term.args[0]
-      expect_type target, DatumNumber
-
-      Datum.wrap(target.value.round)
+      target = eval(term.args[0])
+      Datum.new(target.number_value.round)
     end
   end
 end
