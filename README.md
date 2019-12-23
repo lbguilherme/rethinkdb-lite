@@ -1,4 +1,4 @@
-[![Travis](https://travis-ci.org/lbguilherme/rethinkdb-lite.svg?branch=master)](https://travis-ci.org/lbguilherme/rethinkdb-lite)
+[![GitHub Actions](https://github.com/lbguilherme/rethinkdb-lite/workflows/Crystal%20CI/badge.svg)](https://github.com/lbguilherme/rethinkdb-lite/actions?query=workflow%3A%22Crystal+CI%22)
 
 # RethinkDB-lite
 

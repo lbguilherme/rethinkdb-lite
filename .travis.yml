@@ -1,6 +1,0 @@
-language: generic
-sudo: required
-services:
-  - docker
-script:
-  - docker run -t -v $(pwd):/mnt -w /mnt crystallang/crystal:0.32.1 bash -c "bash travis.sh"
