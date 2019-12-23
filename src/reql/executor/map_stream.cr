@@ -3,6 +3,7 @@ require "./stream"
 module ReQL
   struct MapStream < Stream
     @stream : Box(Stream)
+
     def initialize(stream : Stream, @func : Datum -> Datum)
       @stream = Box(Stream).new(stream)
     end

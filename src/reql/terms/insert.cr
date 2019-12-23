@@ -14,19 +14,19 @@ module ReQL
       datum = eval(term.args[1])
 
       docs = case
-      when array = datum.array_value?
-        array.map do |e|
-          if hash = datum.hash_value?
-            hash
-          else
-            raise QueryLogicError.new("Expected type OBJECT but found #{e.reql_type}")
-          end
-        end
-      when hash = datum.hash_value?
-        [hash]
-      else
-        raise QueryLogicError.new("Expected type OBJECT but found #{datum.reql_type}")
-      end
+             when array = datum.array_value?
+               array.map do |e|
+                 if hash = datum.hash_value?
+                   hash
+                 else
+                   raise QueryLogicError.new("Expected type OBJECT but found #{e.reql_type}")
+                 end
+               end
+             when hash = datum.hash_value?
+               [hash]
+             else
+               raise QueryLogicError.new("Expected type OBJECT but found #{datum.reql_type}")
+             end
 
       inserted = 0i64
       errors = 0i64
