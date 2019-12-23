@@ -63,14 +63,10 @@ end
 
 def test_remote_connection_over_rethinkdb
   conn = begin
-    r.connect("172.17.0.2")
+    r.connect("172.17.0.2") rescue r.connect("localhost") rescue r.connect("rethinkdb")
   rescue
-    begin
-      r.connect("localhost")
-    rescue
-      puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at localhost or 172.17.0.2."
-      return
-    end
+    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at 172.17.0.2:28016 or localhost:28016 or rethinkdb:28016."
+    return
   end
 
   run_reql_spec(conn)
