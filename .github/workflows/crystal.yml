@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
 
     services:
@@ -12,17 +11,21 @@ jobs:
         image: rethinkdb:2.4.0
         ports:
         - 28016:28016
-    
+
     container:
       image: crystallang/crystal:0.32.1
 
     steps:
+    - uses: actions/checkout@v1
+
     - name: Install duktape-dev
       run: apt-get update && apt-get install duktape-dev -y
-    - uses: actions/checkout@v1
+
     - name: Install dependencies
       run: shards install
+
     - name: Build main.cr
       run: crystal build src/main.cr
+
     - name: Run tests
       run: crystal spec
