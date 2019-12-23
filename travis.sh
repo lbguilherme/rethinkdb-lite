@@ -15,5 +15,8 @@ apt-get install duktape-dev -y --force-yes
 # Install dependencies
 shards
 
+# Ensure main.cr builds
+crystal build src/main.cr
+
 # Run spec
 crystal spec --error-trace
