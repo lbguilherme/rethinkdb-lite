@@ -11,15 +11,14 @@ module RethinkDB
       end
 
       def execute(query_id : UInt64, message : Array)
+        start = Time.utc
+
         begin
           answer = nil
           case message[0]
           when 1 # START
-            start = Time.utc
-
             term = ReQL::Term.parse(message[1])
-            runopts = message[2]?.try &.as_h? || {} of String => JSON::Any::Type
-            should_profile = runopts["profile"]?.try &.as?(Bool) || false
+            runopts = message[2]?.try &.as_h? || {} of String => JSON::Any
 
             result = @conn.run(term, RunOpts.new(runopts))
             case result
@@ -32,24 +31,17 @@ module RethinkDB
                 "t" => list.size == 40 ? 3 : 2,
                 "r" => list,
                 "n" => [] of String,
+                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
               }
             when RethinkDB::Datum
               answer = {
                 "t" => 1,
                 "r" => [result],
                 "n" => [] of String,
+                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
               }
             else
               raise "BUG"
-            end
-
-            if should_profile
-              answer = {
-                "t" => answer["t"],
-                "r" => answer["r"],
-                "n" => answer["n"],
-                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
-              }
             end
           when 2 # CONTINUE
             result = @streams[query_id]
@@ -61,6 +53,7 @@ module RethinkDB
               "t" => list.size == 40 ? 3 : 2,
               "r" => list,
               "n" => [] of String,
+              "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
             }
           when 3 # STOP
             result = @streams[query_id]?

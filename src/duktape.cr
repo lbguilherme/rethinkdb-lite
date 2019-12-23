@@ -1,4 +1,3 @@
-{{ system("gcc -c vendor/duktape/src/duktape.c -o vendor/duktape/src/duktape.o") }}
 
 {% begin %}
 @[Link(ldflags: "-lduktape -lm")]

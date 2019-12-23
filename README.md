@@ -73,7 +73,7 @@ sleep
 
 #### Non-goals
 
-- Replace RethinkDB itself for production use (you should simply use RethinkDB itself)
+- Replace RethinkDB itself for production use (you should simply use RethinkDB)
 - Break compactibility to introduce features that would not fit the original RethinkDB
 
 ## Running
@@ -82,6 +82,7 @@ Install these dependencies:
 
 - [Crystal](https://crystal-lang.org/) for compiling the main code
 - [Node](https://nodejs.org/) for compiling the Web UI
+- [Duktape](https://duktape.org/) for a embeddable javascript runtime for `r.js()` (`apt install duktape-dev`)
 
 Then run:
 

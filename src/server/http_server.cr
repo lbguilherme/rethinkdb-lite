@@ -11,7 +11,7 @@ module RethinkDB
 
       def initialize(@port : Int32, @conn : RethinkDB::Connection)
         static_handler = HTTP::StaticFileHandler.new("vendor/rethinkdb-webui/dist/", false, false)
-        @server = HTTP::Server.new(8080) do |context|
+        @server = HTTP::Server.new do |context|
           uri = URI.parse(context.request.resource)
           case uri.path
           when "/ajax/reql/open-new-connection"
@@ -53,7 +53,7 @@ module RethinkDB
 
       def start
         spawn do
-          @server.listen
+          @server.listen(@port)
         end
       end
 
