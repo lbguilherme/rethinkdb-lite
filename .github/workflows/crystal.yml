@@ -10,7 +10,7 @@ jobs:
       postgres:
         image: rethinkdb:2.4.0
         ports:
-        - 28016:28016
+        - 28015:28015
 
     container:
       image: crystallang/crystal:0.32.1

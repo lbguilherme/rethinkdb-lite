@@ -50,9 +50,9 @@ end
 def test_remote_connection_over_local_database
   FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
   real_conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
-  server = RethinkDB::Server::DriverServer.new(28016, real_conn)
+  server = RethinkDB::Server::DriverServer.new(28015, real_conn)
   server.start
-  conn = r.connect({"host" => "localhost", "port" => 28016})
+  conn = r.connect({"host" => "localhost", "port" => 28015})
   run_reql_spec(conn)
   Spec.after_suite do
     conn.close
@@ -65,7 +65,7 @@ def test_remote_connection_over_rethinkdb
   conn = begin
     r.connect("172.17.0.2") rescue r.connect("localhost") rescue r.connect("rethinkdb")
   rescue
-    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at 172.17.0.2:28016 or localhost:28016 or rethinkdb:28016."
+    puts "Skipping tests with RethinkDB driver. Please run a RethinkDB instance at 172.17.0.2:28015 or localhost:28015 or rethinkdb:28015."
     return
   end
 
