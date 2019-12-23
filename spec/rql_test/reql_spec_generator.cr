@@ -50,7 +50,7 @@ if tables = data["table_variable_name"]?
   puts
   tables.as_s.split(", ").map(&.split(" ")).flatten.each_with_index do |tablevar, i|
     random_name = "test_#{Random::Secure.hex}"
-    puts "  r.db(\"test\").table_create(#{random_name.inspect}).run(conn)"
+    puts "  Spec.before_suite { r.db(\"test\").table_create(#{random_name.inspect}).run(conn) }"
     puts "  #{tablevar} = r.db(\"test\").table(#{random_name.inspect})"
   end
 end
