@@ -2,11 +2,11 @@
 
 # RethinkDB-lite
 
-This is a personal project aiming at reimplementing everything [RethinkDB](https://rethinkdb.com) currently does. At the same time, it is also a driver capable to connecting to the database to send queries.
+This is a personal project aiming at reimplementing everything [RethinkDB](https://rethinkdb.com) currently does. At the same time, it is also a driver capable of connecting to a database and sending queries.
 
 ## First use case: Database driver
 
-You can connect to a running RethinkDB instance and send queries for data. Methods are pretty much equal to the official Ruby driver, for which you can find documentation here: https://rethinkdb.com/api/ruby/. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
+You can connect to a running RethinkDB instance and send queries. Methods are pretty much equal to the official Ruby driver, for which you can find documentation here: https://rethinkdb.com/api/ruby/. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
 
 ```cr
 require "rethinkdb-lite/src/driver/*"
@@ -28,7 +28,7 @@ pp overpower_hero
 
 ## Second use case: Local database for your application
 
-This is similar to SQLite. A single user database is run with a local path where data is stored. This is reimplementing the behavior of RethinkDB, but worked as a library. Eventually every query that you would do on the real RethinkDB will be available here, with similar semantics. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
+This is similar to SQLite. A single user database is run with a local path where data is stored. This is reimplementing the behavior of RethinkDB, but working as an embeddable library. The goal is to have every query that you would do on the real RethinkDB working here here, with similar semantics. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
 
 ```cr
 require "rethinkdb-lite/src/driver/*"
@@ -44,7 +44,7 @@ r.table("users").insert({name: "John", username: "john", password: "123"}).run(c
 
 ## Third use case: RethinkDB server
 
-That local database from the second use case can also be run as a multi user full database, listening for RethinkDB driver connections and serving an Web UI for administration. It can receive connection from any other driver from https://rethinkdb.com/docs/install-drivers/.
+That local database from the second use case can also be run as a full multi user database, listening for RethinkDB driver connections and serving an Web UI for administration. It can receive connection from any official or non-official RethinkDB driver from https://rethinkdb.com/docs/install-drivers/.
 
 ```cr
 require "rethinkdb-lite/src/server/*"
@@ -64,17 +64,22 @@ sleep
 
 ---
 
-#### Goals
+## Goals
 
-- Implement all current features of RethinkDB (changefeed, clustering and geoindex will come last)
-- Be compactible with RethinkDB's drivers and WebUI (no need to reinvent anything here)
+- Implement all current features of RethinkDB (all query functions, clustering, changefeed, geoindex, ...)
+- Be full compactible with RethinkDB's drivers and WebUI
 - Make small improvements along the way (with minimal user impact by default)
-- Make it fast (this is a self imposed challenge)
+- Make it fast
+- Add new features (query optimizer? autorebalancing?)
 
-#### Non-goals
+## Roadmap
 
-- Replace RethinkDB itself for production use (you should simply use RethinkDB)
-- Break compactibility to introduce features that would not fit the original RethinkDB
+- Replace the current storage backend with RocksDB
+- Pass successfuly on RethinkDB's spec suite
+- Add some better newer tests
+- Benchmark and improve
+- Implement epic features: clustering, changefeeds
+- Implement new features: query optimizer
 
 ## Running
 
@@ -103,13 +108,13 @@ You can also use any client driver to connect from another language, see https:/
 
 ## Running Tests
 
-You should have a running real RethinkDB server for testing. Do not use one with data in it. You can start one with by simply running `rethinkdb` on the terminal, after [installing it](https://rethinkdb.com/).
+You should have a running real empty RethinkDB server for testing. Do not use one with data in it. You can start one with by simply running `rethinkdb` on the terminal, after [installing it](https://rethinkdb.com/).
 
 ```
 crystal spec
 ```
 
-## Thanks to
+## References
 
 - https://github.com/rethinkdb/rethinkdb
 - https://github.com/AtnNn/rethinkdb-webui
