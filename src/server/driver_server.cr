@@ -33,44 +33,44 @@ module RethinkDB
         end
       end
 
-      private def handle_client(io)
-        return unless io
-        remote_address = io.remote_address
+      private def handle_client(sock)
+        return unless sock
+        remote_address = sock.remote_address
 
         protocol_version_magic = Bytes.new(4)
-        io.read(protocol_version_magic)
+        sock.read(protocol_version_magic)
         protocol_version = IO::ByteFormat::LittleEndian.decode(UInt32, protocol_version_magic)
 
         if protocol_version != V1_0
-          io.write("ERROR: Received an unsupported protocol version. This port is for RethinkDB queries. Does your client driver version not match the server?\0".to_slice)
-          io.close
+          sock.write("ERROR: Received an unsupported protocol version. This port is for RethinkDB queries. Does your client driver version not match the server?\0".to_slice)
+          sock.close
           return
         end
 
-        io.write(({
+        sock.write(({
           success:              true,
           min_protocol_version: 0,
           max_protocol_version: 0,
           server_version:       "0.0.0",
         }.to_json + "\0").to_slice)
 
-        first_auth_message = io.gets('\0', true)
+        first_auth_message = sock.gets('\0', true)
         unless first_auth_message
-          io.write("ERROR: Auth message was not received.\0".to_slice)
-          io.close
+          sock.write("ERROR: Auth message was not received.\0".to_slice)
+          sock.close
           return
         end
         first_auth_message = JSON.parse first_auth_message
 
         if first_auth_message["protocol_version"] != 0
-          io.write("ERROR: Unsupported `protocol_version`.\0".to_slice)
-          io.close
+          sock.write("ERROR: Unsupported `protocol_version`.\0".to_slice)
+          sock.close
           return
         end
 
         if first_auth_message["authentication_method"] != "SCRAM-SHA-256"
-          io.write("ERROR: Unsupported `authentication_method`.\0".to_slice)
-          io.close
+          sock.write("ERROR: Unsupported `authentication_method`.\0".to_slice)
+          sock.close
           return
         end
 
@@ -88,15 +88,15 @@ module RethinkDB
 
         message2 = "r=#{nonce_c}#{nonce_s},s=#{Base64.strict_encode(salt)},i=#{iter}"
 
-        io.write(({
+        sock.write(({
           success:        true,
           authentication: message2,
         }.to_json + "\0").to_slice)
 
-        final_auth_message = io.gets('\0', true)
+        final_auth_message = sock.gets('\0', true)
         unless final_auth_message
-          io.write("ERROR: Auth message was not received.\0".to_slice)
-          io.close
+          sock.write("ERROR: Auth message was not received.\0".to_slice)
+          sock.close
           return
         end
         final_auth_message = JSON.parse final_auth_message
@@ -116,12 +116,12 @@ module RethinkDB
         sent_client_proof = Base64.decode($1)
 
         if client_proof != sent_client_proof
-          io.write(({
+          sock.write(({
             success:    false,
             error:      "Wrong password",
             error_code: 1,
           }.to_json + "\0").to_slice)
-          io.close
+          sock.close
           return
         end
 
@@ -130,15 +130,13 @@ module RethinkDB
 
         message4 = "v=#{Base64.strict_encode server_signature}"
 
-        io.write(({
+        sock.write(({
           success:        true,
           authentication: message4,
         }.to_json + "\0").to_slice)
 
         # puts "Accepted connection from #{remote_address}."
         client = Client.new(@conn)
-
-        sock = io
 
         until sock.closed?
           query_token = sock.read_bytes(UInt64, IO::ByteFormat::LittleEndian)
@@ -153,16 +151,16 @@ module RethinkDB
           end
           break unless offset == query_length
 
+          _sock = sock
           spawn do
             message_json = String.new(query_bytes)
             message = JSON.parse(message_json).as_a
             answer = client.execute(query_token, message)
 
-            sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
-            sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
-            sock.write(answer.to_slice)
-
-            sock.flush
+            _sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
+            _sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
+            _sock.write(answer.to_slice)
+            _sock.flush
           end
         end
       rescue IO::EOFError
@@ -170,9 +168,9 @@ module RethinkDB
       rescue err : Errno
         err.inspect_with_backtrace
       ensure
-        if io
+        if sock
           # puts "Disconnected from #{remote_address}."
-          io.close
+          sock.close
         end
       end
     end
