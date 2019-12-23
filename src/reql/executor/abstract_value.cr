@@ -182,6 +182,10 @@ module ReQL
     value_cast(bool, Bool, "BOOL")
     value_cast(number, Int32 | Int64 | Float64, "NUMBER")
 
+    def is_array?
+      {"ARRAY", "STREAM", "TABLE"}.includes? reql_type
+    end
+
     def is_hash?
       {"OBJECT", "ROW"}.includes? reql_type
     end
