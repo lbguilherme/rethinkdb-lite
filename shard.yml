@@ -2,12 +2,12 @@ name: rethinkdb-lite
 version: 0.1.0
 
 authors:
-  - Guilherme Bernal <dev@lbguilherme.com>
+  - Guilherme Bernal <guilherme@cubos.io>
 
 targets:
   rethinkdb-lite:
     main: src/main.cr
 
-crystal: 0.24.1
+crystal: 0.32.1
 
 license: MIT
