@@ -1,7 +1,7 @@
 {{ system("gcc -c vendor/duktape/src/duktape.c -o vendor/duktape/src/duktape.o") }}
 
 {% begin %}
-@[Link(ldflags: "{{`pwd`.strip}}/vendor/duktape/src/duktape.o -lm")]
+@[Link(ldflags: "-lduktape -lm")]
 {% end %}
 lib LibDuktape
   DUK_COMPILE_EVAL       = 1u32 << 3  # compile eval code (instead of global code)
