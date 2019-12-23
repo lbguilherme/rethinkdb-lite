@@ -20,7 +20,18 @@ module RethinkDB
       def start
         spawn do
           until @wants_close
-            spawn handle_client(@server.try &.accept?)
+            sock = begin
+              @server.try &.accept?
+            rescue err
+              err.inspect_with_backtrace
+              nil
+            end
+
+            if sock
+              # a non nillable version of the closured sock
+              _sock = sock
+              spawn handle_client(_sock)
+            end
           end
         end
       end
@@ -34,7 +45,6 @@ module RethinkDB
       end
 
       private def handle_client(sock)
-        return unless sock
         remote_address = sock.remote_address
 
         protocol_version_magic = Bytes.new(4)
@@ -151,16 +161,15 @@ module RethinkDB
           end
           break unless offset == query_length
 
-          _sock = sock
           spawn do
             message_json = String.new(query_bytes)
             message = JSON.parse(message_json).as_a
             answer = client.execute(query_token, message)
 
-            _sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
-            _sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
-            _sock.write(answer.to_slice)
-            _sock.flush
+            sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
+            sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
+            sock.write(answer.to_slice)
+            sock.flush
           end
         end
       rescue IO::EOFError
