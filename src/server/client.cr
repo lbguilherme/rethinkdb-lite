@@ -67,6 +67,11 @@ module RethinkDB
               "n" => [] of String,
             }
           when 4 # NOREPLY_WAIT
+            # TODO: Wait for previous noreply operations to finish
+            answer = {
+              "t" => 4,
+              "r" => [] of String,
+            }
           when 5 # SERVER_INFO
             info = {
               "id"    => "aa", # Storage::Config.server_info.name,
@@ -74,10 +79,8 @@ module RethinkDB
               "proxy" => false,
             }
             answer = {"t" => 5, "r" => [info]}
-          end
-
-          if !answer
-            raise ReQL::InternalError.new "Invalid type of query."
+          else
+            raise ReQL::InternalError.new "Invalid type of query: #{message.inspect}"
           end
 
           return answer.to_json
@@ -100,8 +103,6 @@ module RethinkDB
           ex.inspect_with_backtrace
           return {"t" => 18, "e" => 1000000, "r" => [ex.message], "b" => [] of String}.to_json
         end
-
-        return "BUG"
       end
     end
   end
