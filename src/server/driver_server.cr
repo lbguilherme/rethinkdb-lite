@@ -45,11 +45,10 @@ module RethinkDB
       end
 
       private def handle_client(sock)
+        sock.sync = false
         remote_address = sock.remote_address
 
-        protocol_version_magic = Bytes.new(4)
-        sock.read(protocol_version_magic)
-        protocol_version = IO::ByteFormat::LittleEndian.decode(UInt32, protocol_version_magic)
+        protocol_version = sock.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
 
         if protocol_version != V1_0
           sock.write("ERROR: Received an unsupported protocol version. This port is for RethinkDB queries. Does your client driver version not match the server?\0".to_slice)
@@ -63,6 +62,7 @@ module RethinkDB
           max_protocol_version: 0,
           server_version:       "0.0.0",
         }.to_json + "\0").to_slice)
+        sock.flush
 
         first_auth_message = sock.gets('\0', true)
         unless first_auth_message
@@ -102,6 +102,7 @@ module RethinkDB
           success:        true,
           authentication: message2,
         }.to_json + "\0").to_slice)
+        sock.flush
 
         final_auth_message = sock.gets('\0', true)
         unless final_auth_message
@@ -144,6 +145,7 @@ module RethinkDB
           success:        true,
           authentication: message4,
         }.to_json + "\0").to_slice)
+        sock.flush
 
         # puts "Accepted connection from #{remote_address}."
         client = Client.new(@conn)
@@ -153,18 +155,12 @@ module RethinkDB
           query_length = sock.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
 
           query_bytes = Bytes.new(query_length)
-          offset = 0
-          while offset < query_length
-            read = sock.read(query_bytes[offset, query_length - offset])
-            break if read == 0
-            offset += read
-          end
-          break unless offset == query_length
+          sock.read_fully(query_bytes)
 
           spawn do
             message_json = String.new(query_bytes)
             message = JSON.parse(message_json).as_a
-            answer = client.execute(query_token, message)
+            answer = client.not_nil!.execute(query_token, message)
 
             sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
             sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
@@ -177,6 +173,7 @@ module RethinkDB
       rescue err : Errno
         err.inspect_with_backtrace
       ensure
+        client.try &.close
         if sock
           # puts "Disconnected from #{remote_address}."
           sock.close
