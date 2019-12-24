@@ -1,6 +1,4 @@
-{% begin %}
-  @[Link(ldflags: "-lduktape -lm")]
-{% end %}
+@[Link(ldflags: "-lduktape -lm")]
 lib LibDuktape
   DUK_COMPILE_EVAL       = 1u32 << 3  # compile eval code (instead of global code)
   DUK_COMPILE_FUNCTION   = 1u32 << 4  # compile function code (instead of global code)
