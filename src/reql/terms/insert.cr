@@ -16,7 +16,7 @@ module ReQL
       docs = case
              when array = datum.array_value?
                array.map do |e|
-                 if hash = datum.hash_value?
+                 if hash = e.hash_value?
                    hash
                  else
                    raise QueryLogicError.new("Expected type OBJECT but found #{e.reql_type}")
