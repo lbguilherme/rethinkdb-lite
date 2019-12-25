@@ -183,6 +183,11 @@ module RethinkDB
         read
       end
 
+      def stop
+        send [QueryType::STOP].to_json
+        read
+      end
+
       private def send(query)
         if @id == 0
           raise "Bug: Using already finished stream."
@@ -258,7 +263,8 @@ module RethinkDB
       end
 
       def close
-        # TODO
+        @response = @query.stop
+        @index = 0
       end
     end
   end
