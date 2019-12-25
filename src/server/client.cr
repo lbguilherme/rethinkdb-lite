@@ -69,14 +69,9 @@ module RethinkDB
               "n" => [] of String,
             }
           when 5 # SERVER_INFO
-            info = {
-              "id"    => "aa", # Storage::Config.server_info.name,
-              "name"  => "aa", # Storage::Config.server_info.name,
-              "proxy" => false,
-            }
             answer = {
               "t" => 5,
-              "r" => [info],
+              "r" => [@conn.server],
               "n" => [] of String,
             }
           else

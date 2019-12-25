@@ -4,6 +4,7 @@ module RethinkDB
     abstract def use(db_name : String)
     abstract def start
     abstract def run(term : ReQL::Term::Type, runopts : RunOpts) : Datum | Cursor
+    abstract def server : JSON::Any
     abstract def close
   end
 

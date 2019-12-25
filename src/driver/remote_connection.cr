@@ -100,6 +100,18 @@ module RethinkDB
       end
     end
 
+    def server : JSON::Any
+      query = Query.new(self, RunOpts.new)
+      response = query.server_info
+
+      case response.t
+      when ResponseType::SERVER_INFO
+        return response.r[0]
+      else
+        raise "TODO"
+      end
+    end
+
     protected def next_query_id
       id = @next_query_id
       @next_query_id += 1
@@ -154,6 +166,11 @@ module RethinkDB
       def initialize(@conn : RemoteConnection, @runopts : RunOpts)
         @id = @conn.next_query_id
         @channel = @conn.@channels[id] = Channel(String).new
+      end
+
+      def server_info
+        send [QueryType::SERVER_INFO].to_json
+        read
       end
 
       def start(term)
