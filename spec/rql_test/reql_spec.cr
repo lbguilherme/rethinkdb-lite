@@ -39,8 +39,9 @@ test_remote_connection_over_local_database
 test_remote_connection_over_rethinkdb
 
 def test_local_database
-  FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
-  conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
+  path = "/tmp/rethinkdb-lite/spec-temp-tables/#{Random::Secure.hex}"
+  FileUtils.rm_rf path
+  conn = r.local_database(path)
   run_reql_spec(conn)
   Spec.after_suite do
     conn.close
@@ -48,8 +49,9 @@ def test_local_database
 end
 
 def test_remote_connection_over_local_database
-  FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
-  real_conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
+  path = "/tmp/rethinkdb-lite/spec-temp-tables/#{Random::Secure.hex}"
+  FileUtils.rm_rf path
+  real_conn = r.local_database(path)
   server = RethinkDB::Server::DriverServer.new(28099, real_conn)
   server.start
   conn = r.connect({"host" => "localhost", "port" => 28099})

@@ -4,13 +4,11 @@ require "../crypto"
 module RethinkDB
   class LocalConnection < Connection
     def initialize(data_path : String)
-      @config = Storage::Config.new data_path
-      @table_manager = Storage::TableManager.new(@config)
+      @manager = Storage::Manager.new data_path
     end
 
     def close
-      @config.save
-      @table_manager.close_all
+      @manager.close
     end
 
     def authorize(user : String, password : String)
@@ -23,7 +21,7 @@ module RethinkDB
     end
 
     def run(term : ReQL::Term::Type, runopts : RunOpts) : RethinkDB::Cursor | RethinkDB::Datum
-      evaluator = ReQL::Evaluator.new(@table_manager)
+      evaluator = ReQL::Evaluator.new(@manager)
       result = evaluator.eval term
 
       case result

@@ -3,8 +3,9 @@ require "../../src/driver/*"
 
 include RethinkDB::DSL
 
-FileUtils.rm_rf "/tmp/rethinkdb-lite/spec-temp-tables"
-conn = r.local_database("/tmp/rethinkdb-lite/spec-temp-tables")
+path = "/tmp/rethinkdb-lite/spec-temp-tables/#{Random::Secure.hex}"
+FileUtils.rm_rf path
+conn = r.local_database(path)
 
 describe RethinkDB do
   it "maps datum array to datum array" do
@@ -35,4 +36,4 @@ describe RethinkDB do
   end
 end
 
-conn.close
+Spec.after_suite { conn.close }

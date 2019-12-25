@@ -38,11 +38,11 @@ module ReQL
         raise QueryLogicError.new "Table name `#{table_name}` invalid (Use A-Z, a-z, 0-9, _ and - only)."
       end
 
-      if @table_manager.find_table(db_name, table_name)
+      if @manager.find_table(db_name, table_name)
         raise OpFailedError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
-      @table_manager.create_table(db_name, table_name)
+      @manager.create_table(db_name, table_name)
 
       Datum.new(Hash(String, Datum::Type).new)
     end

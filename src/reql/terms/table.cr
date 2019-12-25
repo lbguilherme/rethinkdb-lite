@@ -40,7 +40,7 @@ module ReQL
         raise QueryLogicError.new "Table name `#{table_name}` invalid (Use A-Z, a-z, 0-9, _ and - only)."
       end
 
-      Table.new(db, table_name, @table_manager)
+      Table.new(db, table_name, @manager)
     end
   end
 end

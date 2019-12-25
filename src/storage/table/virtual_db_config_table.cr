@@ -1,6 +1,6 @@
 module Storage
   class VirtualDbConfigTable < AbstractTable
-    def initialize(@config : Config)
+    def initialize(@manager : Manager)
     end
 
     def insert(obj : Hash)
@@ -11,11 +11,11 @@ module Storage
       raise "TODO"
     end
 
-    def scan(&block : Hash(String, ReQL::Datum) ->)
-      @config.databases.each do |db|
-        block.call ReQL::Datum.new({
-          "id"   => db.id,
-          "name" => db.name,
+    def scan
+      @manager.databases.each_value do |db|
+        yield ReQL::Datum.new({
+          "id"   => db.info.id.to_s,
+          "name" => db.info.name,
         }).hash_value
       end
     end

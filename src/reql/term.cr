@@ -143,7 +143,7 @@ module ReQL
   class Evaluator
     property vars = {} of Int64 => Datum
 
-    def initialize(@table_manager : Storage::TableManager)
+    def initialize(@manager : Storage::Manager)
     end
 
     def eval(arr : Array)

@@ -3,8 +3,6 @@ require "../../storage/*"
 
 module ReQL
   struct Table < Stream
-    @storage : Storage::AbstractTable?
-
     class InternalData
       property channel : Channel(Datum)?
     end
@@ -13,21 +11,17 @@ module ReQL
       "TABLE"
     end
 
-    def initialize(@db : Db?, @name : String, @table_manager : Storage::TableManager)
+    def initialize(@db : Db?, @name : String, @manager : Storage::Manager)
       @internal = InternalData.new
     end
 
     private def storage
-      x = @storage
-      unless x.nil?
-        return x
-      end
       db_name = @db.try &.name || "test"
-      x = @storage = @table_manager.find_table(db_name, @name)
-      if x.nil?
+      result = @manager.find_table(db_name, @name)
+      if result.nil?
         raise OpFailedError.new("Table `#{db_name}.#{@name}` does not exist")
       end
-      return x
+      result
     end
 
     def check
