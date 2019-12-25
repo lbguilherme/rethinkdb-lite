@@ -96,7 +96,7 @@ module RethinkDB
       when ResponseType::SUCCESS_SEQUENCE, ResponseType::SUCCESS_PARTIAL
         return Cursor.new(query, response, runopts)
       else
-        raise "TODO"
+        raise ReQL::InternalError.new("Expected SUCCESS_ATOM, SUCCESS_SEQUENCE or SUCCESS_PARTIAL, but got #{response.t}")
       end
     end
 
@@ -108,7 +108,7 @@ module RethinkDB
       when ResponseType::SERVER_INFO
         return response.r[0]
       else
-        raise "TODO"
+        raise ReQL::InternalError.new("Expected SERVER_INFO, but got #{response.t}")
       end
     end
 
@@ -242,7 +242,7 @@ module RethinkDB
         @index = 0
 
         unless @response.t == ResponseType::SUCCESS_SEQUENCE || @response.t == ResponseType::SUCCESS_PARTIAL
-          raise ReQL::RuntimeError.new("Expected SUCCESS_SEQUENCE or SUCCESS_PARTIAL but got #{@response.t}")
+          raise ReQL::InternalError.new("Expected SUCCESS_SEQUENCE or SUCCESS_PARTIAL but got #{@response.t}")
         end
       end
 
