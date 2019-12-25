@@ -51,15 +51,18 @@ module ReQL
       @internal.channel = Channel(Datum).new
       s = storage
       spawn do
-        s.scan do |row|
-          if ch = @internal.channel
-            ch.send Datum.new(row)
+        begin
+          s.scan do |row|
+            if ch = @internal.channel
+              ch.send Datum.new(row)
+            end
           end
+          if ch = @internal.channel
+            ch.close
+          end
+          @internal.channel = nil
+        rescue Channel::ClosedError
         end
-        if ch = @internal.channel
-          ch.close
-        end
-        @internal.channel = nil
       end
     end
 
