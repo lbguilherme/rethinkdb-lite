@@ -10,9 +10,7 @@ module RethinkDB
         @streams.each_value &.close
       end
 
-      def execute(query_id : UInt64, message : Array)
-        start = Time.utc
-
+      def execute(query_id : UInt64, message : Array) : Hash
         begin
           answer = nil
           case message[0]
@@ -31,14 +29,12 @@ module RethinkDB
                 "t" => list.size == 40 ? 3 : 2,
                 "r" => list,
                 "n" => [] of String,
-                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
               }
             when RethinkDB::Datum
               answer = {
                 "t" => 1,
                 "r" => [result],
                 "n" => [] of String,
-                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
               }
             else
               raise "BUG"
@@ -53,7 +49,6 @@ module RethinkDB
               "t" => list.size == 40 ? 3 : 2,
               "r" => list,
               "n" => [] of String,
-              "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
             }
           when 3 # STOP
             result = @streams[query_id]?
@@ -71,6 +66,7 @@ module RethinkDB
             answer = {
               "t" => 4,
               "r" => [] of String,
+              "n" => [] of String,
             }
           when 5 # SERVER_INFO
             info = {
@@ -78,14 +74,18 @@ module RethinkDB
               "name"  => "aa", # Storage::Config.server_info.name,
               "proxy" => false,
             }
-            answer = {"t" => 5, "r" => [info]}
+            answer = {
+              "t" => 5,
+              "r" => [info],
+              "n" => [] of String,
+            }
           else
             raise ReQL::InternalError.new "Invalid type of query: #{message.inspect}"
           end
 
-          return answer.to_json
+          return answer
         rescue ex : ReQL::CompileError
-          return {"t" => 17, "r" => [ex.message], "b" => [] of String}.to_json
+          return {"t" => 17, "r" => [ex.message], "b" => [] of String}
         rescue ex : ReQL::RuntimeError
           error_type = case ex
                        when ReQL::InternalError       ; 1000000
@@ -98,10 +98,10 @@ module RethinkDB
                        when ReQL::PermissionError     ; 6000000
                        else                             0
                        end
-          return {"t" => 18, "e" => error_type, "r" => [ex.message], "b" => [] of String}.to_json
+          return {"t" => 18, "e" => error_type, "r" => [ex.message], "b" => [] of String}
         rescue ex
           ex.inspect_with_backtrace
-          return {"t" => 18, "e" => 1000000, "r" => [ex.message], "b" => [] of String}.to_json
+          return {"t" => 18, "e" => 1000000, "r" => [ex.message], "b" => [] of String}
         end
       end
     end

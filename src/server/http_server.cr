@@ -37,11 +37,23 @@ module RethinkDB
             message_json = body.gets_to_end
 
             message = JSON.parse(message_json).raw.as(Array)
+            start = Time.utc
             answer = client.execute(query_id, message)
 
-            context.response.write_bytes(query_id)
-            context.response.write_bytes(answer.bytesize)
-            context.response.write(answer.to_slice)
+            unless answer.has_key?("p")
+              answer = {
+                "t" => answer["t"]?,
+                "r" => answer["r"]?,
+                "n" => answer["n"]?,
+                "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
+              }
+            end
+
+            answer_json = answer.to_json
+
+            context.response.write_bytes(query_id, IO::ByteFormat::LittleEndian)
+            context.response.write_bytes(answer_json.bytesize, IO::ByteFormat::LittleEndian)
+            context.response.write(answer_json.to_slice)
           else
             if context.request.path == "/"
               context.request.path = "/index.html"

@@ -150,6 +150,19 @@ module RethinkDB
         # puts "Accepted connection from #{remote_address}."
         client = Client.new(@conn)
 
+        response_channel = Channel({UInt64, String}).new
+        spawn do
+          while tup = response_channel.receive?
+            query_token = tup[0]
+            answer_json = tup[1]
+
+            sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
+            sock.write_bytes(answer_json.bytesize, IO::ByteFormat::LittleEndian)
+            sock.write(answer_json.to_slice)
+            sock.flush
+          end
+        end
+
         until sock.closed?
           query_token = sock.read_bytes(UInt64, IO::ByteFormat::LittleEndian)
           query_length = sock.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
@@ -157,16 +170,7 @@ module RethinkDB
           query_bytes = Bytes.new(query_length)
           sock.read_fully(query_bytes)
 
-          spawn do
-            message_json = String.new(query_bytes)
-            message = JSON.parse(message_json).as_a
-            answer = client.not_nil!.execute(query_token, message)
-
-            sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
-            sock.write_bytes(answer.bytesize, IO::ByteFormat::LittleEndian)
-            sock.write(answer.to_slice)
-            sock.flush
-          end
+          spawn execute_query(client.not_nil!, query_bytes, query_token, response_channel)
         end
       rescue IO::EOFError
         # This is expected when client closes the connection
@@ -178,6 +182,14 @@ module RethinkDB
           # puts "Disconnected from #{remote_address}."
           sock.close
         end
+      end
+
+      def execute_query(client, query_bytes, query_token, response_channel)
+        message_json = String.new(query_bytes)
+        message = JSON.parse(message_json).as_a
+        answer = client.execute(query_token, message)
+        answer_json = answer.to_json
+        response_channel.send({query_token, answer_json})
       end
     end
   end
