@@ -45,6 +45,8 @@ module RethinkDB
                 "t" => answer["t"]?,
                 "r" => answer["r"]?,
                 "n" => answer["n"]?,
+                "e" => answer["e"]?,
+                "b" => answer["b"]?,
                 "p" => [{"duration(ms)" => (Time.utc - start).to_f * 1000}],
               }
             end
