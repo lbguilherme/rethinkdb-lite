@@ -6,6 +6,8 @@ module ReQL
   end
 
   abstract struct AbstractValue
+    abstract def value : Type
+
     include Comparable(Object)
 
     alias Type = Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | String | Nil | Maxval | Minval | Bytes

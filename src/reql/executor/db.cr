@@ -11,7 +11,7 @@ module ReQL
     def initialize(@name : String)
     end
 
-    def value
+    def value : Type
       raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got DATABASE)"
     end
 

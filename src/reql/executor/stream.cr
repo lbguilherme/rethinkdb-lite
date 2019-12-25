@@ -4,7 +4,7 @@ module ReQL
       "STREAM"
     end
 
-    def value
+    def value : Type
       start_reading
       arr = [] of Datum
       while val = next_val

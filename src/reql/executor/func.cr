@@ -6,7 +6,7 @@ module ReQL
 
     abstract def eval(evaluator : Evaluator, *args)
 
-    def value
+    def value : Type
       raise QueryLogicError.new "Query result must be of type DATUM, GROUPED_DATA, or STREAM (got FUNCTION)."
     end
 

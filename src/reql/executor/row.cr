@@ -12,7 +12,7 @@ module ReQL
       @key = Box(AbstractValue).new(key)
     end
 
-    def value
+    def value : Type
       @table.get(@key.object)
     end
   end
