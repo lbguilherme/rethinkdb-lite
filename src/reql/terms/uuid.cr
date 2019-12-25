@@ -1,3 +1,5 @@
+require "digest/sha1"
+
 module ReQL
   class UuidTerm < Term
     register_type UUID
