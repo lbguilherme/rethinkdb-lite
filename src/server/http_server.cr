@@ -6,7 +6,7 @@ require "http/server/handlers/static_file_handler"
 
 module RethinkDB
   module Server
-    class HttpServer
+    class WebUiServer
       @clients = {} of String => Client
 
       def initialize(@port : Int32, @conn : RethinkDB::Connection)

@@ -5,7 +5,7 @@ include RethinkDB::DSL
 
 conn = r.local_database("./data")
 
-RethinkDB::Server::HttpServer.new(8080, conn).start
+RethinkDB::Server::WebUiServer.new(8080, conn).start
 RethinkDB::Server::DriverServer.new(28015, conn).start
 
 puts "Listening for administrative HTTP connections on http://localhost:8080/"
