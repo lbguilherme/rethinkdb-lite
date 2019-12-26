@@ -24,7 +24,7 @@ jobs:
         apt install debian-archive-keyring && \
         ln -s /usr/share/keyrings/debian-archive*.gpg /etc/apt/trusted.gpg.d/ && \
         echo "deb http://httpredir.debian.org/debian/ experimental main contrib non-free" > /etc/apt/sources.list && \
-        apt-get update \
+        apt-get update && \
         apt-get install duktape-dev librocksdb-dev -y
 
     - name: Install dependencies from shards
