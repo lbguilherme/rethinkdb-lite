@@ -1,4 +1,5 @@
 require "uuid"
+require "file_utils"
 require "../rocksdb"
 
 module Storage
@@ -61,6 +62,7 @@ module Storage
       options.create_if_missing = true
       options.paranoid_checks = true
 
+      FileUtils.mkdir_p path
       @rocksdb = RocksDb::OptimisticTransactionDatabase.open(options, path)
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
