@@ -45,9 +45,9 @@ lib LibRocksDb
   fun transaction_set_savepoint = rocksdb_transaction_set_savepoint(txn : Transaction*)
   fun transaction_rollback_to_savepoint = rocksdb_transaction_rollback_to_savepoint(txn : Transaction*, errptr : UInt8**)
   fun transaction_destroy = rocksdb_transaction_destroy(txn : Transaction*)
-  fun transaction_get = rocksdb_transaction_get(txn : Transaction*, read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT, vallen : LibC::SizeT*, errptr : UInt8**) : UInt8*;
-  fun transaction_get_for_update = rocksdb_transaction_get_for_update(txn : Transaction*, read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT, vallen : LibC::SizeT*, exclusive : UInt8, errptr : UInt8**) : UInt8*;
-  fun transaction_put = rocksdb_transaction_put(txn : Transaction*, key : UInt8*, keylen : LibC::SizeT, val : UInt8*, vallen : LibC::SizeT, errptr : UInt8**) : Void;
+  fun transaction_get = rocksdb_transaction_get(txn : Transaction*, read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT, vallen : LibC::SizeT*, errptr : UInt8**) : UInt8*
+  fun transaction_get_for_update = rocksdb_transaction_get_for_update(txn : Transaction*, read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT, vallen : LibC::SizeT*, exclusive : UInt8, errptr : UInt8**) : UInt8*
+  fun transaction_put = rocksdb_transaction_put(txn : Transaction*, key : UInt8*, keylen : LibC::SizeT, val : UInt8*, vallen : LibC::SizeT, errptr : UInt8**) : Void
 
   struct ReadOptions
     dummy : UInt8
@@ -55,8 +55,8 @@ lib LibRocksDb
 
   fun readoptions_create = rocksdb_readoptions_create : ReadOptions*
   fun readoptions_destroy = rocksdb_readoptions_destroy(read_options : ReadOptions*) : Void
-  fun readoptions_set_iterate_upper_bound = rocksdb_readoptions_set_iterate_upper_bound(read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT);
-  fun readoptions_set_iterate_lower_bound = rocksdb_readoptions_set_iterate_lower_bound(read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT);
+  fun readoptions_set_iterate_upper_bound = rocksdb_readoptions_set_iterate_upper_bound(read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT)
+  fun readoptions_set_iterate_lower_bound = rocksdb_readoptions_set_iterate_lower_bound(read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT)
 
   struct WriteOptions
     dummy : UInt8
@@ -65,8 +65,8 @@ lib LibRocksDb
   fun writeoptions_create = rocksdb_writeoptions_create : WriteOptions*
   fun writeoptions_destroy = rocksdb_writeoptions_destroy(write_options : WriteOptions*) : Void
 
-  fun get = rocksdb_get(db : Db*, read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT, vallen : LibC::SizeT*, errptr : UInt8**) : UInt8*;
-  fun put = rocksdb_put(db : Db*, write_options : WriteOptions*, key : UInt8*, keylen : LibC::SizeT, val : UInt8*, vallen : LibC::SizeT, errptr : UInt8**) : Void;
+  fun get = rocksdb_get(db : Db*, read_options : ReadOptions*, key : UInt8*, keylen : LibC::SizeT, vallen : LibC::SizeT*, errptr : UInt8**) : UInt8*
+  fun put = rocksdb_put(db : Db*, write_options : WriteOptions*, key : UInt8*, keylen : LibC::SizeT, val : UInt8*, vallen : LibC::SizeT, errptr : UInt8**) : Void
 
   struct Iterator
     dummy : UInt8
@@ -236,11 +236,11 @@ module RocksDb
     end
 
     def commit
-      err_check {|err| LibRocksDb.transaction_commit(self, err) }
+      err_check { |err| LibRocksDb.transaction_commit(self, err) }
     end
 
     def rollback
-      err_check {|err| LibRocksDb.transaction_rollback(self, err) }
+      err_check { |err| LibRocksDb.transaction_rollback(self, err) }
     end
 
     def set_savepoint
@@ -248,7 +248,7 @@ module RocksDb
     end
 
     def rollback_to_savepoint
-      err_check {|err| LibRocksDb.transaction_rollback_to_savepoint(self, err) }
+      err_check { |err| LibRocksDb.transaction_rollback_to_savepoint(self, err) }
     end
 
     def get(key : Bytes, read_options : ReadOptions = @default_read_options) : Bytes?
@@ -356,51 +356,51 @@ module RocksDb
 
     def valid?
       result = LibRocksDb.iter_valid(self) != 0
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
       result
     end
 
     def seek_to_first
       LibRocksDb.iter_seek_to_first(self)
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
     end
 
     def seek_to_last
       LibRocksDb.iter_seek_to_last(self)
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
     end
 
     def seek(key : Bytes)
       LibRocksDb.iter_seek(self, key, key.size)
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
     end
 
     def seek_for_prev(key : Bytes)
       LibRocksDb.iter_seek_for_prev(self, key, key.size)
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
     end
 
     def next
       LibRocksDb.iter_next(self)
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
     end
 
     def prev
       LibRocksDb.iter_prev(self)
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
     end
 
     def key
       len = LibC::SizeT.new(0)
       ptr = LibRocksDb.iter_key(self, pointerof(len))
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
       Bytes.new(ptr, len)
     end
 
     def value
       len = LibC::SizeT.new(0)
       ptr = LibRocksDb.iter_value(self, pointerof(len))
-      err_check {|err| LibRocksDb.iter_get_error(self, err) }
+      err_check { |err| LibRocksDb.iter_get_error(self, err) }
       Bytes.new(ptr, len)
     end
   end

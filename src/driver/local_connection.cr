@@ -34,9 +34,9 @@ module RethinkDB
 
     def server : JSON::Any
       JSON::Any.new(Hash{
-        "id" => JSON::Any.new(@manager.system_info.id.to_s),
-        "name" => JSON::Any.new(@manager.system_info.name),
-        "proxy" => JSON::Any.new(false)
+        "id"    => JSON::Any.new(@manager.system_info.id.to_s),
+        "name"  => JSON::Any.new(@manager.system_info.name),
+        "proxy" => JSON::Any.new(false),
       }.as(JSON::Any::Type))
     end
 

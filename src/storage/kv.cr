@@ -3,12 +3,11 @@ require "../rocksdb"
 
 module Storage
   class KeyValueStore
-
     PREFIX_SYSTEM_INFO = 0u8
-    PREFIX_DATABASES = 1u8
-    PREFIX_TABLES = 2u8
-    PREFIX_TABLE_DATA = 3u8
-    TABLE_PREFIX_DATA = 0u8
+    PREFIX_DATABASES   = 1u8
+    PREFIX_TABLES      = 2u8
+    PREFIX_TABLE_DATA  = 3u8
+    TABLE_PREFIX_DATA  = 0u8
 
     def self.key_for_system_info
       Bytes[PREFIX_SYSTEM_INFO]
