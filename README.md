@@ -88,6 +88,7 @@ Install these dependencies:
 - [Crystal](https://crystal-lang.org/) for compiling the main code
 - [Node](https://nodejs.org/) for compiling the Web UI
 - [Duktape](https://duktape.org/) for a embeddable javascript runtime for `r.js()` (`apt install duktape-dev`)
+- [RocksDB](https://rocksdb.org/) for the storage engine (`apt install librocksdb-dev`)
 
 Then run:
 
