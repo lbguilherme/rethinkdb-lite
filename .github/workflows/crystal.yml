@@ -18,13 +18,16 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - name: Install APT dependencies
-      run:
-        - echo "deb http://httpredir.debian.org/debian/ experimental main contrib non-free" > /etc/apt/sources.list
-        - apt-get update
-        - apt-get install duktape-dev librocksdb-dev -y
+    - name: Add Debian (experimental) to APT sources
+      run: echo "deb http://httpredir.debian.org/debian/ experimental main contrib non-free" > /etc/apt/sources.list
 
-    - name: Install dependencies
+    - name: Apt Update
+      run: apt-get update
+
+    - name: Install Duktape and RocksDB from APT
+      run: apt-get install duktape-dev librocksdb-dev -y
+
+    - name: Install dependencies from shards
       run: shards install
 
     - name: Build main.cr
