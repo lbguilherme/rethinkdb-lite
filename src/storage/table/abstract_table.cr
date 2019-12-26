@@ -5,9 +5,9 @@ module Storage
 
     def get(key)
       result = nil
-      scan do |obj|
-        if obj.as(Hash)["id"] == key
-          result = obj
+      scan do |row|
+        if row["id"] == key
+          result = row
         end
       end
       result
@@ -23,6 +23,12 @@ module Storage
         count += 1i64
       end
       count
+    end
+
+    def duplicated_primary_key_error(primary_key : String, existing_value, new_value)
+      pretty_existing = JSON.build(4) { |builder| existing_value.to_json(builder) }
+      pretty_new = JSON.build(4) { |builder| new_value.to_json(builder) }
+      raise ReQL::OpFailedError.new("Duplicate primary key `#{primary_key}`:\n#{pretty_existing}\n#{pretty_new}")
     end
   end
 end

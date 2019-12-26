@@ -9,13 +9,11 @@ module Storage
     def insert(obj : Hash)
       key = obj[@info.primary_key].serialize
 
-      @kv.data_transaction do |t|
+      @kv.transaction do |t|
         existing_row_data = t.get_row(@info.id, key)
         unless existing_row_data.nil?
-          row = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data))
-          pretty_row = JSON.build(4) { |builder| ReQL::Datum.new(row).to_json(builder) }
-          pretty_obj = JSON.build(4) { |builder| ReQL::Datum.new(obj).to_json(builder) }
-          raise ReQL::OpFailedError.new("Duplicate primary key `id`:\n#{pretty_row}\n#{pretty_obj}")
+          existing = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data))
+          duplicated_primary_key_error(@info.primary_key, existing, obj)
         end
 
         t.set_row(@info.id, key, ReQL::Datum.new(obj).serialize)
@@ -30,7 +28,7 @@ module Storage
     def replace(key)
       key_data = key.serialize
 
-      @kv.data_transaction do |t|
+      @kv.transaction do |t|
         existing_row_data = t.get_row(@info.id, key_data)
         if existing_row_data.nil?
           new_row = yield nil

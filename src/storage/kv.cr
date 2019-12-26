@@ -115,7 +115,7 @@ module Storage
       end
     end
 
-    class DataTransaction
+    class Transaction
       def initialize(@txn : RocksDb::Transaction)
       end
 
@@ -126,13 +126,31 @@ module Storage
       def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)
         @txn.put(KeyValueStore.key_for_table_data(table_id, primary_key), data)
       end
+
+      def get_table(id : UUID)
+        bytes = @txn.get(KeyValueStore.key_for_table(id))
+        bytes.nil? ? nil : TableInfo.load(bytes)
+      end
+
+      def save_table(table : TableInfo)
+        @txn.put(KeyValueStore.key_for_table(table.id), table.serialize)
+      end
+
+      def get_db(id : UUID)
+        bytes = @txn.get(KeyValueStore.key_for_database(id))
+        bytes.nil? ? nil : DatabaseInfo.load(bytes)
+      end
+
+      def save_db(db : DatabaseInfo)
+        @txn.put(KeyValueStore.key_for_database(db.id), db.serialize)
+      end
     end
 
-    def data_transaction
+    def transaction
       txn = @rocksdb.begin_transaction
       loop do
         begin
-          yield DataTransaction.new(txn)
+          yield Transaction.new(txn)
           txn.commit
           break
         rescue ex

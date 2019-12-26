@@ -17,7 +17,7 @@ module ReQL
 
     private def storage
       db_name = @db.try &.name || "test"
-      result = @manager.find_table(db_name, @name)
+      result = @manager.get_table(db_name, @name)
       if result.nil?
         raise OpFailedError.new("Table `#{db_name}.#{@name}` does not exist")
       end

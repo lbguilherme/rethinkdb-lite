@@ -24,11 +24,15 @@ module Storage
       end
 
       unless @databases.has_key?("test")
-        create_db("test")
+        create_db("test") {}
       end
     end
 
-    def find_table(db_name, table_name) : AbstractTable?
+    def get_db(db_name)
+      @databases[db_name]?.try &.info
+    end
+
+    def get_table(db_name, table_name) : AbstractTable?
       if db_name == "rethinkdb"
         case table_name
         when "db_config"
@@ -44,14 +48,27 @@ module Storage
       info.nil? ? nil : KvTable.new(@kv, info)
     end
 
-    def create_db(db_name)
+    def create_db(db_name, id = nil)
       if db_name == "rethinkdb" || @databases.has_key?(db_name)
         raise ReQL::OpFailedError.new("Database `#{db_name}` already exists")
       end
 
       info = KeyValueStore::DatabaseInfo.new
       info.name = db_name
-      @kv.save_db(info)
+      if id
+        info.id = id
+        @kv.transaction do |t|
+          old = t.get_db(info.id)
+
+          unless old.nil?
+            yield old, info
+          end
+
+          t.save_db(info)
+        end
+      else
+        @kv.save_db(info)
+      end
       @databases[info.name] = Database.new(info)
     end
 
