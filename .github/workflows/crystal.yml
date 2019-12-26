@@ -19,7 +19,7 @@ jobs:
     - uses: actions/checkout@v1
 
     - name: Install duktape-dev
-      run: apt-get update && apt-get install duktape-dev -y
+      run: apt-get update && apt-get install duktape-dev librocksdb-dev -y
 
     - name: Install dependencies
       run: shards install
