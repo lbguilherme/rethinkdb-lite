@@ -9,7 +9,7 @@ module Storage
     def insert(obj : Hash)
       info = decode(obj)
       @manager.create_db(info.name, info.id) do |current_info|
-          duplicated_primary_key_error("id", encode(current_info), obj)
+        duplicated_primary_key_error("id", encode(current_info), obj)
       end
     end
 

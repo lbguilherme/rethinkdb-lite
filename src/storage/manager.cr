@@ -24,7 +24,7 @@ module Storage
       end
 
       unless @databases.has_key?("test")
-        create_db("test") {}
+        create_db("test") { }
       end
     end
 
