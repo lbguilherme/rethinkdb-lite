@@ -8,6 +8,11 @@ targets:
   rethinkdb-lite:
     main: src/main.cr
 
+dependencies:
+  rocksdb:
+    github: lbguilherme/rocksdb-crystal
+    branch: master
+
 crystal: 0.32.1
 
 license: MIT

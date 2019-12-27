@@ -1,6 +1,6 @@
 require "uuid"
 require "file_utils"
-require "../rocksdb"
+require "rocksdb"
 
 module Storage
   class KeyValueStore
@@ -63,7 +63,7 @@ module Storage
       options.paranoid_checks = true
 
       FileUtils.mkdir_p path
-      @rocksdb = RocksDb::OptimisticTransactionDatabase.open(options, path)
+      @rocksdb = RocksDb::OptimisticTransactionDatabase.open(path, options)
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
