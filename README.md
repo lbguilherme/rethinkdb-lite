@@ -6,7 +6,7 @@ This is a personal project aiming at reimplementing everything [RethinkDB](https
 
 ## First use case: Database driver
 
-You can connect to a running RethinkDB instance and send queries. Methods are pretty much equal to the official Ruby driver, for which you can find documentation here: https://rethinkdb.com/api/ruby/. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
+You can connect to a running RethinkDB instance and send queries. Methods are pretty much equal to the official Ruby driver, for which you can find documentation here: https://rethinkdb.com/api/ruby/. This is not feature complete yet, a lot of functions are missing. Be aware of bugs (please report them).
 
 ```cr
 require "rethinkdb-lite/src/driver/*"
@@ -28,14 +28,14 @@ pp overpower_hero
 
 ## Second use case: Local database for your application
 
-This is similar to SQLite. A single user database is run with a local path where data is stored. This is reimplementing the behavior of RethinkDB, but working as an embeddable library. The goal is to have every query that you would do on the real RethinkDB working here here, with similar semantics. This is not feature complete, a lot of functions are missing. Be aware of bugs (please report them).
+This is similar to SQLite. A single-user database is run with a local path where data is stored. This is reimplementing the behavior of RethinkDB, but working as an embeddable library. The goal is to have every query that you would do on the real RethinkDB working here, with similar semantics. This is not feature complete yet, a lot of functions are missing. Be aware of bugs (please report them).
 
 ```cr
 require "rethinkdb-lite/src/driver/*"
 include RethinkDB::DSL
 
 # The data will be stored in this directory.
-conn = r.local_database("test_database")
+conn = r.local_database("path/to/data")
 
 r.table_create("users").run(conn)
 r.table("users").insert({name: "John", username: "john", password: "123"}).run(conn)
@@ -44,16 +44,16 @@ r.table("users").insert({name: "John", username: "john", password: "123"}).run(c
 
 ## Third use case: RethinkDB server
 
-That local database from the second use case can also be run as a full multi user database, listening for RethinkDB driver connections and serving an Web UI for administration. It can receive connection from any official or non-official RethinkDB driver from https://rethinkdb.com/docs/install-drivers/.
+That local database from the second use case can also be served as a full multi-user database, listening for RethinkDB driver connections and also serving the Web UI for administration. It can receive connection from any official or non-official RethinkDB driver from https://rethinkdb.com/docs/install-drivers/.
 
 ```cr
 require "rethinkdb-lite/src/server/*"
 require "rethinkdb-lite/src/driver/*"
 include RethinkDB::DSL
 
-conn = r.local_database("/tmp/rethinkdb-lite/data")
+conn = r.local_database("path/to/data")
 
-RethinkDB::Server::HttpServer.new(8080, conn).start
+RethinkDB::Server::WebUiServer.new(8080, conn).start
 RethinkDB::Server::DriverServer.new(28015, conn).start
 
 # http://localhost:8080 will bring the Web UI
@@ -67,8 +67,8 @@ sleep
 ## Goals
 
 - Implement all current features of RethinkDB (all query functions, clustering, changefeed, geoindex, ...)
-- Be full compactible with RethinkDB's drivers and WebUI
-- Make small improvements along the way (with minimal user impact by default)
+- Be fully compatible with RethinkDB's drivers and WebUI
+- Make small improvements along the way (with minimal user impact)
 - Make it fast
 - Add new features (query optimizer? autorebalancing?)
 
@@ -77,9 +77,9 @@ sleep
 - Replace the current storage backend with RocksDB
 - Pass successfuly on RethinkDB's spec suite
 - Add some better newer tests
-- Benchmark and improve
+- Benchmark and improve performance
 - Implement epic features: clustering, changefeeds
-- Implement new features: query optimizer
+- Implement new features: query optimizer?
 
 ## Running
 
