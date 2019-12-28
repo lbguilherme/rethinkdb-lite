@@ -11,7 +11,11 @@ module Storage
     TABLE_PREFIX_DATA  = 0u8
 
     SOFT_DURABILITY = RocksDB::WriteOptions.new
+    SOFT_DURABILITY.disable_wal = true
+    SOFT_DURABILITY.sync = false
+
     HARD_DURABILITY = RocksDB::WriteOptions.new
+    HARD_DURABILITY.disable_wal = false
     HARD_DURABILITY.sync = true
 
     def self.key_for_system_info
@@ -72,9 +76,7 @@ module Storage
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
 
-      if @system_info.data_version == 0
-        migrate_v0_to_v1
-      end
+      migrate
     end
 
     def close
@@ -247,11 +249,6 @@ module Storage
       end
     end
 
-    private def migrate_v0_to_v1
-      @system_info.data_version = 1
-      @rocksdb.put(KeyValueStore.key_for_system_info, @system_info.serialize)
-    end
-
     struct SystemInfo
       property id : UUID = UUID.random
       property data_version : UInt8 = 0
@@ -311,6 +308,7 @@ module Storage
       property db : UUID = UUID.empty
       property name : String = ""
       property primary_key : String = "id"
+      property soft_durability : Bool = false
 
       def serialize
         io = IO::Memory.new
@@ -320,6 +318,7 @@ module Storage
         io.write(@name.to_slice)
         io.write_bytes(@primary_key.bytesize.to_u32, IO::ByteFormat::LittleEndian)
         io.write(@primary_key.to_slice)
+        io.write_bytes(@soft_durability ? 1u8 : 0u8)
         io.to_slice
       end
 
@@ -334,6 +333,7 @@ module Storage
         obj.db = UUID.new(db_bytes)
         obj.name = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
         obj.primary_key = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
+        obj.soft_durability = io.read_bytes(UInt8) != 0u8
         obj
       end
     end

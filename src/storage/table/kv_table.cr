@@ -13,7 +13,7 @@ module Storage
     def insert(obj : Hash)
       key = obj[@info.primary_key].serialize
 
-      @kv.transaction do |t|
+      @kv.transaction(@info.soft_durability) do |t|
         t.get_row(@info.id, key) do |existing_row_data|
           unless existing_row_data.nil?
             existing = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data))
@@ -34,7 +34,7 @@ module Storage
     def replace(key)
       key_data = key.serialize
 
-      @kv.transaction do |t|
+      @kv.transaction(@info.soft_durability) do |t|
         existing_row_data = t.get_row(@info.id, key_data)
         if existing_row_data.nil?
           new_row = yield nil
@@ -48,7 +48,7 @@ module Storage
 
     def delete(key) : Bool
       key_data = key.serialize
-      @kv.transaction do |t|
+      @kv.transaction(@info.soft_durability) do |t|
         if t.get_row(@info.id, key_data) { |data| data == nil }
           false
         else

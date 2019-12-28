@@ -42,7 +42,7 @@ module ReQL
         raise OpFailedError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
-      @manager.create_table(db_name, table_name)
+      @manager.create_table(db_name, table_name, primary_key: "id", soft_durability: false)
 
       Datum.new(Hash(String, Datum::Type).new)
     end

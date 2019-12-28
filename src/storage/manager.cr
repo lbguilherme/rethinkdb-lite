@@ -72,7 +72,7 @@ module Storage
       @databases[info.name] = Database.new(info)
     end
 
-    def create_table(db_name, table_name)
+    def create_table(db_name, table_name, primary_key, soft_durability)
       if db_name == "rethinkdb"
         raise ReQL::OpFailedError.new("Database `rethinkdb` is special; you can't create new tables in it")
       end
@@ -90,6 +90,8 @@ module Storage
       info = KeyValueStore::TableInfo.new
       info.db = db.info.id
       info.name = table_name
+      info.primary_key = primary_key
+      info.soft_durability = soft_durability
       @kv.save_table(info)
       db.tables[info.name] = info
     end
