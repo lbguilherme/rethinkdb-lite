@@ -202,7 +202,7 @@ module RethinkDB
         def initialize(*args, **options)
           @val = ReQL::{{term_class}}.new(
             args.to_a.map { |x| R.convert_type(x, 20).as(ReQL::Term::Type) },
-            options.map { |k, v| {k.to_s, R.to_json_any(v)} }.to_h
+            options.to_h.map { |k, v| {k.to_s, R.to_json_any(v)}.as({String, JSON::Any}) }.to_h
           )
         end
       end
