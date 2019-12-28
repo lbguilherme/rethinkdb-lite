@@ -79,7 +79,15 @@ module Storage
 
     def get_db(id : UUID)
       bytes = @rocksdb.get(KeyValueStore.key_for_database(id))
-      bytes.nil? ? nil : DatabaseInfo.load(bytes)
+      if bytes.nil?
+        nil
+      else
+        begin
+          DatabaseInfo.load(bytes)
+        ensure
+          RocksDb.free(bytes)
+        end
+      end
     end
 
     def save_db(db : DatabaseInfo)
@@ -99,7 +107,15 @@ module Storage
 
     def get_table(id : UUID)
       bytes = @rocksdb.get(KeyValueStore.key_for_table(id))
-      bytes.nil? ? nil : TableInfo.load(bytes)
+      if bytes.nil?
+        nil
+      else
+        begin
+          TableInfo.load(bytes)
+        ensure
+          RocksDb.free(bytes)
+        end
+      end
     end
 
     def save_table(table : TableInfo)
@@ -121,8 +137,17 @@ module Storage
       def initialize(@txn : RocksDb::Transaction)
       end
 
-      def get_row(table_id : UUID, primary_key : Bytes) : Bytes?
-        @txn.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+      def get_row(table_id : UUID, primary_key : Bytes)
+        bytes = @txn.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+        if bytes.nil?
+          yield nil
+        else
+          begin
+            yield bytes
+          ensure
+            RocksDb.free(bytes)
+          end
+        end
       end
 
       def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)
@@ -135,7 +160,15 @@ module Storage
 
       def get_table(id : UUID)
         bytes = @txn.get(KeyValueStore.key_for_table(id))
-        bytes.nil? ? nil : TableInfo.load(bytes)
+        if bytes.nil?
+          nil
+        else
+          begin
+            TableInfo.load(bytes)
+          ensure
+            RocksDb.free(bytes)
+          end
+        end
       end
 
       def save_table(table : TableInfo)
@@ -144,7 +177,15 @@ module Storage
 
       def get_db(id : UUID)
         bytes = @txn.get(KeyValueStore.key_for_database(id))
-        bytes.nil? ? nil : DatabaseInfo.load(bytes)
+        if bytes.nil?
+          nil
+        else
+          begin
+            DatabaseInfo.load(bytes)
+          ensure
+            RocksDb.free(bytes)
+          end
+        end
       end
 
       def save_db(db : DatabaseInfo)
@@ -170,8 +211,17 @@ module Storage
       end
     end
 
-    def get_row(table_id : UUID, primary_key : Bytes) : Bytes?
-      @rocksdb.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+    def get_row(table_id : UUID, primary_key : Bytes)
+      bytes = @rocksdb.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+      if bytes.nil?
+        yield nil
+      else
+        begin
+          yield bytes
+        ensure
+          RocksDb.free(bytes)
+        end
+      end
     end
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)

@@ -14,10 +14,11 @@ module Storage
       key = obj[@info.primary_key].serialize
 
       @kv.transaction do |t|
-        existing_row_data = t.get_row(@info.id, key)
-        unless existing_row_data.nil?
-          existing = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data))
-          duplicated_primary_key_error(existing, obj)
+        t.get_row(@info.id, key) do |existing_row_data|
+          unless existing_row_data.nil?
+            existing = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data))
+            duplicated_primary_key_error(existing, obj)
+          end
         end
 
         t.set_row(@info.id, key, ReQL::Datum.new(obj).serialize)
@@ -25,8 +26,9 @@ module Storage
     end
 
     def get(key)
-      data = @kv.get_row(@info.id, key.serialize)
-      data.nil? ? nil : ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+      @kv.get_row(@info.id, key.serialize) do |data|
+        data.nil? ? nil : ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+      end
     end
 
     def replace(key)
