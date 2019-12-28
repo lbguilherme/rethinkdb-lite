@@ -20,28 +20,20 @@ module Storage
         db.tables.each_value do |table|
           yield ReQL::Datum.new({
             "db"          => db.info.name,
+            "durability"  => table.soft_durability ? "soft" : "hard",
             "id"          => table.id.to_s,
+            "indexes"     => [] of String,
             "name"        => table.name,
-            "raft_leader" => @manager.system_info.name,
+            "primary_key" => table.primary_key,
             "shards"      => [
               {
-                "primary_replicas" => [
-                  @manager.system_info.name,
-                ],
-                "replicas" => [
-                  {
-                    "server" => @manager.system_info.name,
-                    "state"  => "ready",
-                  },
-                ],
+                "nonvoting_replicas" => [] of String,
+                "primary_replica"    => @manager.system_info.name,
+                "replicas"           => [@manager.system_info.name],
               },
             ],
-            "status" => {
-              "all_replicas_ready"       => true,
-              "ready_for_outdated_reads" => true,
-              "ready_for_reads"          => true,
-              "ready_for_writes"         => true,
-            },
+            "write_acks" => "single",
+            "write_hook" => nil,
           }).hash_value
         end
       end

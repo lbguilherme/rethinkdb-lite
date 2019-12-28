@@ -37,7 +37,7 @@ module Storage
         case table_name
         when "db_config"
           return VirtualDbConfigTable.new(self)
-        when "table_status"
+        when "table_config"
           return VirtualTableConfigTable.new(self)
         else
           return nil
