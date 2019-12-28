@@ -54,7 +54,7 @@ module RethinkDB
         val = @stream.next_val
 
         if val
-          Datum.new val, @runopts
+          Datum.new val.as_datum, @runopts
         else
           @stream.finish_reading
           @finished = true

@@ -4,7 +4,7 @@ require "../../storage/*"
 module ReQL
   struct Table < Stream
     class InternalData
-      property channel : Channel(Datum)?
+      property channel : Channel(Row)?
     end
 
     def reql_type
@@ -42,13 +42,13 @@ module ReQL
     end
 
     def start_reading
-      @internal.channel = Channel(Datum).new
+      @internal.channel = Channel(Row).new
       s = storage
       spawn do
         begin
           s.scan do |row|
             if ch = @internal.channel
-              ch.send Datum.new(row)
+              ch.send Row.new(s, row[s.primary_key], row)
             end
           end
           if ch = @internal.channel

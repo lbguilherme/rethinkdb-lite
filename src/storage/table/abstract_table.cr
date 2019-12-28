@@ -14,8 +14,13 @@ module Storage
     end
 
     abstract def insert(obj : Hash(String, ReQL::Datum))
+    abstract def delete(key : ReQL::Datum)
     abstract def replace(key : ReQL::Datum, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
     abstract def scan(&block : Hash(String, ReQL::Datum) ->)
+
+    def primary_key
+      "id"
+    end
 
     def count
       count = 0i64
@@ -25,7 +30,7 @@ module Storage
       count
     end
 
-    def duplicated_primary_key_error(primary_key : String, existing_value, new_value)
+    def duplicated_primary_key_error(existing_value, new_value)
       pretty_existing = JSON.build(4) { |builder| existing_value.to_json(builder) }
       pretty_new = JSON.build(4) { |builder| new_value.to_json(builder) }
       raise ReQL::OpFailedError.new("Duplicate primary key `#{primary_key}`:\n#{pretty_existing}\n#{pretty_new}")

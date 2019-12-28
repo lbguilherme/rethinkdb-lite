@@ -14,7 +14,7 @@ module ReQL
 
     def next_val
       if val = @stream.object.next_val
-        if @func.call(val).value
+        if @func.call(val.as_datum).value
           val
         else
           next_val

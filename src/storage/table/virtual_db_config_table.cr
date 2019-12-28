@@ -9,11 +9,15 @@ module Storage
     def insert(obj : Hash)
       info = decode(obj)
       @manager.create_db(info.name, info.id) do |current_info|
-        duplicated_primary_key_error("id", encode(current_info), obj)
+        duplicated_primary_key_error(encode(current_info), obj)
       end
     end
 
     def replace(key, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
+      raise "TODO"
+    end
+
+    def delete(key)
       raise "TODO"
     end
 

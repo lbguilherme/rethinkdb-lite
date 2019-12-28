@@ -228,6 +228,10 @@ module ReQL
     def as_table
       raise QueryLogicError.new("Expected type TABLE but found #{reql_type}.")
     end
+
+    def as_row
+      raise QueryLogicError.new("Expected type ROW but found #{reql_type}.")
+    end
   end
 end
 

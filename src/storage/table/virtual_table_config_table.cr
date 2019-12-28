@@ -11,6 +11,10 @@ module Storage
       raise "TODO"
     end
 
+    def delete(key)
+      raise "TODO"
+    end
+
     def scan
       @manager.databases.each_value do |db|
         db.tables.each_value do |table|

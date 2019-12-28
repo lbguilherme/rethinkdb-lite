@@ -214,6 +214,7 @@ module RethinkDB
     term table_create, TableCreateTerm
     term get, GetTerm
     term insert, InsertTerm
+    term delete, DeleteTerm
     term bracket, BracketTerm
     term "do", DoTerm
     term count, CountTerm

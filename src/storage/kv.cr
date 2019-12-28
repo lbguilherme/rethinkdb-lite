@@ -129,6 +129,10 @@ module Storage
         @txn.put(KeyValueStore.key_for_table_data(table_id, primary_key), data)
       end
 
+      def delete_row(table_id : UUID, primary_key : Bytes) : Bytes?
+        @txn.delete(KeyValueStore.key_for_table_data(table_id, primary_key))
+      end
+
       def get_table(id : UUID)
         bytes = @txn.get(KeyValueStore.key_for_table(id))
         bytes.nil? ? nil : TableInfo.load(bytes)
@@ -172,6 +176,10 @@ module Storage
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)
       @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data)
+    end
+
+    def delete_row(table_id : UUID, primary_key : Bytes) : Bytes?
+      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key))
     end
 
     def each_row(table_id : UUID)

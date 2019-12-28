@@ -6,6 +6,10 @@ module Storage
     def initialize(@kv : KeyValueStore, @info : KeyValueStore::TableInfo)
     end
 
+    def primary_key
+      @info.primary_key
+    end
+
     def insert(obj : Hash)
       key = obj[@info.primary_key].serialize
 
@@ -13,7 +17,7 @@ module Storage
         existing_row_data = t.get_row(@info.id, key)
         unless existing_row_data.nil?
           existing = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data))
-          duplicated_primary_key_error(@info.primary_key, existing, obj)
+          duplicated_primary_key_error(existing, obj)
         end
 
         t.set_row(@info.id, key, ReQL::Datum.new(obj).serialize)
@@ -38,6 +42,11 @@ module Storage
 
         t.set_row(@info.id, key, ReQL::Datum.new(new_row).serialize)
       end
+    end
+
+    def delete(key)
+      key_data = key.serialize
+      @kv.delete_row(@info.id, key_data)
     end
 
     def scan

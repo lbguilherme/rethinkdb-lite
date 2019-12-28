@@ -1,7 +1,7 @@
 # STATUS
 
-- 92x :heavy_check_mark:
-- 129x :x:
+- 90x :heavy_check_mark:
+- 131x :x:
 
 # Connection
 
@@ -295,11 +295,11 @@
 
 | Term | Support | Notes |
 |-|-|-|
-| table_slice.delete() | :x: |  |
-| row.delete() | :x: |  |
+| table_slice.delete() | :heavy_check_mark: |  |
+| row.delete() | :heavy_check_mark: |  |
 | table.insert(...) | :heavy_check_mark: |  |
-| table_slice.replace(...) | :heavy_check_mark: |  |
-| row.replace(...) | :heavy_check_mark: |  |
+| table_slice.replace(...) | :x: |  |
+| row.replace(...) | :x: |  |
 | table.sync() | :x: |  |
-| table_slice.update(...) | :heavy_check_mark: |  |
-| row.update(...) | :heavy_check_mark: |  |
+| table_slice.update(...) | :x: |  |
+| row.update(...) | :x: |  |

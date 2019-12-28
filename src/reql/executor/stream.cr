@@ -8,7 +8,7 @@ module ReQL
       start_reading
       arr = [] of Datum
       while val = next_val
-        arr << val
+        arr << val.as_datum
       end
       finish_reading
       arr
