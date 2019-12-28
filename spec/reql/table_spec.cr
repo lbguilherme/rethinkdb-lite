@@ -1,6 +1,6 @@
-require "spec"
 require "../../src/driver/*"
-
+require "spec"
+require "file_utils"
 include RethinkDB::DSL
 
 path = "/tmp/rethinkdb-lite/spec-temp-tables/#{Random::Secure.hex}"

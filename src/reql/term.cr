@@ -1,3 +1,5 @@
+require "./error"
+
 module ReQL
   abstract class Term
     alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes
