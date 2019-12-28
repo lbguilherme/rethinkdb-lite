@@ -74,7 +74,6 @@ sleep
 
 ## Roadmap
 
-- Replace the current storage backend with RocksDB
 - Pass successfuly on RethinkDB's spec suite
 - Add some better newer tests
 - Benchmark and improve performance
