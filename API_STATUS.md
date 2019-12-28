@@ -1,7 +1,7 @@
 # STATUS
 
-- 91x :heavy_check_mark:
-- 130x :x:
+- 92x :heavy_check_mark:
+- 129x :x:
 
 # Connection
 
@@ -55,7 +55,7 @@
 | sequence.min() | :x: |  |
 | table.min({index}) | :x: |  |
 | reduce.contains(function) | :x: |  |
-| sequence.sum() | :x: |  |
+| sequence.sum() | :heavy_check_mark: |  |
 | sequence.sum(function) | :x: |  |
 | grouped_stream.ungroup() | :x: |  |
 
