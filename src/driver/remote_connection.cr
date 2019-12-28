@@ -1,4 +1,5 @@
 require "socket"
+require "json"
 require "../crypto"
 
 module RethinkDB
