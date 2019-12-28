@@ -1,6 +1,3 @@
-require "./executor/*"
-require "./error"
-
 module ReQL
   abstract class Term
     alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes
@@ -138,37 +135,6 @@ module ReQL
     macro register_type(const)
       Term.add_type(TermType::{{const.id}}, self)
     end
-  end
-
-  class Evaluator
-    property vars = {} of Int64 => Datum
-
-    def initialize(@manager : Storage::Manager)
-    end
-
-    def eval(arr : Array)
-      Datum.new(arr.map do |e|
-        Datum.new(eval(e).value)
-      end)
-    end
-
-    def eval(hsh : Hash)
-      result = {} of String => Datum
-      hsh.each do |(k, v)|
-        result[k] = Datum.new(eval(v).value)
-      end
-      Datum.new(result)
-    end
-
-    def eval(val : Bool | String | String | Bytes | Float64 | Int64 | Int32 | Nil)
-      Datum.new(val)
-    end
-
-    # macro expect_type(val, type)
-    #   unless {{val}}.is_a? {{type.id}}
-    #     raise QueryLogicError.new("Expected type #{{{type}}.reql_type} but found #{{{type}}.reql_type == "FUNCTION" && {{val}}.is_a?(Datum) ? "DATUM" : {{val}}.reql_type}.")
-    #   end
-    # end
   end
 
   enum TermType
