@@ -1,4 +1,3 @@
-
 module ReQL
   class TableWriter
     @deleted = 0
