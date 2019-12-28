@@ -42,7 +42,25 @@ module ReQL
         raise OpFailedError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
-      @manager.create_table(db_name, table_name, primary_key: "id", soft_durability: false)
+      soft_durability = false
+      if term.options.has_key? "durability"
+        durability = Datum.new(term.options["durability"]).string_value
+        case durability
+        when "hard"
+          soft_durability = false
+        when "soft"
+          soft_durability = true
+        else
+          raise QueryLogicError.new "Durability option `#{durability}` unrecognized (options are \"hard\" and \"soft\")"
+        end
+      end
+
+      primary_key = "id"
+      if term.options.has_key? "primary_key"
+        primary_key = Datum.new(term.options["primary_key"]).string_value
+      end
+
+      @manager.create_table(db_name, table_name, primary_key, soft_durability)
 
       Datum.new(Hash(String, Datum::Type).new)
     end
