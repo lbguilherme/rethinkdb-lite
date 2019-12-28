@@ -35,7 +35,7 @@ module ReQL
         elsif klass = @@type_to_class[type_id]?
           klass.new(args, json[2]?.try &.as_h?).as(Type)
         else
-          raise CompileError.new("Don't know how to handle #{type_id} term")
+          raise CompileError.new("r.#{type_id.to_s.downcase.gsub(/_(\w)/) { $1.upcase }}() is not yet implemented.")
         end
       else
         raw.as(Type)
@@ -326,5 +326,3 @@ module ReQL
     BIT_SAR            = 196
   end
 end
-
-require "./terms/*"
