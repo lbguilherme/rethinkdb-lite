@@ -55,15 +55,15 @@ module Storage
 
     property system_info
 
-    @rocksdb : RocksDb::OptimisticTransactionDatabase
+    @rocksdb : RocksDB::OptimisticTransactionDatabase
 
     def initialize(path)
-      options = RocksDb::Options.new
+      options = RocksDB::Options.new
       options.create_if_missing = true
       options.paranoid_checks = true
 
       FileUtils.mkdir_p path
-      @rocksdb = RocksDb::OptimisticTransactionDatabase.open(path, options)
+      @rocksdb = RocksDB::OptimisticTransactionDatabase.open(path, options)
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
@@ -85,7 +85,7 @@ module Storage
         begin
           DatabaseInfo.load(bytes)
         ensure
-          RocksDb.free(bytes)
+          RocksDB.free(bytes)
         end
       end
     end
@@ -95,7 +95,7 @@ module Storage
     end
 
     def each_db
-      options = RocksDb::ReadOptions.new
+      options = RocksDB::ReadOptions.new
       options.iterate_upper_bound = Bytes[PREFIX_DATABASES + 1]
       iter = @rocksdb.iterator(options)
       iter.seek(Bytes[PREFIX_DATABASES])
@@ -113,7 +113,7 @@ module Storage
         begin
           TableInfo.load(bytes)
         ensure
-          RocksDb.free(bytes)
+          RocksDB.free(bytes)
         end
       end
     end
@@ -123,7 +123,7 @@ module Storage
     end
 
     def each_table
-      options = RocksDb::ReadOptions.new
+      options = RocksDB::ReadOptions.new
       options.iterate_upper_bound = Bytes[PREFIX_TABLES + 1]
       iter = @rocksdb.iterator(options)
       iter.seek(Bytes[PREFIX_TABLES])
@@ -134,7 +134,7 @@ module Storage
     end
 
     class Transaction
-      def initialize(@txn : RocksDb::Transaction)
+      def initialize(@txn : RocksDB::Transaction)
       end
 
       def get_row(table_id : UUID, primary_key : Bytes)
@@ -145,7 +145,7 @@ module Storage
           begin
             yield bytes
           ensure
-            RocksDb.free(bytes)
+            RocksDB.free(bytes)
           end
         end
       end
@@ -166,7 +166,7 @@ module Storage
           begin
             TableInfo.load(bytes)
           ensure
-            RocksDb.free(bytes)
+            RocksDB.free(bytes)
           end
         end
       end
@@ -183,7 +183,7 @@ module Storage
           begin
             DatabaseInfo.load(bytes)
           ensure
-            RocksDb.free(bytes)
+            RocksDB.free(bytes)
           end
         end
       end
@@ -201,7 +201,7 @@ module Storage
           txn.commit
           break
         rescue ex
-          if ex.is_a?(RocksDb::Error) && ex.message.try &.starts_with? "Resource busy"
+          if ex.is_a?(RocksDB::Error) && ex.message.try &.starts_with? "Resource busy"
             txn.begin
           else
             txn.rollback
@@ -219,7 +219,7 @@ module Storage
         begin
           yield bytes
         ensure
-          RocksDb.free(bytes)
+          RocksDB.free(bytes)
         end
       end
     end
@@ -233,7 +233,7 @@ module Storage
     end
 
     def each_row(table_id : UUID)
-      options = RocksDb::ReadOptions.new
+      options = RocksDB::ReadOptions.new
       options.iterate_upper_bound = KeyValueStore.key_for_table_data_end(table_id)
       iter = @rocksdb.iterator(options)
       iter.seek(KeyValueStore.key_for_table_data_start(table_id))
