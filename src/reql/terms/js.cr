@@ -16,9 +16,9 @@ module ReQL
 
       ctx = Duktape::Context.new
 
-      flags = LibDuktape::DUK_COMPILE_EVAL | LibDuktape::DUK_COMPILE_NOSOURCE | LibDuktape::DUK_COMPILE_NOFILENAME | LibDuktape::DUK_COMPILE_SAFE
-      if LibDuktape.duk_eval_raw(ctx, code, code.bytesize, flags) != 0
-        raise QueryLogicError.new String.new(LibDuktape.duk_safe_to_lstring(ctx, -1, nil))
+      flags = LibDuktape::COMPILE_EVAL | LibDuktape::COMPILE_NOSOURCE | LibDuktape::COMPILE_NOFILENAME | LibDuktape::COMPILE_SAFE
+      if LibDuktape.eval_raw(ctx, code, code.bytesize, flags) != 0
+        raise QueryLogicError.new String.new(LibDuktape.safe_to_lstring(ctx, -1, nil))
       end
 
       return ctx.get_datum
