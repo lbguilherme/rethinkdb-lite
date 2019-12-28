@@ -81,5 +81,13 @@ module ReQL
     def self.unserialize(io : IO)
       Datum.new(JSON.parse(io))
     end
+
+    def as_function
+      if (str = @value).is_a? String
+        FieldFunc.new(str)
+      else
+        raise QueryLogicError.new("Expected type FUNCTION but found #{reql_type}.")
+      end
+    end
   end
 end

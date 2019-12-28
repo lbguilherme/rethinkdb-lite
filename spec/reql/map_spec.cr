@@ -35,6 +35,10 @@ describe RethinkDB do
     end
     stream.close
   end
+
+  it "accepts a string as a function" do
+    r([{"a" => 3}, {"a" => 7}]).map("a").run(conn).datum.should eq [3, 7]
+  end
 end
 
 Spec.after_suite { conn.close }
