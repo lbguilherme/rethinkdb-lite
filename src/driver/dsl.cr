@@ -78,6 +78,22 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
+      def self.to_json_any(val : JSON::Any::Type)
+        JSON::Any.new(val)
+      end
+
+      def self.to_json_any(val : Int32)
+        JSON::Any.new(val.to_i64)
+      end
+
+      def self.to_json_any(val : Array)
+        JSON::Any.new(val.map { |x| to_json_any(x) })
+      end
+
+      def self.to_json_any(val : Hash)
+        JSON::Any.new(val.map { |(k, v)| {k.to_s, to_json_any(v)} })
+      end
+
       def self.make_var_i
         i = @@next_var_i
         @@next_var_i += 1
@@ -100,7 +116,6 @@ module RethinkDB
         end
 
         conn.run(@val, RunOpts.new(runopts))
-        # Evaluator.new.eval @val
       end
 
       def +(other)
@@ -184,26 +199,29 @@ module RethinkDB
       struct R{{name.id}}
         include R
 
-        def initialize(*args)
-          @val = ReQL::{{term_class}}.new(args.to_a.map { |x| R.convert_type(x, 20).as(ReQL::Term::Type) }, nil)
+        def initialize(*args, **options)
+          @val = ReQL::{{term_class}}.new(
+            args.to_a.map { |x| R.convert_type(x, 20).as(ReQL::Term::Type) },
+            options.map { |k, v| {k.to_s, R.to_json_any(v)} }.to_h
+          )
         end
       end
 
       module R
-        def self.{{name.id}}(*args)
-          R{{name.id}}.new(*args)
+        def self.{{name.id}}(*args, **options)
+          R{{name.id}}.new(*args, **options)
         end
 
-        def {{name.id}}(*args)
-          R{{name.id}}.new(self, *args)
+        def {{name.id}}(*args, **options)
+          R{{name.id}}.new(self, *args, **options)
         end
 
-        def self.{{name.id}}(*args, &block : R, R, R, R, R -> R::Type)
-          R{{name.id}}.new(*args, block)
+        def self.{{name.id}}(*args, **options, &block : R, R, R, R, R -> R::Type)
+          R{{name.id}}.new(*args, block, **options)
         end
 
-        def {{name.id}}(*args, &block : R, R, R, R, R -> R::Type)
-          R{{name.id}}.new(self, *args, block)
+        def {{name.id}}(*args, **options, &block : R, R, R, R, R -> R::Type)
+          R{{name.id}}.new(self, *args, block, **options)
         end
       end
     end

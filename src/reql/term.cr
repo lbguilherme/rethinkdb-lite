@@ -5,8 +5,10 @@ module ReQL
     alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes
 
     getter args
+    getter options : Hash(String, JSON::Any)
 
     def initialize(@args : Array(Type), options : Hash(String, JSON::Any)?)
+      @options = options.nil? ? {} of String => JSON::Any : options
       compile
     end
 
@@ -91,6 +93,33 @@ module ReQL
       end
     end
 
+    private def inspect_json(io, obj : Hash)
+      io << '{'
+      obj.each_with_index do |(k, v), i|
+        io << k << ": "
+        inspect_json(io, v)
+        io << ", " unless i == obj.size - 1
+      end
+      io << '}'
+    end
+
+    private def inspect_json(io, arr : Array)
+      io << '['
+      arr.each_with_index do |e, i|
+        inspect_json(io, e)
+        io << ", " unless i == arr.size - 1
+      end
+      io << ']'
+    end
+
+    private def inspect_json(io, val : Int64 | String | Bool | Float64 | Nil)
+      val.inspect(io)
+    end
+
+    private def inspect_json(io, any : JSON::Any)
+      inspect_json(io, any.raw)
+    end
+
     macro infix_inspect(name)
       def inspect(io)
         if @args.size == 0
@@ -111,6 +140,12 @@ module ReQL
           @args[i].inspect(io)
           io << ", " unless i == @args.size - 1
         end
+
+        if @options.size > 0
+          io << ", " if @args.size > 1
+          inspect_json(io, @options)
+        end
+
         io << ")"
       end
     end
@@ -122,6 +157,12 @@ module ReQL
           e.inspect(io)
           io << ", " unless i == @args.size - 1
         end
+
+        if @options.size > 0
+          io << ", " if @args.size > 0
+          inspect_json(io, @options)
+        end
+
         io << ")"
       end
     end
