@@ -1,7 +1,7 @@
-/doc/
-/lib/
-/bin/
-/.shards/
-/.crystal/
-*.rb
-/data/
+docs
+lib
+bin
+.shards
+.crystal
+
+data
