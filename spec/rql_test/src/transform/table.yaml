@@ -11,8 +11,8 @@ tests:
       ot: {"k1":"v1","k2":"v2"}
 
     # Coerce to an array
-    - cd: tbl.limit(1).type_of()
-      ot: "SELECTION<STREAM>"
+    # - cd: tbl.limit(1).type_of()
+    #   ot: "SELECTION<STREAM>"
 
     - cd: tbl.limit(1).coerce_to('array').type_of()
       ot: "ARRAY"

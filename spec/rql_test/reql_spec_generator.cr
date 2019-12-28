@@ -28,10 +28,11 @@ def language_fixes(str)
   end
   str = quotes_fixes(str)
   str = str.gsub(".force_encoding(\"BINARY\")", ".to_slice")
+  return str if str.starts_with? "\""
   str = str.gsub("[]", "[] of Int32")
   str = str.gsub(/([\(,<>=]\s*)\{\}/) { "#{$1}{} of String => Int32" }
   str = str.gsub(/^\{\}/) { "{} of String => Int32" }
-  str = str.gsub(/([^\\\d])\":/) { "#{$1}\" => " }
+  str = str.gsub(/\":/) { "\" => " }
   str = str.gsub(/(\s|\{|,)(\d+):/) { "#{$1}#{$2} => " }
   str = str.gsub(/(\}):/) { "#{$1} => " }
   str = str.gsub(/(\W\s|\{|,|\()(\w+):/) { "#{$1}#{$2}: " }
@@ -63,27 +64,28 @@ data["tests"].as_a.each_with_index do |test, i|
       code = d.as_s
     end
     puts "  #{language_fixes code}"
-  elsif test["ot"]? == nil && (test["rb"]? || test["cd"]?)
+  elsif test["ot"]? == nil && (test["rb"]? || test["cd"]?).try &.as_s?.try &.match(/^\w+\s*=/)
     assign = (language_fixes (test["rb"]? || test["cd"]).as_s).split("=")
     var = assign[0].strip
     value = assign[1].strip
     puts "  #{var} = #{value}.run(conn).datum.int32"
   else
-    test["ot"]?
     subtests = test["rb"]? || test["cd"]?
     next unless subtests
     next if subtests == ""
     subtests = subtests.raw.is_a?(Array) ? subtests.as_a.map &.as_s : subtests.raw.is_a?(String) ? [subtests.as_s] : [] of String
 
-    output = test["ot"]
-    unless output.raw.is_a? String
-      if output["js"]? && output["js"].as_s =~ /reduction/
-        output = output["js"]
-      else
-        output = output["rb"]? || output["cd"]
+    output = test["ot"]?
+    if output
+      unless output.raw.is_a? String
+        if output["js"]? && output["js"].as_s =~ /reduction/
+          output = output["js"]
+        else
+          output = output["rb"]? || output["cd"]
+        end
       end
+      output = quotes_fixes output.as_s
     end
-    output = quotes_fixes output.as_s
 
     runopts = if test["runopts"]?
                 String.build do |io|
@@ -100,12 +102,14 @@ data["tests"].as_a.each_with_index do |test, i|
 
     puts unless i == 0
     subtests.each_with_index do |subtest, j|
-      next if output =~ /lambda/ || subtest =~ /lambda/
+      next if (output && output =~ /lambda/) || subtest =~ /lambda/
       subtest = language_fixes subtest
       puts unless j == 0
       test_id = "##{i + 1}.#{j + 1}"
       puts "  #{ARGV.includes?(test_id) ? "pending" : "it"} \"passes on test #{test_id}: #{subtest.gsub("\\", "\\\\").gsub("\"", "\\\"")}\" do"
-      if output =~ /err\("(\w+)",\s?"(.+?)"[,)]/
+      if output.nil?
+        puts "    #{subtest}"
+      elsif output =~ /err\("(\w+)",\s?"(.+?)"[,)]/
         err = $1.gsub("Reql", "ReQL::")
         puts "    expect_raises(#{err}, \"#{$2.gsub("\\\\", "\\")}\") do"
         puts "      (#{subtest}).run(conn#{runopts}).datum"

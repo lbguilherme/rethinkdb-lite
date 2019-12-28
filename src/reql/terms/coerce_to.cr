@@ -12,12 +12,11 @@ module ReQL
     def eval(term : CoerceToTerm)
       source = eval(term.args[0])
       target_type = eval(term.args[1]).string_value.upcase
+      source = source.as_datum
 
       if source.reql_type == target_type
         return source
       end
-
-      source = source.as_datum
 
       case target_type
       when "NUMBER"

@@ -1,4 +1,4 @@
-require "spec/*"
+require "spec"
 require "file_utils"
 require "../../src/driver/*"
 require "../../src/server/*"
@@ -31,6 +31,7 @@ def run_reql_spec(conn)
     {{ run("./reql_spec_generator", "spec/rql_test/src/control.yaml") }}
     # {{ run("./reql_spec_generator", "spec/rql_test/src/default.yaml") }}
     {{ run("./reql_spec_generator", "spec/rql_test/src/range.yaml") }}
+    {{ run("./reql_spec_generator", "spec/rql_test/src/transform/table.yaml") }}
   end
 end
 
