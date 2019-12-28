@@ -138,7 +138,7 @@ module Storage
       end
 
       def get_row(table_id : UUID, primary_key : Bytes)
-        bytes = @txn.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+        bytes = @txn.get_for_update(KeyValueStore.key_for_table_data(table_id, primary_key))
         if bytes.nil?
           yield nil
         else
