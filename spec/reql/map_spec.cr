@@ -33,6 +33,7 @@ describe RethinkDB do
     1000.times do |i|
       stream.next.should eq([i.to_i64])
     end
+    stream.close
   end
 end
 
