@@ -17,5 +17,9 @@ module ReQL
     def count(max)
       err
     end
+
+    def each
+      err
+    end
   end
 end
