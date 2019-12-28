@@ -11,7 +11,7 @@ module Storage
       raise "TODO"
     end
 
-    def delete(key)
+    def delete(key) : Bool
       raise "TODO"
     end
 

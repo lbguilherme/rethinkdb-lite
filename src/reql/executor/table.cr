@@ -15,7 +15,7 @@ module ReQL
       @internal = InternalData.new
     end
 
-    private def storage
+    def storage
       db_name = @db.try &.name || "test"
       result = @manager.get_table(db_name, @name)
       if result.nil?
@@ -24,17 +24,8 @@ module ReQL
       result
     end
 
-    def check
-      storage
-      nil
-    end
-
     def get(key : Datum)
       RowReference.new(storage, key)
-    end
-
-    def insert(obj : Hash)
-      storage.insert(obj)
     end
 
     def count(max)

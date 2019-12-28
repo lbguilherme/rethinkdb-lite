@@ -46,9 +46,16 @@ module Storage
       end
     end
 
-    def delete(key)
+    def delete(key) : Bool
       key_data = key.serialize
-      @kv.delete_row(@info.id, key_data)
+      @kv.transaction do |t|
+        if t.get_row(@info.id, key_data) { |data| data == nil }
+          false
+        else
+          t.delete_row(@info.id, key_data)
+          true
+        end
+      end
     end
 
     def scan

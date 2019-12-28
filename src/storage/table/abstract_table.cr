@@ -14,7 +14,7 @@ module Storage
     end
 
     abstract def insert(obj : Hash(String, ReQL::Datum))
-    abstract def delete(key : ReQL::Datum)
+    abstract def delete(key : ReQL::Datum) : Bool
     abstract def replace(key : ReQL::Datum, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
     abstract def scan(&block : Hash(String, ReQL::Datum) ->)
 

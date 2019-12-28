@@ -2,5 +2,5 @@ version: 1.0
 shards:
   rocksdb:
     github: lbguilherme/rocksdb-crystal
-    commit: 2a1df55b4cbf3e2a0827514b5299a414e6c46c7a
+    commit: 8f3258b45c4935f9af34e3a451c318c20c3aa9c7
 

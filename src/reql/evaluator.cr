@@ -1,10 +1,12 @@
 require "./executor/*"
 require "./error"
 require "./term"
+require "./table_writter"
 
 module ReQL
   class Evaluator
     property vars = {} of Int64 => Datum
+    property table_writer : TableWriter?
 
     def initialize(@manager : Storage::Manager)
     end

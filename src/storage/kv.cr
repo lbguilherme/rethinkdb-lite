@@ -197,9 +197,9 @@ module Storage
       txn = @rocksdb.begin_transaction
       loop do
         begin
-          yield Transaction.new(txn)
+          result = yield Transaction.new(txn)
           txn.commit
-          break
+          return result
         rescue ex
           if ex.is_a?(RocksDB::Error) && ex.message.try &.starts_with? "Resource busy"
             txn.begin
