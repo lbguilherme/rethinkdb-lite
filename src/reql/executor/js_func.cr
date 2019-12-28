@@ -9,7 +9,7 @@ module ReQL
     def initialize(@bytecode : Bytes)
     end
 
-    def eval(evaluator : Evaluator, *args)
+    def eval(evaluator : Evaluator, args)
       ctx = Duktape::Context.new
       data = LibDuktape.duk_push_buffer_raw(ctx, 0, LibDuktape::DUK_BUF_FLAG_DYNAMIC | LibDuktape::DUK_BUF_FLAG_EXTERNAL)
       LibDuktape.duk_config_buffer(ctx, -1, @bytecode.to_unsafe, @bytecode.size)

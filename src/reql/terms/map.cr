@@ -16,11 +16,11 @@ module ReQL
       case
       when target.is_a? Stream
         MapStream.new(target, ->(val : Datum) {
-          return func.as(Func).eval(self, val).as_datum
+          return func.eval(self, {val}).as_datum
         })
       when array = target.array_value?
         Datum.new(array.map do |val|
-          func.as(Func).eval(self, val).value
+          func.eval(self, {val}).value
         end)
       else
         raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")

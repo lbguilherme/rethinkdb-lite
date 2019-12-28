@@ -30,7 +30,7 @@ module ReQL
       block = case func
               when Func
                 ->(val : Datum) {
-                  func.as(Func).eval(self, val)
+                  func.as(Func).eval(self, {val})
                 }
               when Datum
                 ->(val : Datum) {

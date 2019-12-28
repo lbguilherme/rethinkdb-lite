@@ -31,7 +31,7 @@ module ReQL
             raise QueryLogicError.new("Cannot perform bracket on a non-object non-sequence `#{val.inspect}`.")
           end
         when func.is_a? Func
-          func.eval(self, val)
+          func.eval(self, {val})
         else
           raise QueryLogicError.new("Expected type STRING but found #{func.reql_type}")
         end

@@ -7,9 +7,8 @@ module ReQL
     def initialize(@vars : Array(Int64), @func : Term::Type)
     end
 
-    def eval(evaluator : Evaluator, *args)
+    def eval(evaluator : Evaluator, args)
       evaluator = evaluator.dup
-      args = args.to_a + [] of Datum
       if @vars.size > args.size
         raise QueryLogicError.new("Function expects #{@vars.size} arguments, but only #{args.size} available")
       end
