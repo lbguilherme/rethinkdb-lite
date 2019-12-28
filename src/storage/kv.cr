@@ -10,6 +10,10 @@ module Storage
     PREFIX_TABLE_DATA  = 3u8
     TABLE_PREFIX_DATA  = 0u8
 
+    SOFT_DURABILITY = RocksDB::WriteOptions.new
+    HARD_DURABILITY = RocksDB::WriteOptions.new
+    HARD_DURABILITY.sync = true
+
     def self.key_for_system_info
       Bytes[PREFIX_SYSTEM_INFO]
     end
@@ -91,7 +95,7 @@ module Storage
     end
 
     def save_db(db : DatabaseInfo)
-      @rocksdb.put(KeyValueStore.key_for_database(db.id), db.serialize)
+      @rocksdb.put(KeyValueStore.key_for_database(db.id), db.serialize, HARD_DURABILITY)
     end
 
     def each_db
@@ -119,7 +123,7 @@ module Storage
     end
 
     def save_table(table : TableInfo)
-      @rocksdb.put(KeyValueStore.key_for_table(table.id), table.serialize)
+      @rocksdb.put(KeyValueStore.key_for_table(table.id), table.serialize, HARD_DURABILITY)
     end
 
     def each_table
@@ -193,8 +197,8 @@ module Storage
       end
     end
 
-    def transaction
-      txn = @rocksdb.begin_transaction
+    def transaction(soft_durability : Bool = false)
+      txn = @rocksdb.begin_transaction(soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
       loop do
         begin
           result = yield Transaction.new(txn)
@@ -224,12 +228,12 @@ module Storage
       end
     end
 
-    def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)
-      @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data)
+    def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, soft_durability : Bool = false)
+      @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data, soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
     end
 
-    def delete_row(table_id : UUID, primary_key : Bytes) : Bytes?
-      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key))
+    def delete_row(table_id : UUID, primary_key : Bytes, soft_durability : Bool = false) : Bytes?
+      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key), soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
     end
 
     def each_row(table_id : UUID)
