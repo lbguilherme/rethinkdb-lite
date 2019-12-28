@@ -18,6 +18,7 @@ module ReQL
 
     def compile
       expect_args 1, 2
+      check_optional_args "durability", "primary_key"
     end
   end
 

@@ -93,6 +93,15 @@ module ReQL
       end
     end
 
+    macro check_optional_args(*args)
+      begin
+        extra_options = @options.keys - {{ args }}.to_a
+        unless extra_options.empty?
+          raise CompileError.new "Unrecognized optional argument `#{extra_options[0]}`"
+        end
+      end
+    end
+
     private def inspect_json(io, obj : Hash)
       io << '{'
       obj.each_with_index do |(k, v), i|
