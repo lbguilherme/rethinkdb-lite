@@ -223,7 +223,7 @@ module Storage
           return result
         rescue ex
           if ex.is_a?(RocksDB::Error) && ex.message.try &.starts_with? "Resource busy"
-            txn.begin
+            txn.begin(soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
           else
             txn.rollback
             raise ex
