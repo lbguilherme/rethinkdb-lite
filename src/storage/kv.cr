@@ -83,10 +83,10 @@ module Storage
       FileUtils.mkdir_p path
 
       @rocksdb = {% if flag?(:preview_mt) %}
-        RocksDB::TransactionDatabase.open(path, options)
-      {% else %}
-        RocksDB::OptimisticTransactionDatabase.open(path, options)
-      {% end %}
+                   RocksDB::TransactionDatabase.open(path, options)
+                 {% else %}
+                   RocksDB::OptimisticTransactionDatabase.open(path, options)
+                 {% end %}
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
