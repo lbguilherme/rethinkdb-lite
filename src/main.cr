@@ -3,6 +3,18 @@ require "./driver/*"
 
 include RethinkDB::DSL
 
+{% if flag?(:preview_mt) %}
+  class Crystal::Scheduler
+    private def self.worker_count
+      # RocksDB's IO is not integrated with Crystal's Scheduler and will block the entire thread.
+      # Given that we need to have a high number of threads to make sure there are always some
+      # threads available to run Fibers. This is not optimal.
+      # Waiting on https://github.com/facebook/rocksdb/issues/3254
+      Crystal::System.cpu_count.to_i * 16
+    end
+  end
+{% end %}
+
 conn = r.local_database("./data")
 
 webui_server = RethinkDB::Server::WebUiServer.new(8080, conn)

@@ -106,10 +106,10 @@ Most of the Web UI doesn't work yet, but you can use the tabs _Tables_ and _Data
 
 You can also use any client driver to connect from another language, see https://rethinkdb.com/docs/install-drivers/.
 
-For higher read/write throughput use the following, to enable multi-threads:
+For higher read/write throughput enable multithreading. Use the following:
 
 ```sh
-CRYSTAL_WORKERS=128 crystal run -Dpreview_mt src/main.cr
+crystal run -Dpreview_mt src/main.cr
 ```
 
 ## Running Tests
