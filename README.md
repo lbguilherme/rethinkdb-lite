@@ -106,6 +106,12 @@ Most of the Web UI doesn't work yet, but you can use the tabs _Tables_ and _Data
 
 You can also use any client driver to connect from another language, see https://rethinkdb.com/docs/install-drivers/.
 
+For higher read/write throughput use the following, to enable multi-threads:
+
+```sh
+CRYSTAL_WORKERS=128 crystal run -Dpreview_mt src/main.cr
+```
+
 ## Running Tests
 
 You should have a running real empty RethinkDB server for testing. Do not use one with data in it. You can start one with by simply running `rethinkdb` on the terminal, after [installing it](https://rethinkdb.com/).

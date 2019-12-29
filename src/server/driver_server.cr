@@ -150,7 +150,7 @@ module RethinkDB
         # puts "Accepted connection from #{remote_address}."
         client = Client.new(@conn)
 
-        response_channel = Channel({UInt64, String}).new
+        response_channel = Channel({UInt64, String}).new(32)
         spawn do
           while tup = response_channel.receive?
             query_token = tup[0]

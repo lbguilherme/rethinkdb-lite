@@ -33,8 +33,14 @@ jobs:
     - name: Build main.cr
       run: crystal build src/main.cr
 
+    - name: Build main.cr with -Dpreview_mt
+      run: crystal build -Dpreview_mt src/main.cr
+
     - name: Run tests
       run: crystal spec
+
+    - name: Run tests with -Dpreview_mt
+      run: crystal spec -Dpreview_mt
 
     - name: Check format
       run: crystal tool format --check

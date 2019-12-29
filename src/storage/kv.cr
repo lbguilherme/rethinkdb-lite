@@ -63,15 +63,30 @@ module Storage
 
     property system_info
 
-    @rocksdb : RocksDB::OptimisticTransactionDatabase
+    {% if flag?(:preview_mt) %}
+      @rocksdb : RocksDB::TransactionDatabase
+    {% else %}
+      @rocksdb : RocksDB::OptimisticTransactionDatabase
+    {% end %}
 
     def initialize(path)
       options = RocksDB::Options.new
       options.create_if_missing = true
       options.paranoid_checks = true
 
+      {% if flag?(:preview_mt) %}
+        options.enable_pipelined_write = true
+        options.increase_parallelism(16)
+        options.max_background_jobs = 4
+      {% end %}
+
       FileUtils.mkdir_p path
-      @rocksdb = RocksDB::OptimisticTransactionDatabase.open(path, options)
+
+      @rocksdb = {% if flag?(:preview_mt) %}
+        RocksDB::TransactionDatabase.open(path, options)
+      {% else %}
+        RocksDB::OptimisticTransactionDatabase.open(path, options)
+      {% end %}
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
@@ -140,7 +155,7 @@ module Storage
     end
 
     class Transaction
-      def initialize(@txn : RocksDB::Transaction)
+      def initialize(@txn : RocksDB::BaseTransaction)
       end
 
       def get_row(table_id : UUID, primary_key : Bytes)
