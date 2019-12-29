@@ -8,6 +8,7 @@ module RethinkDB
 
       def close
         @streams.each_value &.close
+        @streams.clear
       end
 
       def execute(query_id : UInt64, message : Array)

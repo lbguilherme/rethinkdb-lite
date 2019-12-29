@@ -12,6 +12,8 @@ module RethinkDB
       V0_4 = 0x400c2d20_u32
       V1_0 = 0x34c2bdc3_u32
 
+      @client_sockets = Set(TCPSocket).new
+
       def initialize(@port : Int32, @conn : RethinkDB::Connection)
         @server = TCPServer.new(@port)
         @wants_close = false
@@ -28,6 +30,8 @@ module RethinkDB
             end
 
             if sock
+              @client_sockets << sock
+
               # a non nillable version of the closured sock
               _sock = sock
               spawn handle_client(_sock)
@@ -42,6 +46,8 @@ module RethinkDB
           server.close
           @server = nil
         end
+        @client_sockets.each &.close
+        @client_sockets.clear
       end
 
       private def handle_client(sock)
@@ -178,10 +184,8 @@ module RethinkDB
         err.inspect_with_backtrace
       ensure
         client.try &.close
-        if sock
-          # puts "Disconnected from #{remote_address}."
-          sock.close
-        end
+        sock.close
+        @client_sockets.delete sock
       end
 
       def execute_query(client, query_bytes, query_token, response_channel)
