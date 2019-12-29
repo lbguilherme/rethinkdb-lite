@@ -27,7 +27,17 @@ module ReQL
         row[primary_key] = Datum.new(id)
         @generated_keys << id
       end
-      table.insert(row)
+
+      table.replace(row[primary_key]) do |old|
+        if old.nil?
+          row
+        else
+          pretty_old = JSON.build(4) { |builder| old.to_json(builder) }
+          pretty_row = JSON.build(4) { |builder| row.to_json(builder) }
+          raise ReQL::OpFailedError.new("Duplicate primary key `#{primary_key}`:\n#{pretty_old}\n#{pretty_row}")
+        end
+      end
+
       @inserted += 1
     rescue err : RuntimeError
       @errors += 1

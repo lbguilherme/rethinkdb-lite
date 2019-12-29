@@ -6,15 +6,17 @@ module Storage
       super("db_config")
     end
 
-    def insert(obj : Hash)
-      info = decode(obj)
-      @manager.create_db(info.name, info.id) do |current_info|
-        duplicated_primary_key_error(encode(current_info), obj)
+    def replace(key)
+      existing = get(key)
+      row = yield existing
+      if existing.nil?
+        info = decode(row)
+        @manager.create_db(info.name, info.id) do |current_info|
+          yield encode(current_info)
+        end
+      else
+        raise "TODO"
       end
-    end
-
-    def replace(key, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
-      raise "TODO"
     end
 
     def delete(key) : Bool

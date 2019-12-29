@@ -3,10 +3,6 @@ module Storage
     def initialize(@manager : Manager)
     end
 
-    def insert(obj : Hash)
-      raise "TODO"
-    end
-
     def replace(key, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
       raise "TODO"
     end
