@@ -16,8 +16,13 @@ module ReQL
 
       writter = TableWriter.new
 
-      source.each do |obj|
-        row = obj.as_row
+      if source.is_array?
+        source.each do |obj|
+          row = obj.as_row
+          writter.delete(row.table, row.key)
+        end
+      else
+        row = source.as_row
         writter.delete(row.table, row.key)
       end
 

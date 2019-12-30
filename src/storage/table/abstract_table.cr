@@ -13,8 +13,7 @@ module Storage
       result
     end
 
-    abstract def delete(key : ReQL::Datum) : Bool
-    abstract def replace(key : ReQL::Datum, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
+    abstract def replace(key : ReQL::Datum, &block : Hash(String, ReQL::Datum)? -> Hash(String, ReQL::Datum)?)
     abstract def scan(&block : Hash(String, ReQL::Datum) ->)
 
     def primary_key

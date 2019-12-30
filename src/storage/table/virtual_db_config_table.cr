@@ -39,10 +39,6 @@ module Storage
       end
     end
 
-    def delete(key) : Bool
-      raise "TODO"
-    end
-
     private def encode(info : KeyValueStore::DatabaseInfo)
       ReQL::Datum.new({
         "id"   => info.id.to_s,
