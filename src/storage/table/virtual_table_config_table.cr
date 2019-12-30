@@ -5,8 +5,41 @@ module Storage
     end
 
     def replace(key)
-      yield nil
-      raise "TODO"
+      id = extract_uuid({"id" => key}, "id")
+
+      @manager.lock.synchronize do
+        after_commit = nil
+
+        @manager.kv.transaction do |t|
+          existing_info = t.get_table(id)
+          new_row = yield encode(existing_info)
+
+          if new_row.nil?
+            raise "TODO: Delete table"
+          else
+            if new_row["db"]? == "rethinkdb"
+              raise ReQL::OpFailedError.new("Database `rethinkdb` is special; you can't create new tables in it")
+            end
+
+            info = decode(new_row)
+
+            if existing_info.nil?
+              db = @manager.databases[new_row["db"].string_value]
+              if db.tables.has_key?(info.name)
+                raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
+              end
+
+              t.save_table(info)
+
+              after_commit = ->{ db.tables[info.name] = info }
+            else
+              raise "TODO: Update table"
+            end
+          end
+        end
+
+        after_commit.try &.call
+      end
     end
 
     private def encode(info : KeyValueStore::TableInfo)
@@ -27,6 +60,21 @@ module Storage
         "write_acks" => "single",
         "write_hook" => nil,
       }).hash_value
+    end
+
+    private def decode(obj)
+      info = KeyValueStore::TableInfo.new
+      check_extra_keys(obj, {"id", "db", "name", "primary_key", "durability"})
+      info.id = extract_uuid(obj, "id")
+      info.db = extract_db_reference(obj, "db")
+      info.name = extract_table_name(obj, "name")
+      if obj.has_key? "primary_key"
+        info.primary_key = extract_string(obj, "primary_key")
+      end
+      if obj.has_key? "durability"
+        info.soft_durability = extract_durability(obj, "durability") == "soft"
+      end
+      info
     end
 
     def get(key)

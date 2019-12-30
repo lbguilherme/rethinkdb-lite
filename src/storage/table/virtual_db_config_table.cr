@@ -50,7 +50,7 @@ module Storage
       info = KeyValueStore::DatabaseInfo.new
       check_extra_keys(obj, {"id", "name"})
       info.id = extract_uuid(obj, "id")
-      info.name = extract_string(obj, "name", "a db name")
+      info.name = extract_db_name(obj, "name")
       info
     end
 
