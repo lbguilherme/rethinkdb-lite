@@ -14,9 +14,9 @@ module ReQL
 
       table.replace(key) do |old|
         if old.nil?
-          after_commit = -> { @skipped += 1 }
+          after_commit = ->{ @skipped += 1 }
         else
-          after_commit = -> { @deleted += 1 }
+          after_commit = ->{ @deleted += 1 }
         end
         nil.as(Hash(String, ReQL::Datum)?)
       end
