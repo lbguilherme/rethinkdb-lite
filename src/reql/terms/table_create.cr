@@ -44,8 +44,8 @@ module ReQL
       end
 
       descriptor = {
-        "db" => Datum.new(db_name),
-        "name" => Datum.new(table_name)
+        "db"   => Datum.new(db_name),
+        "name" => Datum.new(table_name),
       }
 
       if term.options.has_key? "durability"
