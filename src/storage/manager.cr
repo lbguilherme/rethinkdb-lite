@@ -52,7 +52,7 @@ module Storage
       end
 
       info = @databases[db_name]?.try &.tables[table_name]?
-      info.nil? ? nil : KvTable.new(@kv, info)
+      info.nil? ? nil : PhysicalTable.new(@kv, info)
     end
 
     def create_table(db_name, table_name, primary_key, soft_durability)
