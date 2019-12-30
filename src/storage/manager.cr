@@ -44,6 +44,8 @@ module Storage
           return VirtualDbConfigTable.new(self)
         when "table_config"
           return VirtualTableConfigTable.new(self)
+        when "table_status"
+          return VirtualTableStatusTable.new(self)
         else
           return nil
         end
