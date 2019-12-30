@@ -180,15 +180,15 @@ tests:
     - cd: r.expr([1, 2, 3]).map(r.js('(function(a) { return a + 1; })'))
       ot: ([2, 3, 4])
 
-    # - cd: r.expr([1, 2, 3]).map(r.js('1'))
-    #   ot: err("ReqlQueryLogicError", "Expected type FUNCTION but found NUMBER.", [0])
+    - cd: r.expr([1, 2, 3]).map(r.js('1'))
+      ot: err("ReqlQueryLogicError", "Expected type FUNCTION but found DATUM", [0])
 
     - cd: r.expr([1, 2, 3]).filter(r.js('(function(a) {})'))
       ot: err("ReqlQueryLogicError", "Cannot convert javascript `undefined`", [0])
 
     # What happens if we pass static values to things that expect functions
-    # - cd: r.expr([1, 2, 3]).map(1)
-    #   ot: err("ReqlQueryLogicError", "Expected type FUNCTION but found NUMBER.", [0])
+    - cd: r.expr([1, 2, 3]).map(1)
+      ot: err("ReqlQueryLogicError", "Expected type FUNCTION but found DATUM", [0])
 
     - cd: r.expr([1, 2, 3]).filter('foo')
       ot: ([1, 2, 3])
