@@ -31,6 +31,7 @@ module Storage
             t.save_db(info)
 
             after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
+            next
           end
 
           if existing_info != info

@@ -34,6 +34,7 @@ module Storage
             t.save_table(info)
 
             after_commit = ->{ db.tables[info.name] = info }
+            next
           end
 
           if existing_info != info
