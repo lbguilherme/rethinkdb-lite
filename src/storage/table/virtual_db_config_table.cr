@@ -33,7 +33,7 @@ module Storage
             after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
           end
 
-          if existing_row != new_row
+          if existing_info != info
             # Update
             raise "TODO: Update database"
           end

@@ -36,7 +36,7 @@ module Storage
             after_commit = ->{ db.tables[info.name] = info }
           end
 
-          if existing_row != new_row
+          if existing_info != info
             # Update
             raise "TODO: Update table"
           end
