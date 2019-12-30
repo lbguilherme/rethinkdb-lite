@@ -56,6 +56,38 @@ module ReQL
       @first_error ||= err.message
     end
 
+    def atomic_update(table : Storage::AbstractTable, key : Datum, durability : Durability? = nil)
+      after_commit = nil
+      primary_key = table.primary_key
+
+      table.replace(key, durability) do |old|
+        if old.nil?
+          after_commit = ->{ @skipped += 1 }
+          nil
+        else
+          row = yield old
+          row = ReQL.merge_objects(old, row)
+
+          if row == old
+            after_commit = ->{ @unchanged += 1 }
+            old
+          elsif row[primary_key] != old[primary_key]
+            pretty_old = JSON.build(4) { |builder| old.to_json(builder) }
+            pretty_row = JSON.build(4) { |builder| row.to_json(builder) }
+            raise ReQL::OpFailedError.new("Primary key `#{primary_key}` cannot be changed:\n#{pretty_old}\n#{pretty_row}")
+          else
+            after_commit = ->{ @replaced += 1 }
+            row
+          end
+        end
+      end
+
+      after_commit.try &.call
+    rescue err
+      @errors += 1
+      @first_error ||= err.message
+    end
+
     def summary
       result = Hash(String, Datum).new
 

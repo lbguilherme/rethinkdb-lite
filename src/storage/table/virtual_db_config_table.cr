@@ -17,21 +17,25 @@ module Storage
           new_row = yield encode(existing_info)
 
           if new_row.nil?
+            # Delete
             raise "TODO: Delete database"
-          else
-            info = decode(new_row)
+          end
+          info = decode(new_row)
 
-            if existing_info.nil?
-              if info.name == "rethinkdb" || @manager.databases.has_key?(info.name)
-                raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
-              end
-
-              t.save_db(info)
-
-              after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
-            else
-              raise "TODO: Update database"
+          if existing_info.nil?
+            # Insert
+            if info.name == "rethinkdb" || @manager.databases.has_key?(info.name)
+              raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
             end
+
+            t.save_db(info)
+
+            after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
+          end
+
+          if existing_row != new_row
+            # Update
+            raise "TODO: Update database"
           end
         end
 

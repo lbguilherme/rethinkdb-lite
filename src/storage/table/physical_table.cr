@@ -35,7 +35,9 @@ module Storage
             t.delete_row(@info.id, key_data)
           end
         else
-          t.set_row(@info.id, key_data, ReQL::Datum.new(new_row).serialize)
+          if existing_row != new_row
+            t.set_row(@info.id, key_data, ReQL::Datum.new(new_row).serialize)
+          end
         end
       end
     end

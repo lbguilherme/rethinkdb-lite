@@ -15,26 +15,30 @@ module Storage
           new_row = yield encode(existing_info)
 
           if new_row.nil?
+            # Delete
             raise "TODO: Delete table"
-          else
-            if new_row["db"]? == "rethinkdb"
-              raise ReQL::OpFailedError.new("Database `rethinkdb` is special; you can't create new tables in it")
+          end
+
+          if new_row["db"]? == "rethinkdb"
+            raise ReQL::OpFailedError.new("Database `rethinkdb` is special; you can't create new tables in it")
+          end
+          info = decode(new_row)
+
+          if existing_info.nil?
+            # Insert
+            db = @manager.databases[new_row["db"].string_value]
+            if db.tables.has_key?(info.name)
+              raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
             end
 
-            info = decode(new_row)
+            t.save_table(info)
 
-            if existing_info.nil?
-              db = @manager.databases[new_row["db"].string_value]
-              if db.tables.has_key?(info.name)
-                raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
-              end
+            after_commit = ->{ db.tables[info.name] = info }
+          end
 
-              t.save_table(info)
-
-              after_commit = ->{ db.tables[info.name] = info }
-            else
-              raise "TODO: Update table"
-            end
+          if existing_row != new_row
+            # Update
+            raise "TODO: Update table"
           end
         end
 
