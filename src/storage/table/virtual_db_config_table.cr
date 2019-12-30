@@ -1,7 +1,7 @@
 require "./virtual_table"
 
 module Storage
-  class VirtualDbConfigTable < VirtualTable
+  struct VirtualDbConfigTable < VirtualTable
     def initialize(@manager : Manager)
       super("db_config")
     end

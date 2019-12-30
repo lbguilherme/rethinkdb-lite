@@ -1,5 +1,5 @@
 module Storage
-  abstract class AbstractTable
+  abstract struct AbstractTable
     def close
     end
 

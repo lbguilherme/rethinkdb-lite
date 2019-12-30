@@ -1,5 +1,5 @@
 module Storage
-  abstract class VirtualTable < AbstractTable
+  abstract struct VirtualTable < AbstractTable
     def initialize(@name : String)
     end
 

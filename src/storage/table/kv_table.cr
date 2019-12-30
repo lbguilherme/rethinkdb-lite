@@ -2,7 +2,7 @@ require "json"
 require "./abstract_table"
 
 module Storage
-  class KvTable < AbstractTable
+  struct KvTable < AbstractTable
     def initialize(@kv : KeyValueStore, @info : KeyValueStore::TableInfo)
     end
 

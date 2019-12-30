@@ -1,5 +1,5 @@
 module Storage
-  class VirtualTableConfigTable < VirtualTable
+  struct VirtualTableConfigTable < VirtualTable
     def initialize(@manager : Manager)
       super("table_config")
     end
