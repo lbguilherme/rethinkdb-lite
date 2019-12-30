@@ -6,7 +6,7 @@ module Storage
       super("db_config", manager)
     end
 
-    def replace(key)
+    def replace(key, durability : ReQL::Durability? = nil)
       id = extract_uuid({"id" => key}, "id")
 
       @manager.lock.synchronize do

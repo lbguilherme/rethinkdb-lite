@@ -3,7 +3,7 @@ module Storage
     def initialize(@name : String, @manager : Manager)
     end
 
-    def replace(key, &block : Hash(String, ReQL::Datum)? -> Hash(String, ReQL::Datum)?)
+    def replace(key, durability : ReQL::Durability? = nil, &block : Hash(String, ReQL::Datum)? -> Hash(String, ReQL::Datum)?)
       raise ReQL::QueryLogicError.new("It's illegal to write to the `rethinkdb.#{@name}` table.")
     end
 

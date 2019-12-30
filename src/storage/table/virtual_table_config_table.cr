@@ -4,7 +4,7 @@ module Storage
       super("table_config", manager)
     end
 
-    def replace(key)
+    def replace(key, durability : ReQL::Durability? = nil)
       id = extract_uuid({"id" => key}, "id")
 
       @manager.lock.synchronize do
@@ -45,7 +45,7 @@ module Storage
     private def encode(info : KeyValueStore::TableInfo)
       ReQL::Datum.new({
         "db"          => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
-        "durability"  => info.soft_durability ? "soft" : "hard",
+        "durability"  => info.durability == ReQL::Durability::Soft ? "soft" : "hard",
         "id"          => info.id.to_s,
         "indexes"     => [] of String,
         "name"        => info.name,
@@ -72,7 +72,7 @@ module Storage
         info.primary_key = extract_string(obj, "primary_key")
       end
       if obj.has_key? "durability"
-        info.soft_durability = extract_durability(obj, "durability") == "soft"
+        info.durability = extract_durability(obj, "durability") == "soft" ? ReQL::Durability::Soft : ReQL::Durability::Hard
       end
       info
     end

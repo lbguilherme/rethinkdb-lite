@@ -16,10 +16,10 @@ module Storage
       end
     end
 
-    def replace(key)
+    def replace(key, durability : ReQL::Durability? = nil)
       key_data = key.serialize
 
-      @kv.transaction(@info.soft_durability) do |t|
+      @kv.transaction(durability || @info.durability) do |t|
         existing_row = t.get_row(@info.id, key_data) do |existing_row_data|
           if existing_row_data.nil?
             nil

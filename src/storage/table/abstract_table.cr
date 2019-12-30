@@ -13,7 +13,7 @@ module Storage
       result
     end
 
-    abstract def replace(key : ReQL::Datum, &block : Hash(String, ReQL::Datum)? -> Hash(String, ReQL::Datum)?)
+    abstract def replace(key : ReQL::Datum, durability : ReQL::Durability? = nil, &block : Hash(String, ReQL::Datum)? -> Hash(String, ReQL::Datum)?)
     abstract def scan(&block : Hash(String, ReQL::Datum) ->)
 
     def primary_key

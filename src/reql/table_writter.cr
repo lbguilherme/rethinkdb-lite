@@ -1,4 +1,9 @@
 module ReQL
+  enum Durability
+    Hard
+    Soft
+  end
+
   class TableWriter
     @deleted = 0
     @replaced = 0
@@ -9,10 +14,10 @@ module ReQL
     @first_error : String?
     @generated_keys = [] of String
 
-    def delete(table : Storage::AbstractTable, key : Datum)
+    def delete(table : Storage::AbstractTable, key : Datum, durability : Durability? = nil)
       after_commit = nil
 
-      table.replace(key) do |old|
+      table.replace(key, durability) do |old|
         if old.nil?
           after_commit = ->{ @skipped += 1 }
         else
@@ -27,7 +32,7 @@ module ReQL
       @first_error ||= err.message
     end
 
-    def insert(table : Storage::AbstractTable, row : Hash(String, Datum))
+    def insert(table : Storage::AbstractTable, row : Hash(String, Datum), durability : Durability? = nil)
       primary_key = table.primary_key
       unless row.has_key? primary_key
         id = UUID.random.to_s
@@ -35,7 +40,7 @@ module ReQL
         @generated_keys << id
       end
 
-      table.replace(row[primary_key]) do |old|
+      table.replace(row[primary_key], durability) do |old|
         if old.nil?
           row
         else
