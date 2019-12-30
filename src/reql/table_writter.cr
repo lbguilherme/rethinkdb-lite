@@ -10,12 +10,19 @@ module ReQL
     @generated_keys = [] of String
 
     def delete(table : Storage::AbstractTable, key : Datum)
-      if table.delete(key)
-        @deleted += 1
-      else
-        @skipped += 1
+      after_commit = nil
+
+      table.replace(key) do |old|
+        if old.nil?
+          after_commit = -> { @skipped += 1 }
+        else
+          after_commit = -> { @deleted += 1 }
+        end
+        nil
       end
-    rescue err : RuntimeError
+
+      after_commit.try &.call
+    rescue err
       @errors += 1
       @first_error ||= err.message
     end
@@ -39,7 +46,7 @@ module ReQL
       end
 
       @inserted += 1
-    rescue err : RuntimeError
+    rescue err
       @errors += 1
       @first_error ||= err.message
     end

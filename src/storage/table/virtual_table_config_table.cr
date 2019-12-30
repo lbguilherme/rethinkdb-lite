@@ -3,11 +3,8 @@ module Storage
     def initialize(@manager : Manager)
     end
 
-    def replace(key, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
-      raise "TODO"
-    end
-
-    def delete(key) : Bool
+    def replace(key)
+      yield nil
       raise "TODO"
     end
 

@@ -20,26 +20,22 @@ module Storage
       key_data = key.serialize
 
       @kv.transaction(@info.soft_durability) do |t|
-        new_row = t.get_row(@info.id, key_data) do |existing_row_data|
+        existing_row = t.get_row(@info.id, key_data) do |existing_row_data|
           if existing_row_data.nil?
-            yield nil
+            nil
           else
-            yield ReQL::Datum.unserialize(IO::Memory.new(existing_row_data)).hash_value
+            ReQL::Datum.unserialize(IO::Memory.new(existing_row_data)).hash_value
           end
         end
 
-        t.set_row(@info.id, key_data, ReQL::Datum.new(new_row).serialize)
-      end
-    end
+        new_row = yield existing_row
 
-    def delete(key) : Bool
-      key_data = key.serialize
-      @kv.transaction(@info.soft_durability) do |t|
-        if t.get_row(@info.id, key_data) { |data| data == nil }
-          false
+        if new_row.nil?
+          unless existing_row.nil?
+            t.delete_row(@info.id, key_data)
+          end
         else
-          t.delete_row(@info.id, key_data)
-          true
+          t.set_row(@info.id, key_data, ReQL::Datum.new(new_row).serialize)
         end
       end
     end
