@@ -6,7 +6,7 @@ require "./table_writter"
 module ReQL
   class Evaluator
     property vars = {} of Int64 => Datum
-    property table_writer : TableWriter?
+    property table_writers = [] of TableWriter
 
     def initialize(@manager : Storage::Manager)
     end

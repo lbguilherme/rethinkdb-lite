@@ -205,29 +205,29 @@ tests:
     - cd: tbl.count()
       ot: 0
 
-    # # Insert three elements
-    # - js: r([1, 2, 3]).forEach(function (row) { return tbl.insert({ id:row }) })
-    #   py: r.expr([1, 2, 3]).for_each(lambda row:tbl.insert({ 'id':row }))
-    #   rb: r([1, 2, 3]).for_each{ |row| tbl.insert({ :id => row }) }
-    #   ot: ({'deleted':0.0,'replaced':0.0,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':3})
+    # Insert three elements
+    - js: r([1, 2, 3]).forEach(function (row) { return tbl.insert({ id:row }) })
+      py: r.expr([1, 2, 3]).for_each(lambda row:tbl.insert({ 'id':row }))
+      rb: r([1, 2, 3]).for_each{ |row| tbl.insert({ :id => row }) }
+      ot: ({'deleted':0.0,'replaced':0.0,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':3})
 
-    # - cd: tbl.count()
-    #   ot: 3
+    - cd: tbl.count()
+      ot: 3
 
-    # # Update each row to add additional attribute
-    # - js: r([1, 2, 3]).forEach(function (row) { return tbl.update({ foo:row }) })
-    #   py: r.expr([1,2,3]).for_each(lambda row:tbl.update({'foo':row}))
-    #   rb: r.expr([1,2,3]).for_each{ |row| tbl.update({ :foo => row }) }
-    #   ot: ({'deleted':0.0,'replaced':9,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':0.0})
+    # Update each row to add additional attribute
+    - js: r([1, 2, 3]).forEach(function (row) { return tbl.update({ foo:row }) })
+      py: r.expr([1,2,3]).for_each(lambda row:tbl.update({'foo':row}))
+      rb: r.expr([1,2,3]).for_each{ |row| tbl.update({ :foo => row }) }
+      ot: ({'deleted':0.0,'replaced':9,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':0.0})
 
-    # # Insert three more elements (and error on three)
-    # - js: r([1, 2, 3]).forEach(function (row) { return [tbl.insert({ id:row }), tbl.insert({ id:row.mul(10) })] })
-    #   py: r.expr([1,2,3]).for_each(lambda row:[tbl.insert({ 'id':row }), tbl.insert({ 'id':row*10 })])
-    #   rb: r.expr([1,2,3]).for_each{ |row| [tbl.insert({ :id => row}), tbl.insert({ :id => row*10})] }
-    #   ot: {'first_error':"Duplicate primary key `id`:\n{\n\t\"foo\":\t3,\n\t\"id\":\t1\n}\n{\n\t\"id\":\t1\n}",'deleted':0.0,'replaced':0.0,'unchanged':0.0,'errors':3,'skipped':0.0,'inserted':3}
+    # Insert three more elements (and error on three)
+    - js: r([1, 2, 3]).forEach(function (row) { return [tbl.insert({ id:row }), tbl.insert({ id:row.mul(10) })] })
+      py: r.expr([1,2,3]).for_each(lambda row:[tbl.insert({ 'id':row }), tbl.insert({ 'id':row*10 })])
+      rb: r.expr([1,2,3]).for_each{ |row| [tbl.insert({ :id => row}), tbl.insert({ :id => row*10})] }
+      ot: partial({'deleted':0.0,'replaced':0.0,'unchanged':0.0,'errors':3,'skipped':0.0,'inserted':3})
 
-    # - cd: tbl.count()
-    #   ot: 6
+    - cd: tbl.count()
+      ot: 6
 
     # - cd: tableCount = tbl2.count()
     # - cd: r.expr([1, 2, 3]).for_each( tbl2.insert({}) )
@@ -236,16 +236,16 @@ tests:
     # - cd: tbl2.count()
     #   ot: tableCount + 1
 
-    # # We have six elements, update them 6*2*3=36 times
-    # - js: r([1, 2, 3]).forEach(function (row) { return [tbl.update({ foo:row }), tbl.update({ bar:row })] })
-    #   py: r.expr([1,2,3]).for_each(lambda row:[tbl.update({'foo':row}), tbl.update({'bar':row})])
-    #   rb: r.expr([1,2,3]).for_each{ |row| [tbl.update({:foo => row}), tbl.update({:bar => row})]}
-    #   ot: ({'deleted':0.0,'replaced':36,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':0.0})
+    # We have six elements, update them 6*2*3=36 times
+    - js: r([1, 2, 3]).forEach(function (row) { return [tbl.update({ foo:row }), tbl.update({ bar:row })] })
+      py: r.expr([1,2,3]).for_each(lambda row:[tbl.update({'foo':row}), tbl.update({'bar':row})])
+      rb: r.expr([1,2,3]).for_each{ |row| [tbl.update({:foo => row}), tbl.update({:bar => row})]}
+      ot: ({'deleted':0.0,'replaced':36,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':0.0})
 
-    # # forEach negative cases
-    # - cd: r.expr([1, 2, 3]).for_each( tbl2.insert({ 'id':r.row }) )
-    #   rb: r([1, 2, 3]).for_each{ |row| tbl2.insert({ 'id':row }) }
-    #   ot: ({'deleted':0.0,'replaced':0.0,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':3})
+    # forEach negative cases
+    - cd: r.expr([1, 2, 3]).for_each( tbl2.insert({ 'id':r.row }) )
+      rb: r([1, 2, 3]).for_each{ |row| tbl2.insert({ 'id':row }) }
+      ot: ({'deleted':0.0,'replaced':0.0,'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':3})
 
     # - cd: r.expr([1, 2, 3]).for_each(1)
     #   ot: err("ReqlQueryLogicError", "FOR_EACH expects one or more basic write queries.  Expected type ARRAY but found NUMBER.", [0])

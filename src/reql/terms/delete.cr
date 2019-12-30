@@ -26,6 +26,8 @@ module ReQL
         writter.delete(row.table, row.key)
       end
 
+      @table_writers.last?.try &.merge(writter)
+
       writter.summary
     end
   end

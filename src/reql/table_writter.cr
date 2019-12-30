@@ -5,14 +5,14 @@ module ReQL
   end
 
   class TableWriter
-    @deleted = 0
-    @replaced = 0
-    @skipped = 0
-    @unchanged = 0
-    @inserted = 0
-    @errors = 0
-    @first_error : String?
-    @generated_keys = [] of String
+    property deleted = 0
+    property replaced = 0
+    property skipped = 0
+    property unchanged = 0
+    property inserted = 0
+    property errors = 0
+    property first_error : String?
+    property generated_keys = [] of String
 
     def delete(table : Storage::AbstractTable, key : Datum, durability : Durability? = nil)
       after_commit = nil
@@ -86,6 +86,17 @@ module ReQL
     rescue err
       @errors += 1
       @first_error ||= err.message
+    end
+
+    def merge(other : TableWriter)
+      @deleted += other.deleted
+      @replaced += other.replaced
+      @skipped += other.skipped
+      @unchanged += other.unchanged
+      @inserted += other.inserted
+      @errors += other.errors
+      @first_error ||= other.first_error
+      @generated_keys += other.generated_keys
     end
 
     def summary

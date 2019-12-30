@@ -25,12 +25,6 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(block : R, R, R, R, R -> R::Type, max_depth)
-        vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
-        vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)], nil), max_depth - 1).as(R) }
-        ReQL::FuncTerm.new([vari.to_a.map(&.as(ReQL::Term::Type)).as(ReQL::Term::Type), R.convert_type(block.call(*vars), max_depth - 1).as(ReQL::Term::Type)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
-      end
-
       def self.convert_type(x : Int32, max_depth)
         x.as(ReQL::Term::Type)
       end
@@ -205,6 +199,14 @@ module RethinkDB
             options.to_h.map { |k, v| {k.to_s, R.to_json_any(v)}.as({String, JSON::Any}) }.to_h
           )
         end
+
+        def initialize(*args, **options, &block : Int32, R, R, R, R, R, R, R -> ReQL::Term::Type)
+          max_depth = 1000
+          vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
+          vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)], nil), max_depth).as(R) }
+          block = ReQL::FuncTerm.new([vari.to_a.map(&.as(ReQL::Term::Type)).as(ReQL::Term::Type), block.call(max_depth - 1, *vars)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
+          initialize(*args, block, **options)
+        end
       end
 
       module R
@@ -216,12 +218,12 @@ module RethinkDB
           R{{name.id}}.new(self, *args, **options)
         end
 
-        def self.{{name.id}}(*args, **options, &block : R, R, R, R, R -> R::Type)
-          R{{name.id}}.new(*args, block, **options)
+        def self.{{name.id}}(*args, **options, &block : R, R, R, R, R, R, R -> X) forall X
+          R{{name.id}}.new(*args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
         end
 
-        def {{name.id}}(*args, **options, &block : R, R, R, R, R -> R::Type)
-          R{{name.id}}.new(self, *args, block, **options)
+        def {{name.id}}(*args, **options, &block : R, R, R, R, R, R, R -> X) forall X
+          R{{name.id}}.new(self, *args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
         end
       end
     end
@@ -234,6 +236,7 @@ module RethinkDB
     term insert, InsertTerm
     term delete, DeleteTerm
     term update, UpdateTerm
+    term for_each, ForEachTerm
     term bracket, BracketTerm
     term "do", DoTerm
     term count, CountTerm

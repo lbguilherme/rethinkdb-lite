@@ -32,6 +32,8 @@ module ReQL
         writter.insert(table.storage, obj)
       end
 
+      @table_writers.last?.try &.merge(writter)
+
       writter.summary
     end
   end
