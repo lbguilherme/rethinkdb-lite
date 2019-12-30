@@ -1,7 +1,7 @@
 module Storage
   struct VirtualTableConfigTable < VirtualTable
-    def initialize(@manager : Manager)
-      super("table_config")
+    def initialize(manager : Manager)
+      super("table_config", manager)
     end
 
     def replace(key)

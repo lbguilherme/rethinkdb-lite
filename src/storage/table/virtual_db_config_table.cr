@@ -2,8 +2,8 @@ require "./virtual_table"
 
 module Storage
   struct VirtualDbConfigTable < VirtualTable
-    def initialize(@manager : Manager)
-      super("db_config")
+    def initialize(manager : Manager)
+      super("db_config", manager)
     end
 
     def replace(key)

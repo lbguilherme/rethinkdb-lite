@@ -1,7 +1,7 @@
 module Storage
   struct VirtualTableStatusTable < VirtualTable
-    def initialize(@manager : Manager)
-      super("table_status")
+    def initialize(manager : Manager)
+      super("table_status", manager)
     end
 
     private def encode(info : KeyValueStore::TableInfo)
