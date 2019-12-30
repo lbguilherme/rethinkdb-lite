@@ -5,3 +5,5 @@ bin
 .crystal
 
 data
+cov
+src/test.cr
