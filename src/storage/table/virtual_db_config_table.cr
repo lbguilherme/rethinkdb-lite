@@ -7,15 +7,35 @@ module Storage
     end
 
     def replace(key)
-      existing = get(key)
-      row = yield existing
-      if existing.nil?
-        info = decode(row)
-        @manager.create_db(info.name, info.id) do |current_info|
-          yield encode(current_info)
+      id = extract_uuid({"id" => key}, "id")
+
+      @manager.lock.synchronize do
+        after_commit = nil
+
+        @manager.kv.transaction do |t|
+          existing_info = t.get_db(id)
+          new_row = yield encode(existing_info)
+
+          if new_row.nil?
+            raise "TODO: Delete database"
+          else
+            info = decode(new_row)
+
+            if existing_info.nil?
+              if info.name == "rethinkdb" || @manager.databases.has_key?(info.name)
+                raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
+              end
+
+              t.save_db(info)
+
+              after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
+            else
+              raise "TODO: Update database"
+            end
+          end
         end
-      else
-        raise "TODO"
+
+        after_commit.try &.call
       end
     end
 
@@ -40,12 +60,12 @@ module Storage
 
     def get(key)
       id = UUID.new(key.string_value) rescue return nil
-      encode(@manager.get_db(id))
+      encode(@manager.kv.get_db(id))
     end
 
     def scan
-      @manager.databases.each_value do |db|
-        yield encode(db.info)
+      @manager.kv.each_db do |info|
+        yield encode(info)
       end
     end
   end

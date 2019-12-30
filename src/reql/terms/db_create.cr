@@ -16,7 +16,12 @@ module ReQL
         raise QueryLogicError.new "Database name `#{name}` invalid (Use A-Z, a-z, 0-9, _ and - only)."
       end
 
-      @manager.create_db(name) { }
+      db_config = @manager.get_table("rethinkdb", "db_config").not_nil!
+
+      writter = TableWriter.new
+      writter.insert(db_config, {
+        "name" => Datum.new(name),
+      })
 
       Datum.new(Hash(String, Datum::Type).new)
     end
