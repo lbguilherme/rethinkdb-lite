@@ -4,11 +4,6 @@ module Storage
       super("table_status")
     end
 
-    def replace(key)
-      yield nil
-      raise "TODO"
-    end
-
     private def encode(info : KeyValueStore::TableInfo)
       ReQL::Datum.new({
         "db"          => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
