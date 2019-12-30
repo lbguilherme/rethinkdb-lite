@@ -18,7 +18,7 @@ module ReQL
         else
           after_commit = ->{ @deleted += 1 }
         end
-        nil.as(Hash(String, ReQL::Datum)?)
+        nil
       end
 
       after_commit.try &.call
