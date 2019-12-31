@@ -12,10 +12,20 @@ module Storage
     TABLE_PREFIX_INDICES    = 1u8
     TABLE_PREFIX_INDEX_DATA = 2u8
 
+    # Minimal durability: data it stored in memory only and flushed to disk at some later point.
+    # A process crash will might cause data loss. A graceful server close (Ctrl+C or calling .close()) won't lose data.
+    # The data might be lost, but it won't be corrupted. This is the fastest option.
+    MINIMAL_DURABILITY = RocksDB::WriteOptions.new
+    MINIMAL_DURABILITY.disable_wal = true
+    MINIMAL_DURABILITY.sync = false
+
+    # Soft durability: data is sent to the operating system memory and will be synced to disk later.
+    # A kernel panic or system power or hardware failure might cause data loss. A process crash won't lose any data.
     SOFT_DURABILITY = RocksDB::WriteOptions.new
-    SOFT_DURABILITY.disable_wal = true
+    SOFT_DURABILITY.disable_wal = false
     SOFT_DURABILITY.sync = false
 
+    # Hard durability: data is written on disk always. This is the default and this is paranoic. No data will be lost, ever.
     HARD_DURABILITY = RocksDB::WriteOptions.new
     HARD_DURABILITY.disable_wal = false
     HARD_DURABILITY.sync = true
@@ -176,6 +186,19 @@ module Storage
 
     def close
       @rocksdb.close
+    end
+
+    private def get_write_options(durability : ReQL::Durability)
+      case durability
+      when ReQL::Durability::Soft
+        SOFT_DURABILITY
+      when ReQL::Durability::Hard
+        HARD_DURABILITY
+      when ReQL::Durability::Minimal
+        MINIMAL_DURABILITY
+      else
+        raise "BUG: unknown durability"
+      end
     end
 
     def get_db(id : UUID)
@@ -341,7 +364,7 @@ module Storage
                   RocksDB::OptimisticTransactionOptions.new
                 {% end %}
       options.set_snapshot = true
-      txn = @rocksdb.begin_transaction(durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY, options)
+      txn = @rocksdb.begin_transaction(get_write_options(durability), options)
       loop do
         begin
           result = yield Transaction.new(txn)
@@ -349,7 +372,7 @@ module Storage
           return result
         rescue ex
           if ex.is_a?(RocksDB::Error) && ex.message.try &.starts_with? "Resource busy"
-            txn.begin(durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
+            txn.begin(get_write_options(durability))
           else
             txn.rollback
             raise ex
@@ -379,11 +402,11 @@ module Storage
     end
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft)
-      @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data, durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
+      @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data, get_write_options(durability))
     end
 
     def delete_row(table_id : UUID, primary_key : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft) : Bytes?
-      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key), durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
+      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key), get_write_options(durability))
     end
 
     def each_row(table_id : UUID)

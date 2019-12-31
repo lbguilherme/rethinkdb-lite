@@ -2,6 +2,7 @@ module ReQL
   enum Durability
     Hard
     Soft
+    Minimal
   end
 
   class TableWriter

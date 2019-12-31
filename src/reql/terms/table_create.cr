@@ -55,8 +55,10 @@ module ReQL
           descriptor["durability"] = Datum.new("hard")
         when "soft"
           descriptor["durability"] = Datum.new("soft")
+        when "minimal"
+          descriptor["durability"] = Datum.new("minimal")
         else
-          raise QueryLogicError.new "Durability option `#{durability}` unrecognized (options are \"hard\" and \"soft\")"
+          raise QueryLogicError.new "Durability option `#{durability}` unrecognized (options are \"hard\", \"soft\" and \"minimal\")"
         end
       end
 
