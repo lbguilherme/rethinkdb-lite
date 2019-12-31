@@ -103,10 +103,6 @@ module ReQL
       result = Hash(String, Datum).new
 
       result["deleted"] = Datum.new(@deleted)
-      result["replaced"] = Datum.new(@replaced)
-      result["skipped"] = Datum.new(@skipped)
-      result["unchanged"] = Datum.new(@unchanged)
-      result["inserted"] = Datum.new(@inserted)
       result["errors"] = Datum.new(@errors)
 
       if @first_error
@@ -116,6 +112,11 @@ module ReQL
       if !@generated_keys.empty?
         result["generated_keys"] = Datum.new(@generated_keys)
       end
+
+      result["inserted"] = Datum.new(@inserted)
+      result["replaced"] = Datum.new(@replaced)
+      result["skipped"] = Datum.new(@skipped)
+      result["unchanged"] = Datum.new(@unchanged)
 
       Datum.new(result)
     end
