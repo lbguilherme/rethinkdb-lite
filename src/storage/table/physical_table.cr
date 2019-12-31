@@ -37,6 +37,10 @@ module Storage
         else
           if existing_row != new_row
             t.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
+
+            @table.indices.values.each do |index|
+              update_index_data(t, index, key_data, existing_row, new_row)
+            end
           end
         end
       end
@@ -45,6 +49,34 @@ module Storage
     def scan
       @manager.kv.each_row(@table.info.id) do |data|
         yield ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+      end
+    end
+
+    def update_index_data(t, index, key_data, old_row, new_row)
+      evaluator = ReQL::Evaluator.new(@manager)
+      old_computed = old_row.try { |row| index.info.function.eval(evaluator, {ReQL::Datum.new(row)}).as_datum rescue nil }
+      new_computed = new_row.try { |row| index.info.function.eval(evaluator, {ReQL::Datum.new(row)}).as_datum rescue nil }
+
+      old_set = Set(ReQL::Datum).new
+      new_set = Set(ReQL::Datum).new
+      if index.info.multi
+        old_computed = old_computed.try &.array_value?
+        old_set.concat(old_computed) if old_computed
+        new_computed = new_computed.try &.array_value?
+        new_set.concat(new_computed) if new_computed
+      else
+        old_set << old_computed if old_computed
+        new_set << new_computed if new_computed
+      end
+
+      # Remove values that are now missing
+      (old_set - new_set).each do |value|
+        t.delete_index_entry(@table.info.id, index.info.id, value.serialize, key_data)
+      end
+
+      # Add new values
+      (new_set - old_set).each do |value|
+        t.set_index_entry(@table.info.id, index.info.id, value.serialize, key_data)
       end
     end
 

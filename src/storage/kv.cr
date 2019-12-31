@@ -59,7 +59,7 @@ module Storage
       io = IO::Memory.new
       io.write_bytes(PREFIX_TABLE_DATA)
       io.write(table_id.bytes.to_slice)
-      io.write_bytes(TABLE_PREFIX_DATA + 1)
+      io.write_bytes(TABLE_PREFIX_DATA + 1u8)
       io.to_slice
     end
 
@@ -84,7 +84,21 @@ module Storage
       io = IO::Memory.new
       io.write_bytes(PREFIX_TABLE_DATA)
       io.write(table_id.bytes.to_slice)
-      io.write_bytes(TABLE_PREFIX_INDICES + 1)
+      io.write_bytes(TABLE_PREFIX_INDICES + 1u8)
+      io.to_slice
+    end
+
+    def self.key_for_table_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, primary_key : Bytes)
+      io = IO::Memory.new
+      io.write_bytes(PREFIX_TABLE_DATA)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(TABLE_PREFIX_INDEX_DATA)
+      io.write(index_id.bytes.to_slice)
+      io.write_bytes(0u8)
+      io.write(index_value)
+      io.write_bytes(0u8)
+      io.write(primary_key)
+      io.write_bytes(primary_key.size.to_u32)
       io.to_slice
     end
 
@@ -221,6 +235,14 @@ module Storage
         @txn.delete(KeyValueStore.key_for_table_data(table_id, primary_key))
       end
 
+      def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, primary_key : Bytes)
+        @txn.put(KeyValueStore.key_for_table_index_entry(table_id, index_id, index_value, primary_key), Bytes.new(0))
+      end
+
+      def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, primary_key : Bytes)
+        @txn.delete(KeyValueStore.key_for_table_index_entry(table_id, index_id, index_value, primary_key))
+      end
+
       def get_table(id : UUID)
         bytes = @txn.get(KeyValueStore.key_for_table(id))
         if bytes.nil?
@@ -257,7 +279,13 @@ module Storage
     end
 
     def transaction(durability : ReQL::Durability = ReQL::Durability::Soft)
-      txn = @rocksdb.begin_transaction(durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
+      options = {% if flag?(:preview_mt) %}
+                  RocksDB::TransactionOptions.new
+                {% else %}
+                  RocksDB::OptimisticTransactionOptions.new
+                {% end %}
+      options.set_snapshot = true
+      txn = @rocksdb.begin_transaction(durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY, options)
       loop do
         begin
           result = yield Transaction.new(txn)
