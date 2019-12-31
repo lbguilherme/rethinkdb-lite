@@ -4,11 +4,13 @@ require "rocksdb"
 
 module Storage
   class KeyValueStore
-    PREFIX_SYSTEM_INFO = 0u8
-    PREFIX_DATABASES   = 1u8
-    PREFIX_TABLES      = 2u8
-    PREFIX_TABLE_DATA  = 3u8
-    TABLE_PREFIX_DATA  = 0u8
+    PREFIX_SYSTEM_INFO      = 0u8
+    PREFIX_DATABASES        = 1u8
+    PREFIX_TABLES           = 2u8
+    PREFIX_TABLE_DATA       = 3u8
+    TABLE_PREFIX_DATA       = 0u8
+    TABLE_PREFIX_INDICES    = 1u8
+    TABLE_PREFIX_INDEX_DATA = 2u8
 
     SOFT_DURABILITY = RocksDB::WriteOptions.new
     SOFT_DURABILITY.disable_wal = true
@@ -58,6 +60,31 @@ module Storage
       io.write_bytes(PREFIX_TABLE_DATA)
       io.write(table_id.bytes.to_slice)
       io.write_bytes(TABLE_PREFIX_DATA + 1)
+      io.to_slice
+    end
+
+    def self.key_for_table_index(table_id : UUID, index_id : UUID)
+      io = IO::Memory.new
+      io.write_bytes(PREFIX_TABLE_DATA)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(TABLE_PREFIX_INDICES)
+      io.write(index_id.bytes.to_slice)
+      io.to_slice
+    end
+
+    def self.key_for_table_index_start(table_id : UUID)
+      io = IO::Memory.new
+      io.write_bytes(PREFIX_TABLE_DATA)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(TABLE_PREFIX_INDICES)
+      io.to_slice
+    end
+
+    def self.key_for_table_index_end(table_id : UUID)
+      io = IO::Memory.new
+      io.write_bytes(PREFIX_TABLE_DATA)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(TABLE_PREFIX_INDICES + 1)
       io.to_slice
     end
 
@@ -150,6 +177,21 @@ module Storage
       iter.seek(Bytes[PREFIX_TABLES])
       while iter.valid?
         yield TableInfo.load(iter.value)
+        iter.next
+      end
+    end
+
+    def save_index(index : IndexInfo)
+      @rocksdb.put(KeyValueStore.key_for_table_index(index.table, index.id), index.serialize, HARD_DURABILITY)
+    end
+
+    def each_index(table_id : UUID)
+      options = RocksDB::ReadOptions.new
+      options.iterate_upper_bound = KeyValueStore.key_for_table_index_end(table_id)
+      iter = @rocksdb.iterator(options)
+      iter.seek(KeyValueStore.key_for_table_index_start(table_id))
+      while iter.valid?
+        yield IndexInfo.load(iter.value)
         iter.next
       end
     end
@@ -349,6 +391,47 @@ module Storage
         obj.name = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
         obj.primary_key = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
         obj.durability = io.read_bytes(UInt8) != 0u8 ? ReQL::Durability::Soft : ReQL::Durability::Hard
+        obj
+      end
+    end
+
+    struct IndexInfo
+      property id : UUID = UUID.random
+      property table : UUID = UUID.empty
+      property name : String = ""
+      property ready : Bool = false
+      property multi : Bool = false
+      property function : ReQL::Func = ReQL::ReqlFunc.new([1i64], ReQL::VarTerm.new([1i64.as(ReQL::Term::Type)], nil).as(ReQL::Term))
+
+      def serialize
+        io = IO::Memory.new
+        io.write(@id.bytes.to_slice)
+        io.write(@table.bytes.to_slice)
+        io.write_bytes(@name.bytesize.to_u32, IO::ByteFormat::LittleEndian)
+        io.write(@name.to_slice)
+        io.write_bytes(@ready ? 1u8 : 0u8)
+        io.write_bytes(@multi ? 1u8 : 0u8)
+        function_bytes = @function.encode
+        io.write_bytes(function_bytes.size.to_u32, IO::ByteFormat::LittleEndian)
+        io.write(function_bytes)
+        io.to_slice
+      end
+
+      def self.load(bytes : Bytes) : IndexInfo
+        io = IO::Memory.new(bytes, false)
+        obj = new
+        id_bytes = Bytes.new(16)
+        io.read_fully(id_bytes)
+        obj.id = UUID.new(id_bytes)
+        table_bytes = Bytes.new(16)
+        io.read_fully(table_bytes)
+        obj.table = UUID.new(table_bytes)
+        obj.name = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
+        obj.ready = io.read_bytes(UInt8) != 0u8
+        obj.multi = io.read_bytes(UInt8) != 0u8
+        function_bytes = Bytes.new(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
+        io.read_fully(function_bytes)
+        obj.function = ReQL::Func.decode(function_bytes)
         obj
       end
     end

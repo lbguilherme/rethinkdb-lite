@@ -7,9 +7,28 @@ module Storage
     property kv : KeyValueStore
     property lock = Mutex.new
 
-    record Database,
-      info : KeyValueStore::DatabaseInfo,
-      tables = Hash(String, KeyValueStore::TableInfo).new
+    class Database
+      property info : KeyValueStore::DatabaseInfo
+      property tables = Hash(String, Table).new
+
+      def initialize(@info)
+      end
+    end
+
+    class Table
+      property info : KeyValueStore::TableInfo
+      property indices = Hash(String, Index).new
+
+      def initialize(@info)
+      end
+    end
+
+    class Index
+      property info : KeyValueStore::IndexInfo
+
+      def initialize(@info)
+      end
+    end
 
     def initialize(path : String)
       @kv = KeyValueStore.new(path)
@@ -22,7 +41,11 @@ module Storage
       end
 
       @kv.each_table do |info|
-        db_by_id[info.db].tables[info.name] = info
+        table = db_by_id[info.db].tables[info.name] = Table.new(info)
+
+        @kv.each_index(info.id) do |index_info|
+          table.indices[index_info.name] = Index.new(index_info)
+        end
       end
 
       unless @databases.has_key?("test")
@@ -47,8 +70,8 @@ module Storage
         end
       end
 
-      info = @databases[db_name]?.try &.tables[table_name]?
-      info.nil? ? nil : PhysicalTable.new(@kv, info)
+      table = @lock.synchronize { @databases[db_name]?.try &.tables[table_name]? }
+      table.nil? ? nil : PhysicalTable.new(self, table)
     end
 
     def close

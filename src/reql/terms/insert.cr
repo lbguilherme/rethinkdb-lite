@@ -4,6 +4,10 @@ module ReQL
   class InsertTerm < Term
     register_type INSERT
     infix_inspect "insert"
+
+    def compile
+      expect_args 2
+    end
   end
 
   class Evaluator

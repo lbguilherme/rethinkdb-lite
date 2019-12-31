@@ -11,15 +11,17 @@ module ReQL
       "TABLE"
     end
 
-    def initialize(@db : Db?, @name : String, @manager : Storage::Manager)
+    property name
+    property db
+
+    def initialize(@db : Db, @name : String, @manager : Storage::Manager)
       @internal = InternalData.new
     end
 
     def storage
-      db_name = @db.try &.name || "test"
-      result = @manager.get_table(db_name, @name)
+      result = @manager.get_table(@db.name, @name)
       if result.nil?
-        raise OpFailedError.new("Table `#{db_name}.#{@name}` does not exist")
+        raise OpFailedError.new("Table `#{@db.name}.#{@name}` does not exist")
       end
       result
     end

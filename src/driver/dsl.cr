@@ -228,64 +228,66 @@ module RethinkDB
       end
     end
 
-    term db, DbTerm
-    term db_create, DbCreateTerm
-    term table, TableTerm
-    term table_create, TableCreateTerm
-    term get, GetTerm
-    term insert, InsertTerm
-    term delete, DeleteTerm
-    term update, UpdateTerm
-    term for_each, ForEachTerm
-    term bracket, BracketTerm
     term "do", DoTerm
-    term count, CountTerm
-    term range, RangeTerm
-    term uuid, UuidTerm
-    term filter, FilterTerm
-    term map, MapTerm
-    term merge, MergeTerm
-    term default, DefaultTerm
-    term slice, SliceTerm
-    term limit, LimitTerm
-    term skip, SkipTerm
-    term sum, SumTerm
-    term object, ObjectTerm
-    term type_of, TypeOfTerm
-    term coerce_to, CoerceToTerm
-    term order_by, OrderByTerm
-    term distinct, DistinctTerm
-    term split, SplitTerm
-    term upcase, UpCaseTerm
-    term downcase, DownCaseTerm
-    term insert_at, InsertAtTerm
-    term change_at, ChangeAtTerm
-    term splice_at, SpliceAtTerm
-    term delete_at, DeleteAtTerm
     term add, AddTerm
-    term sub, SubTerm
-    term mul, MulTerm
-    term div, DivTerm
-    term mod, ModTerm
-    term eq, EqTerm
-    term ne, NeTerm
-    term gt, GtTerm
-    term ge, GeTerm
-    term lt, LtTerm
-    term le, LeTerm
     term and, AndTerm
-    term or, OrTerm
-    term not, NotTerm
-    term floor, FloorTerm
-    term ceil, CeilTerm
-    term round, RoundTerm
     term append, AppendTerm
-    term minval, MinvalTerm
-    term maxval, MaxvalTerm
     term binary, BinaryTerm
+    term bracket, BracketTerm
     term branch, BranchTerm
+    term ceil, CeilTerm
+    term change_at, ChangeAtTerm
+    term coerce_to, CoerceToTerm
+    term count, CountTerm
+    term db_create, DbCreateTerm
+    term db, DbTerm
+    term default, DefaultTerm
+    term delete_at, DeleteAtTerm
+    term delete, DeleteTerm
+    term distinct, DistinctTerm
+    term div, DivTerm
+    term downcase, DownCaseTerm
+    term eq, EqTerm
     term error, ErrorTerm
+    term filter, FilterTerm
+    term floor, FloorTerm
+    term for_each, ForEachTerm
+    term ge, GeTerm
+    term get, GetTerm
+    term gt, GtTerm
+    term index_status, IndexStatusTerm
+    term index_create, IndexCreateTerm
+    term insert_at, InsertAtTerm
+    term insert, InsertTerm
     term js, JsTerm
+    term le, LeTerm
+    term limit, LimitTerm
+    term lt, LtTerm
+    term map, MapTerm
+    term maxval, MaxvalTerm
+    term merge, MergeTerm
+    term minval, MinvalTerm
+    term mod, ModTerm
+    term mul, MulTerm
+    term ne, NeTerm
+    term not, NotTerm
+    term object, ObjectTerm
+    term or, OrTerm
+    term order_by, OrderByTerm
+    term range, RangeTerm
+    term round, RoundTerm
+    term skip, SkipTerm
+    term slice, SliceTerm
+    term splice_at, SpliceAtTerm
+    term split, SplitTerm
+    term sub, SubTerm
+    term sum, SumTerm
+    term table_create, TableCreateTerm
+    term table, TableTerm
+    term type_of, TypeOfTerm
+    term upcase, UpCaseTerm
+    term update, UpdateTerm
+    term uuid, UuidTerm
   end
 end
 
