@@ -13,14 +13,14 @@ module Storage
     TABLE_PREFIX_INDEX_DATA = 2u8
 
     # Minimal durability: data it stored in memory only and flushed to disk at some later point.
-    # A process crash will might cause data loss. A graceful server close (Ctrl+C or calling .close()) won't lose data.
-    # The data might be lost, but it won't be corrupted. This is the fastest option.
+    # A process crash might cause data loss. A graceful server close (calling .close()) won't lose data.
+    # Note: The data might be lost, but it won't be corrupted. This is the fastest option.
     MINIMAL_DURABILITY = RocksDB::WriteOptions.new
     MINIMAL_DURABILITY.disable_wal = true
     MINIMAL_DURABILITY.sync = false
 
     # Soft durability: data is sent to the operating system memory and will be synced to disk later.
-    # A kernel panic or system power or hardware failure might cause data loss. A process crash won't lose any data.
+    # Only a kernel panic or hardware failure might cause data loss. Crashing the process won't lose any data.
     SOFT_DURABILITY = RocksDB::WriteOptions.new
     SOFT_DURABILITY.disable_wal = false
     SOFT_DURABILITY.sync = false
