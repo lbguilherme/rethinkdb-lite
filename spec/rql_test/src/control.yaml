@@ -269,9 +269,9 @@ tests:
     #   ot: err("ReqlDriverCompileError", 'Anonymous function returned `undefined`. Did you forget a `return`?', [1])
 
     # Make sure write queries can't be nested into stream ops
-    # - cd: r.expr(1).do(tbl.insert({'foo':r.row}))
-    #   rb: r(1).do{ |row| tbl.insert({ :foo => row }) }
-    #   ot: ({'deleted':0.0,'replaced':0.0,'generated_keys':arrlen(1,uuid()),'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':1})
+    - cd: r.expr(1).do(tbl.insert({'foo':r.row}))
+      rb: r(1).do{ |row| tbl.insert({ :foo => row }) }
+      ot: ({'deleted':0.0,'replaced':0.0,'generated_keys':arrlen(1,uuid()),'unchanged':0.0,'errors':0.0,'skipped':0.0,'inserted':1})
 
     # - py: r.expr([1, 2])[0].do(tbl.insert({'foo':r.row}))
     #   js: r.expr([1, 2]).nth(0).do(tbl.insert({'foo':r.row}))
