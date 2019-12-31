@@ -33,7 +33,7 @@ module Storage
 
             t.save_table(info)
 
-            after_commit = ->{ db.tables[info.name] = Manager::Table.new(info) }
+            after_commit = ->{ db.tables[info.name] = Manager::Table.new(info, db.info.name) }
             next
           end
 

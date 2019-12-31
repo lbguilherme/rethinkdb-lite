@@ -98,8 +98,47 @@ module Storage
       io.write(index_value)
       io.write_bytes(0u8)
       io.write(primary_key)
-      io.write_bytes(primary_key.size.to_u32)
+      io.write_bytes(primary_key.size.to_u32, IO::ByteFormat::LittleEndian)
       io.to_slice
+    end
+
+    def self.key_for_table_index_entry_start(table_id : UUID, index_id : UUID, index_value : Bytes)
+      io = IO::Memory.new
+      io.write_bytes(PREFIX_TABLE_DATA)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(TABLE_PREFIX_INDEX_DATA)
+      io.write(index_id.bytes.to_slice)
+      io.write_bytes(0u8)
+      io.write(index_value)
+      io.write_bytes(0u8)
+      io.to_slice
+    end
+
+    def self.key_for_table_index_entry_end(table_id : UUID, index_id : UUID, index_value : Bytes)
+      io = IO::Memory.new
+      io.write_bytes(PREFIX_TABLE_DATA)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(TABLE_PREFIX_INDEX_DATA)
+      io.write(index_id.bytes.to_slice)
+      io.write_bytes(0u8)
+      io.write(index_value)
+      io.write_bytes(1u8)
+      io.to_slice
+    end
+
+    def self.decompose_index_entry_key(index_entry_key : Bytes)
+      io = IO::Memory.new(index_entry_key, false)
+      io.seek(index_entry_key.size - 4)
+
+      primary_key = Bytes.new(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
+      io.seek(index_entry_key.size - 4 - primary_key.size)
+      io.read_fully(primary_key)
+
+      index_value = Bytes.new(index_entry_key.size - 1 - 16 - 1 - 16 - 1 - 1 - primary_key.size - 4)
+      io.seek(1 + 16 + 1 + 16 + 1)
+      io.read_fully(index_value)
+
+      return {index_value, primary_key}
     end
 
     property system_info
@@ -210,6 +249,23 @@ module Storage
       end
     end
 
+    def each_index_entry(table_id : UUID, index_id : UUID, index_value_start : Bytes, index_value_end : Bytes, snapshot : RocksDB::BaseSnapshot? = nil)
+      options = RocksDB::ReadOptions.new
+      options.iterate_upper_bound = KeyValueStore.key_for_table_index_entry_end(table_id, index_id, index_value_end)
+      options.snapshot = snapshot if snapshot
+      iter = @rocksdb.iterator(options)
+      iter.seek(KeyValueStore.key_for_table_index_entry_start(table_id, index_id, index_value_start))
+      while iter.valid?
+        index_value, primary_key = KeyValueStore.decompose_index_entry_key(iter.key)
+        yield index_value, primary_key
+        iter.next
+      end
+    end
+
+    def snapshot
+      @rocksdb.snapshot
+    end
+
     class Transaction
       def initialize(@txn : RocksDB::BaseTransaction)
       end
@@ -302,8 +358,15 @@ module Storage
       end
     end
 
-    def get_row(table_id : UUID, primary_key : Bytes)
-      bytes = @rocksdb.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+    def get_row(table_id : UUID, primary_key : Bytes, snapshot : RocksDB::BaseSnapshot? = nil)
+      if snapshot
+        options = RocksDB::ReadOptions.new
+        options.snapshot = snapshot
+        bytes = @rocksdb.get(KeyValueStore.key_for_table_data(table_id, primary_key), options)
+      else
+        bytes = @rocksdb.get(KeyValueStore.key_for_table_data(table_id, primary_key))
+      end
+
       if bytes.nil?
         yield nil
       else

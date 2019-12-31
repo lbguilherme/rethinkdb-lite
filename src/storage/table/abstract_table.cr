@@ -28,10 +28,6 @@ module Storage
       count
     end
 
-    def duplicated_primary_key_error(existing_value, new_value)
-      pretty_existing = JSON.build(4) { |builder| existing_value.to_json(builder) }
-      pretty_new = JSON.build(4) { |builder| new_value.to_json(builder) }
-      raise ReQL::OpFailedError.new("Duplicate primary key `#{primary_key}`:\n#{pretty_existing}\n#{pretty_new}")
-    end
+    abstract def index_scan(index_name : String, index_value_start : ReQL::Datum, index_value_end : ReQL::Datum, &block : Hash(String, ReQL::Datum) ->)
   end
 end

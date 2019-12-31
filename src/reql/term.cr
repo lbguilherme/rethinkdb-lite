@@ -93,7 +93,7 @@ module ReQL
       end
     end
 
-    macro check_optional_args(*args)
+    macro expect_maybe_options(*args)
       begin
         extra_options = @options.keys - {{ args }}.to_a
         unless extra_options.empty?

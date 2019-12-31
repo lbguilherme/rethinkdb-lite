@@ -50,7 +50,10 @@ module ReQL
 
     def next_val
       val = @internal.channel.try &.receive?
-      @internal.channel.try &.send nil unless val
+      unless val
+        @internal.channel.try &.close
+        @internal.channel = nil
+      end
       val
     end
 

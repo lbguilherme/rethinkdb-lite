@@ -7,6 +7,10 @@ module Storage
       raise ReQL::QueryLogicError.new("It's illegal to write to the `rethinkdb.#{@name}` table.")
     end
 
+    def index_scan(index_name : String, index_value_start : ReQL::Datum, index_value_end : ReQL::Datum, &block : Hash(String, ReQL::Datum) ->)
+      raise ReQL::QueryLogicError.new "Index `#{index_name}` was not found on table `rethinkdb.#{@name}`"
+    end
+
     private def extract_error(message)
       raise ReQL::QueryLogicError.new("The change you're trying to make to `rethinkdb.#{@name}` has the wrong format. #{message}.")
     end

@@ -17,9 +17,10 @@ module Storage
 
     class Table
       property info : KeyValueStore::TableInfo
+      property db_name : String
       property indices = Hash(String, Index).new
 
-      def initialize(@info)
+      def initialize(@info, @db_name)
       end
     end
 
@@ -41,7 +42,8 @@ module Storage
       end
 
       @kv.each_table do |info|
-        table = db_by_id[info.db].tables[info.name] = Table.new(info)
+        db = db_by_id[info.db]
+        table = db.tables[info.name] = Table.new(info, db.info.name)
 
         @kv.each_index(info.id) do |index_info|
           table.indices[index_info.name] = Index.new(index_info)

@@ -109,5 +109,18 @@ module Storage
     def get_all_indices_status
       ReQL::Datum.new(@table.indices.keys.map { |name| get_index_status name })
     end
+
+    def index_scan(index_name : String, index_value_start : ReQL::Datum, index_value_end : ReQL::Datum, &block : Hash(String, ReQL::Datum) ->)
+      index = @table.indices[index_name]?
+      unless index
+        raise ReQL::QueryLogicError.new "Index `#{index_name}` was not found on table `#{@table.db_name}.#{@table.info.name}`"
+      end
+      snapshot = @manager.kv.snapshot
+      @manager.kv.each_index_entry(@table.info.id, index.info.id, index_value_start.serialize, index_value_end.serialize, snapshot) do |index_value_data, primary_key_data|
+        @manager.kv.get_row(@table.info.id, primary_key_data, snapshot) do |row|
+          yield ReQL::Datum.unserialize(IO::Memory.new(row)).hash_value if row
+        end
+      end
+    end
   end
 end
