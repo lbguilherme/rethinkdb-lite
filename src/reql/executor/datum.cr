@@ -1,4 +1,6 @@
 require "./abstract_value"
+require "../error"
+require "json"
 
 module ReQL
   struct Datum < AbstractValue

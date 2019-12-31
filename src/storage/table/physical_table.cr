@@ -11,13 +11,13 @@ module Storage
     end
 
     def get(key)
-      @manager.kv.get_row(@table.info.id, key.serialize) do |data|
+      @manager.kv.get_row(@table.info.id, ReQL.encode_key(key)) do |data|
         data.nil? ? nil : ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
       end
     end
 
     def replace(key, durability : ReQL::Durability? = nil)
-      key_data = key.serialize
+      key_data = ReQL.encode_key(key)
 
       @manager.kv.transaction(durability || @table.info.durability) do |t|
         existing_row = t.get_row(@table.info.id, key_data) do |existing_row_data|
@@ -71,12 +71,12 @@ module Storage
 
       # Remove values that are now missing
       (old_set - new_set).each do |value|
-        t.delete_index_entry(@table.info.id, index.info.id, value.serialize, key_data)
+        t.delete_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), key_data)
       end
 
       # Add new values
       (new_set - old_set).each do |value|
-        t.set_index_entry(@table.info.id, index.info.id, value.serialize, key_data)
+        t.set_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), key_data)
       end
     end
 
@@ -116,7 +116,7 @@ module Storage
         raise ReQL::QueryLogicError.new "Index `#{index_name}` was not found on table `#{@table.db_name}.#{@table.info.name}`"
       end
       snapshot = @manager.kv.snapshot
-      @manager.kv.each_index_entry(@table.info.id, index.info.id, index_value_start.serialize, index_value_end.serialize, snapshot) do |index_value_data, primary_key_data|
+      @manager.kv.each_index_entry(@table.info.id, index.info.id, ReQL.encode_key(index_value_start), ReQL.encode_key(index_value_end), snapshot) do |index_value_data, primary_key_data|
         @manager.kv.get_row(@table.info.id, primary_key_data, snapshot) do |row|
           yield ReQL::Datum.unserialize(IO::Memory.new(row)).hash_value if row
         end

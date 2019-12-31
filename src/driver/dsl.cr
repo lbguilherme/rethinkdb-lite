@@ -33,6 +33,10 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
+      def self.convert_type(x : JSON::Any, max_depth)
+        convert_type(x.raw, max_depth)
+      end
+
       def self.convert_type(x : Int, max_depth)
         x.to_i64.as(ReQL::Term::Type)
       end
