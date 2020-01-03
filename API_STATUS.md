@@ -1,7 +1,7 @@
 # STATUS
 
-- 90x :heavy_check_mark:
-- 131x :x:
+- 95x :heavy_check_mark:
+- 126x :x:
 
 # Connection
 
@@ -204,11 +204,11 @@
 |-|-|-|
 | stream.changes() | :x: |  |
 | table.get_write_hook() | :x: |  |
-| table.index_create(...) | :x: |  |
+| table.index_create(...) | :heavy_check_mark: |  |
 | table.index_drop(name) | :x: |  |
 | table.index_list() | :x: |  |
 | table.index_rename(old, new) | :x: |  |
-| table.index_status(...) | :x: |  |
+| table.index_status(...) | :heavy_check_mark: |  |
 | table.index_wait(...) | :x: |  |
 | table.set_write_hook(function) | :x: |  |
 | db.table_create(name) | :heavy_check_mark: |  |
@@ -257,7 +257,7 @@
 | r.db(name) | :heavy_check_mark: |  |
 | sequence.filter(object) | :heavy_check_mark: |  |
 | sequence.filter(function) | :heavy_check_mark: |  |
-| table.get_all(key, ...) | :x: |  |
+| table.get_all(key, ...) | :heavy_check_mark: |  |
 | table.get(key) | :heavy_check_mark: |  |
 | db.table(name) | :heavy_check_mark: |  |
 
@@ -301,5 +301,5 @@
 | table_slice.replace(...) | :x: |  |
 | row.replace(...) | :x: |  |
 | table.sync() | :x: |  |
-| table_slice.update(...) | :x: |  |
-| row.update(...) | :x: |  |
+| table_slice.update(...) | :heavy_check_mark: |  |
+| row.update(...) | :heavy_check_mark: |  |
