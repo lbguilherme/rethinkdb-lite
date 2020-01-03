@@ -82,35 +82,18 @@ describe ReQL::Datum do
   if _conn
     conn = _conn
     it "sorts in the same order on RethinkDB" do
-      futures = [] of Concurrent::Future(Bool)
-      arr[1..-2].each_with_index do |a, i|
-        arr[1..-2].each_with_index do |b, j|
-          futures << future do
-            aexpr = r.expr(JSON.parse(a.to_json))
-            bexpr = r.expr(JSON.parse(b.to_json))
+      (1..(arr.size-3)).each do |i|
+        a = arr[i]
+        b = arr[i + 1]
 
-            if i < j
-              unless aexpr.lt(bexpr).run(conn).datum.bool
-                err = "'#{a.inspect}' should order before '#{b.inspect}'"
-                fail err
-              end
-            elsif i == j
-              unless aexpr.eq(bexpr).run(conn).datum.bool
-                err = "'#{a.inspect}' should be equal to '#{b.inspect}'"
-                fail err
-              end
-            else
-              unless aexpr.gt(bexpr).run(conn).datum.bool
-                err = "'#{a.inspect}' should order after '#{b.inspect}'"
-                fail err
-              end
-            end
+        aexpr = r.expr(JSON.parse(a.to_json))
+        bexpr = r.expr(JSON.parse(b.to_json))
 
-            true
-          end
+        unless aexpr.lt(bexpr).run(conn).datum.bool
+          err = "'#{a.inspect}' should order before '#{b.inspect}'"
+          fail err
         end
       end
-      futures.each &.get
     end
 
     Spec.after_suite do
