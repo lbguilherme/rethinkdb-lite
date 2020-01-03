@@ -82,7 +82,7 @@ describe ReQL::Datum do
   if _conn
     conn = _conn
     it "sorts in the same order on RethinkDB" do
-      (1..(arr.size-3)).each do |i|
+      (1..(arr.size - 3)).each do |i|
         a = arr[i]
         b = arr[i + 1]
 
