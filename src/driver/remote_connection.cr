@@ -77,12 +77,18 @@ module RethinkDB
 
     def start
       spawn do
-        until @socket.closed?
-          id = @socket.read_bytes(UInt64, IO::ByteFormat::LittleEndian)
-          size = @socket.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
-          slice = Slice(UInt8).new(size)
-          @socket.read(slice)
-          @channels[id]?.try &.send String.new(slice)
+        begin
+          until @socket.closed?
+            id = @socket.read_bytes(UInt64, IO::ByteFormat::LittleEndian)
+            size = @socket.read_bytes(UInt32, IO::ByteFormat::LittleEndian)
+            slice = Slice(UInt8).new(size)
+            @socket.read(slice)
+            @channels[id]?.try &.send String.new(slice)
+          end
+        rescue IO::EOFError
+          @channels.each_value &.close
+          @channels.clear
+          @socket.close rescue nil
         end
       end
     end
