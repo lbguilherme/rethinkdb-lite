@@ -183,8 +183,8 @@ module RethinkDB
       rescue err : Errno
         err.inspect_with_backtrace
       ensure
-        client.try &.close
-        sock.close
+        client.try &.close rescue nil
+        sock.close rescue nil
         @client_sockets.delete sock
       end
 
