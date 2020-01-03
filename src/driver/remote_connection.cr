@@ -24,7 +24,9 @@ module RethinkDB
     end
 
     def close
-      @socket.close
+      @channels.each_value &.close
+      @channels.clear
+      @socket.close rescue nil
     end
 
     # TODO: Proper error handling
@@ -85,7 +87,7 @@ module RethinkDB
             @socket.read(slice)
             @channels[id]?.try &.send String.new(slice)
           end
-        rescue IO::EOFError
+        rescue IO::EOFError | Errno
           @channels.each_value &.close
           @channels.clear
           @socket.close rescue nil
@@ -200,13 +202,21 @@ module RethinkDB
           raise "Bug: Using already finished stream."
         end
 
-        @conn.@socket.write_bytes(@id, IO::ByteFormat::LittleEndian)
-        @conn.@socket.write_bytes(query.bytesize, IO::ByteFormat::LittleEndian)
-        @conn.@socket.write(query.to_slice)
+        begin
+          @conn.@socket.write_bytes(@id, IO::ByteFormat::LittleEndian)
+          @conn.@socket.write_bytes(query.bytesize, IO::ByteFormat::LittleEndian)
+          @conn.@socket.write(query.to_slice)
+        rescue error
+          raise ReQL::RuntimeError.new("Connection closed: #{error.to_s}")
+        end
       end
 
       private def read
-        response = Response.from_json(@channel.receive)
+        response_json = @channel.receive?
+        unless response_json
+          raise ReQL::RuntimeError.new("Connection closed")
+        end
+        response = Response.from_json(response_json)
         finish unless response.t == ResponseType::SUCCESS_PARTIAL
 
         if response.t == ResponseType::CLIENT_ERROR
