@@ -242,6 +242,7 @@ module RethinkDB
     term ceil, CeilTerm
     term change_at, ChangeAtTerm
     term coerce_to, CoerceToTerm
+    term contains, ContainsTerm
     term count, CountTerm
     term db_create, DbCreateTerm
     term db, DbTerm
