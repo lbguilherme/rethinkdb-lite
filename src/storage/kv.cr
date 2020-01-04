@@ -98,7 +98,7 @@ module Storage
       io.to_slice
     end
 
-    def self.key_for_table_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, primary_key : Bytes)
+    def self.key_for_table_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
       io = IO::Memory.new
       io.write_bytes(PREFIX_TABLE_DATA)
       io.write(table_id.bytes.to_slice)
@@ -107,6 +107,7 @@ module Storage
       io.write_bytes(0u8)
       io.write(index_value)
       io.write_bytes(0u8)
+      io.write_bytes(counter, IO::ByteFormat::LittleEndian)
       io.write(primary_key)
       io.write_bytes(primary_key.size.to_u32, IO::ByteFormat::LittleEndian)
       io.to_slice
@@ -144,7 +145,7 @@ module Storage
       io.seek(index_entry_key.size - 4 - primary_key.size)
       io.read_fully(primary_key)
 
-      index_value = Bytes.new(index_entry_key.size - 1 - 16 - 1 - 16 - 1 - 1 - primary_key.size - 4)
+      index_value = Bytes.new(index_entry_key.size - 1 - 16 - 1 - 16 - 1 - 1 - primary_key.size - 4 - 4)
       io.seek(1 + 16 + 1 + 16 + 1)
       io.read_fully(index_value)
 
@@ -314,12 +315,12 @@ module Storage
         @txn.delete(KeyValueStore.key_for_table_data(table_id, primary_key))
       end
 
-      def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, primary_key : Bytes)
-        @txn.put(KeyValueStore.key_for_table_index_entry(table_id, index_id, index_value, primary_key), Bytes.new(0))
+      def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+        @txn.put(KeyValueStore.key_for_table_index_entry(table_id, index_id, index_value, counter, primary_key), Bytes.new(0))
       end
 
-      def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, primary_key : Bytes)
-        @txn.delete(KeyValueStore.key_for_table_index_entry(table_id, index_id, index_value, primary_key))
+      def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+        @txn.delete(KeyValueStore.key_for_table_index_entry(table_id, index_id, index_value, counter, primary_key))
       end
 
       def get_table(id : UUID)

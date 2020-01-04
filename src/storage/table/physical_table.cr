@@ -33,6 +33,11 @@ module Storage
         if new_row.nil?
           unless existing_row.nil?
             t.delete_row(@table.info.id, key_data)
+
+            # TODO: This crashes the compiler
+            # @table.indices.values.each do |index|
+            #   update_index_data(t, index, key_data, existing_row, new_row)
+            # end
           end
         else
           if existing_row != new_row
@@ -52,31 +57,44 @@ module Storage
       end
     end
 
-    def update_index_data(t, index, key_data, old_row, new_row)
-      evaluator = ReQL::Evaluator.new(@manager)
-      old_computed = old_row.try { |row| index.info.function.eval(evaluator, {ReQL::Datum.new(row)}).as_datum rescue nil }
-      new_computed = new_row.try { |row| index.info.function.eval(evaluator, {ReQL::Datum.new(row)}).as_datum rescue nil }
+    private def index_values(evaluator, index, row)
+      computed = row.try { |row| index.info.function.eval(evaluator, {ReQL::Datum.new(row)}).as_datum rescue nil }
 
-      old_set = Set(ReQL::Datum).new
-      new_set = Set(ReQL::Datum).new
-      if index.info.multi
-        old_computed = old_computed.try &.array_value?
-        old_set.concat(old_computed) if old_computed
-        new_computed = new_computed.try &.array_value?
-        new_set.concat(new_computed) if new_computed
-      else
-        old_set << old_computed if old_computed
-        new_set << new_computed if new_computed
+      if computed.nil?
+        return Set({ReQL::Datum, Int32}).new
       end
 
+      if index.info.multi
+        set = Set({ReQL::Datum, Int32}).new
+        hash = Hash(ReQL::Datum, Int32).new { 0 }
+        computed.array_value?.try &.each do |val|
+          set << {val, hash[val] += 1}
+        end
+
+        set
+      else
+        [{computed, 1}].to_set
+      end
+    end
+
+    def update_index_data(t, index, key_data, old_row, new_row)
+      evaluator = ReQL::Evaluator.new(@manager)
+
+      old_values = index_values(evaluator, index, old_row)
+      new_values = index_values(evaluator, index, new_row)
+
+      p [index, key_data, old_row, new_row]
+      p old_values
+      p new_values
+
       # Remove values that are now missing
-      (old_set - new_set).each do |value|
-        t.delete_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), key_data)
+      (old_values - new_values).each do |(value, counter)|
+        t.delete_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), counter, key_data)
       end
 
       # Add new values
-      (new_set - old_set).each do |value|
-        t.set_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), key_data)
+      (new_values - old_values).each do |(value, counter)|
+        t.set_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), counter, key_data)
       end
     end
 
