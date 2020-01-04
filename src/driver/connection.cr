@@ -113,6 +113,10 @@ module RethinkDB
       @value.as(Float64 | Int64 | Int32).to_f64
     end
 
+    def int32
+      @value.as(Float64 | Int64 | Int32).to_i
+    end
+
     def int64
       @value.as(Float64 | Int64 | Int32).to_i64
     end
@@ -139,6 +143,10 @@ module RethinkDB
 
     def float?
       @value.as?(Float64 | Int64 | Int32).try &.to_f64
+    end
+
+    def int32?
+      @value.as?(Float64 | Int64 | Int32).try &.to_i
     end
 
     def int64?

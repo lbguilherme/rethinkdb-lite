@@ -28,6 +28,8 @@ module ReQL
 
       case term.args.size
       when 1
+        # TODO: Get default database name from connection / runopts
+        db = Db.new("test")
         table_name = eval(term.args[0]).string_value
       when 2
         db = eval(term.args[0]).as_database

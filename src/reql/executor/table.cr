@@ -4,22 +4,24 @@ require "../../storage/*"
 module ReQL
   struct Table < Stream
     class InternalData
-      property channel : Channel(RowValue)?
+      property channel : Channel(RowValue?)?
     end
 
     def reql_type
       "TABLE"
     end
 
-    def initialize(@db : Db?, @name : String, @manager : Storage::Manager)
+    property name
+    property db
+
+    def initialize(@db : Db, @name : String, @manager : Storage::Manager)
       @internal = InternalData.new
     end
 
     def storage
-      db_name = @db.try &.name || "test"
-      result = @manager.get_table(db_name, @name)
+      result = @manager.get_table(@db.name, @name)
       if result.nil?
-        raise OpFailedError.new("Table `#{db_name}.#{@name}` does not exist")
+        raise OpFailedError.new("Table `#{@db.name}.#{@name}` does not exist")
       end
       result
     end
@@ -33,40 +35,30 @@ module ReQL
     end
 
     def start_reading
-      @internal.channel = Channel(RowValue).new
+      @internal.channel = Channel(RowValue?).new(32)
       s = storage
       spawn do
         begin
           s.scan do |row|
-            if ch = @internal.channel
-              ch.send RowValue.new(s, row)
-            end
+            @internal.channel.try &.send RowValue.new(s, row)
           end
-          if ch = @internal.channel
-            ch.close
-          end
-          @internal.channel = nil
+          @internal.channel.try &.send nil
         rescue Channel::ClosedError
         end
       end
     end
 
     def next_val
-      begin
-        if ch = @internal.channel
-          return ch.receive
-        else
-          return nil
-        end
-      rescue Channel::ClosedError
-        return nil
+      val = @internal.channel.try &.receive?
+      unless val
+        @internal.channel.try &.close
+        @internal.channel = nil
       end
+      val
     end
 
     def finish_reading
-      if ch = @internal.channel
-        ch.close
-      end
+      @internal.channel.try &.close
       @internal.channel = nil
     end
 

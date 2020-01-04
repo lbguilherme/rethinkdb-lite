@@ -1,5 +1,7 @@
 # UNRELEASED (0.2.0)
 
+- Implement secondary indexes with `index_create`/`index_status`/`get_all`.
+- Implement table.update().
 - Implement custom primary keys on tables and configurable durability setting.
 - Implement r.db("rethinkdb").table("db_config").insert({name: "aa"}) to create databases.
 - Replace storage engine with RocksDB, improving write performance by a factor of 2x.

@@ -1,4 +1,6 @@
 require "./abstract_value"
+require "../error"
+require "json"
 
 module ReQL
   struct Datum < AbstractValue
@@ -82,12 +84,24 @@ module ReQL
       Datum.new(JSON.parse(io))
     end
 
+    def as_database
+      raise QueryLogicError.new("Expected type DATABASE but found DATUM.")
+    end
+
     def as_function
       if (str = @value).is_a? String
         FieldFunc.new(str)
       else
-        raise QueryLogicError.new("Expected type FUNCTION but found #{reql_type}.")
+        raise QueryLogicError.new("Expected type FUNCTION but found DATUM.")
       end
+    end
+
+    def as_table
+      raise QueryLogicError.new("Expected type TABLE but found DATUM.")
+    end
+
+    def as_row
+      raise QueryLogicError.new("Expected type ROW but found DATUM.")
     end
   end
 end

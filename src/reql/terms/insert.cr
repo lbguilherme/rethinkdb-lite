@@ -4,6 +4,10 @@ module ReQL
   class InsertTerm < Term
     register_type INSERT
     infix_inspect "insert"
+
+    def compile
+      expect_args 2
+    end
   end
 
   class Evaluator
@@ -31,6 +35,8 @@ module ReQL
       docs.each do |obj|
         writter.insert(table.storage, obj)
       end
+
+      @table_writers.last?.try &.merge(writter)
 
       writter.summary
     end

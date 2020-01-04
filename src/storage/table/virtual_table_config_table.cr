@@ -33,7 +33,7 @@ module Storage
 
             t.save_table(info)
 
-            after_commit = ->{ db.tables[info.name] = info }
+            after_commit = ->{ db.tables[info.name] = Manager::Table.new(info, db.info.name) }
             next
           end
 
@@ -50,7 +50,7 @@ module Storage
     private def encode(info : KeyValueStore::TableInfo)
       ReQL::Datum.new({
         "db"          => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
-        "durability"  => info.durability == ReQL::Durability::Soft ? "soft" : "hard",
+        "durability"  => info.durability == ReQL::Durability::Hard ? "hard" : info.durability == ReQL::Durability::Soft ? "soft" : "minimal",
         "id"          => info.id.to_s,
         "indexes"     => [] of String,
         "name"        => info.name,
@@ -77,7 +77,7 @@ module Storage
         info.primary_key = extract_string(obj, "primary_key")
       end
       if obj.has_key? "durability"
-        info.durability = extract_durability(obj, "durability") == "soft" ? ReQL::Durability::Soft : ReQL::Durability::Hard
+        info.durability = extract_durability(obj, "durability")
       end
       info
     end

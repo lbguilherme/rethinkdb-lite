@@ -7,6 +7,10 @@ module Storage
       raise ReQL::QueryLogicError.new("It's illegal to write to the `rethinkdb.#{@name}` table.")
     end
 
+    def index_scan(index_name : String, index_value_start : ReQL::Datum, index_value_end : ReQL::Datum, &block : Hash(String, ReQL::Datum) ->)
+      raise ReQL::QueryLogicError.new "Index `#{index_name}` was not found on table `rethinkdb.#{@name}`"
+    end
+
     private def extract_error(message)
       raise ReQL::QueryLogicError.new("The change you're trying to make to `rethinkdb.#{@name}` has the wrong format. #{message}.")
     end
@@ -57,11 +61,17 @@ module Storage
     end
 
     private def extract_durability(obj : Hash(String, ReQL::Datum), key : String)
-      durability = extract_string(obj, key)
-      if durability != "soft" && durability != "hard"
-        extract_error "In `#{key}`: Expected \"soft\" or \"hard\", got: `#{durability}`"
+      str = extract_string(obj, key)
+      case str
+      when "soft"
+        ReQL::Durability::Soft
+      when "hard"
+        ReQL::Durability::Hard
+      when "minimal"
+        ReQL::Durability::Minimal
+      else
+        extract_error "In `#{key}`: Expected \"soft\", \"hard\" or \"minimal\", got: `#{str}`"
       end
-      durability
     end
 
     private def check_extra_keys(obj : Hash(String, ReQL::Datum), keys)

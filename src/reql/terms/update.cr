@@ -39,6 +39,8 @@ module ReQL
         end
       end
 
+      @table_writers.last?.try &.merge(writter)
+
       writter.summary
     end
   end

@@ -43,10 +43,10 @@ module RethinkDB
       def close
         @wants_close = true
         if server = @server
-          server.close
+          server.close rescue nil
           @server = nil
         end
-        @client_sockets.each &.close
+        @client_sockets.each { |sock| sock.close rescue nil }
         @client_sockets.clear
       end
 
@@ -183,8 +183,8 @@ module RethinkDB
       rescue err : Errno
         err.inspect_with_backtrace
       ensure
-        client.try &.close
-        sock.close
+        client.try &.close rescue nil
+        sock.close rescue nil
         @client_sockets.delete sock
       end
 

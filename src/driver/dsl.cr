@@ -25,18 +25,16 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(block : R, R, R, R, R -> R::Type, max_depth)
-        vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
-        vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)], nil), max_depth - 1).as(R) }
-        ReQL::FuncTerm.new([vari.to_a.map(&.as(ReQL::Term::Type)).as(ReQL::Term::Type), R.convert_type(block.call(*vars), max_depth - 1).as(ReQL::Term::Type)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
-      end
-
       def self.convert_type(x : Int32, max_depth)
         x.as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Bytes, max_depth)
         x.as(ReQL::Term::Type)
+      end
+
+      def self.convert_type(x : JSON::Any, max_depth)
+        convert_type(x.raw, max_depth)
       end
 
       def self.convert_type(x : Int, max_depth)
@@ -205,6 +203,14 @@ module RethinkDB
             options.to_h.map { |k, v| {k.to_s, R.to_json_any(v)}.as({String, JSON::Any}) }.to_h
           )
         end
+
+        def initialize(*args, **options, &block : Int32, R, R, R, R, R, R, R -> ReQL::Term::Type)
+          max_depth = 1000
+          vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
+          vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)], nil), max_depth).as(R) }
+          block = ReQL::FuncTerm.new([vari.to_a.map(&.as(ReQL::Term::Type)).as(ReQL::Term::Type), block.call(max_depth - 1, *vars)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
+          initialize(*args, block, **options)
+        end
       end
 
       module R
@@ -216,76 +222,81 @@ module RethinkDB
           R{{name.id}}.new(self, *args, **options)
         end
 
-        def self.{{name.id}}(*args, **options, &block : R, R, R, R, R -> R::Type)
-          R{{name.id}}.new(*args, block, **options)
+        def self.{{name.id}}(*args, **options, &block : R, R, R, R, R, R, R -> X) forall X
+          R{{name.id}}.new(*args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
         end
 
-        def {{name.id}}(*args, **options, &block : R, R, R, R, R -> R::Type)
-          R{{name.id}}.new(self, *args, block, **options)
+        def {{name.id}}(*args, **options, &block : R, R, R, R, R, R, R -> X) forall X
+          R{{name.id}}.new(self, *args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
         end
       end
     end
 
-    term db, DbTerm
-    term db_create, DbCreateTerm
-    term table, TableTerm
-    term table_create, TableCreateTerm
-    term get, GetTerm
-    term insert, InsertTerm
-    term delete, DeleteTerm
-    term update, UpdateTerm
-    term bracket, BracketTerm
     term "do", DoTerm
-    term count, CountTerm
-    term range, RangeTerm
-    term uuid, UuidTerm
-    term filter, FilterTerm
-    term map, MapTerm
-    term merge, MergeTerm
-    term default, DefaultTerm
-    term slice, SliceTerm
-    term limit, LimitTerm
-    term skip, SkipTerm
-    term sum, SumTerm
-    term object, ObjectTerm
-    term type_of, TypeOfTerm
-    term coerce_to, CoerceToTerm
-    term order_by, OrderByTerm
-    term distinct, DistinctTerm
-    term split, SplitTerm
-    term upcase, UpCaseTerm
-    term downcase, DownCaseTerm
-    term insert_at, InsertAtTerm
-    term change_at, ChangeAtTerm
-    term splice_at, SpliceAtTerm
-    term delete_at, DeleteAtTerm
     term add, AddTerm
-    term sub, SubTerm
-    term mul, MulTerm
-    term div, DivTerm
-    term mod, ModTerm
-    term eq, EqTerm
-    term ne, NeTerm
-    term gt, GtTerm
-    term ge, GeTerm
-    term lt, LtTerm
-    term le, LeTerm
     term and, AndTerm
-    term or, OrTerm
-    term not, NotTerm
-    term floor, FloorTerm
-    term ceil, CeilTerm
-    term round, RoundTerm
     term append, AppendTerm
-    term minval, MinvalTerm
-    term maxval, MaxvalTerm
     term binary, BinaryTerm
+    term bracket, BracketTerm
     term branch, BranchTerm
+    term ceil, CeilTerm
+    term change_at, ChangeAtTerm
+    term coerce_to, CoerceToTerm
+    term contains, ContainsTerm
+    term count, CountTerm
+    term db_create, DbCreateTerm
+    term db, DbTerm
+    term default, DefaultTerm
+    term delete_at, DeleteAtTerm
+    term delete, DeleteTerm
+    term distinct, DistinctTerm
+    term div, DivTerm
+    term downcase, DownCaseTerm
+    term eq, EqTerm
     term error, ErrorTerm
+    term filter, FilterTerm
+    term floor, FloorTerm
+    term for_each, ForEachTerm
+    term ge, GeTerm
+    term get, GetTerm
+    term gt, GtTerm
+    term index_create, IndexCreateTerm
+    term index_list, IndexListTerm
+    term index_status, IndexStatusTerm
+    term insert_at, InsertAtTerm
+    term insert, InsertTerm
     term js, JsTerm
+    term le, LeTerm
+    term limit, LimitTerm
+    term lt, LtTerm
+    term map, MapTerm
     term max, MaxTerm
+    term maxval, MaxvalTerm
+    term merge, MergeTerm
     term min, MinTerm
+    term minval, MinvalTerm
+    term mod, ModTerm
+    term mul, MulTerm
+    term ne, NeTerm
+    term not, NotTerm
+    term object, ObjectTerm
+    term or, OrTerm
+    term order_by, OrderByTerm
     term random, RandomTerm
+    term range, RangeTerm
+    term round, RoundTerm
+    term skip, SkipTerm
+    term slice, SliceTerm
+    term splice_at, SpliceAtTerm
+    term split, SplitTerm
+    term sub, SubTerm
+    term sum, SumTerm
+    term table_create, TableCreateTerm
+    term table, TableTerm
+    term type_of, TypeOfTerm
+    term upcase, UpCaseTerm
+    term update, UpdateTerm
+    term uuid, UuidTerm
   end
 end
 

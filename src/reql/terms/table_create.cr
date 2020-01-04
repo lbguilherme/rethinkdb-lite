@@ -18,7 +18,7 @@ module ReQL
 
     def compile
       expect_args 1, 2
-      check_optional_args "durability", "primary_key"
+      expect_maybe_options "durability", "primary_key"
     end
   end
 
@@ -55,8 +55,10 @@ module ReQL
           descriptor["durability"] = Datum.new("hard")
         when "soft"
           descriptor["durability"] = Datum.new("soft")
+        when "minimal"
+          descriptor["durability"] = Datum.new("minimal")
         else
-          raise QueryLogicError.new "Durability option `#{durability}` unrecognized (options are \"hard\" and \"soft\")"
+          raise QueryLogicError.new "Durability option `#{durability}` unrecognized (options are \"hard\", \"soft\" and \"minimal\")"
         end
       end
 
@@ -64,12 +66,14 @@ module ReQL
         descriptor["primary_key"] = Datum.new(Datum.new(term.options["primary_key"]).string_value)
       end
 
-      table_config = @manager.get_table("rethinkdb", "table_config").not_nil!
+      table_config = @manager.get_table("rethinkdb", "table_config").as(Storage::VirtualTableConfigTable)
 
       writter = TableWriter.new
-      writter.insert(table_config, descriptor)
+      writter.create_table(table_config, descriptor)
 
-      Datum.new(Hash(String, Datum::Type).new)
+      @table_writers.last?.try &.merge(writter)
+
+      writter.summary
     end
   end
 end
