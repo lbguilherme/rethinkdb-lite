@@ -76,6 +76,11 @@ module ReQL
       @tables_created.add(1)
     end
 
+    def create_index(table : Storage::PhysicalTable, name : String, function : Func)
+      table.create_index(name, function)
+      @created.add(1)
+    end
+
     def atomic_update(table : Storage::AbstractTable, key : Datum, durability : Durability? = nil)
       after_commit = nil
       primary_key = table.primary_key

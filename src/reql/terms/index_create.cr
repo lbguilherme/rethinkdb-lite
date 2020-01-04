@@ -27,11 +27,12 @@ module ReQL
         raise QueryLogicError.new("Database `rethinkdb` is special; you can't create secondary indexes on the tables in it")
       end
 
-      storage.create_index(name, function)
+      writter = TableWriter.new
+      writter.create_index(storage, name, function)
 
-      Datum.new({
-        "created" => 1,
-      })
+      @table_writers.last?.try &.merge(writter)
+
+      writter.summary
     end
   end
 end
