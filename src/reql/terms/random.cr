@@ -5,7 +5,7 @@ module ReQL
 
     def compile
       expect_args 0,2
-      check_optional_args "float"
+      expect_maybe_options "float"
     end
   end
 
@@ -34,7 +34,7 @@ module ReQL
           Datum.new(Random.rand(min...max))
         end
       else
-        raise "Expected between 0 and 2 arguments but found" + term.args.size.to_s
+        raise "Expected between 0 and 2 arguments but found #{term.args.size}"
       end
     end
   end
