@@ -260,8 +260,9 @@ module RethinkDB
     term ge, GeTerm
     term get, GetTerm
     term gt, GtTerm
-    term index_status, IndexStatusTerm
     term index_create, IndexCreateTerm
+    term index_list, IndexListTerm
+    term index_status, IndexStatusTerm
     term insert_at, InsertAtTerm
     term insert, InsertTerm
     term js, JsTerm

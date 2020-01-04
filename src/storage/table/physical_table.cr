@@ -109,6 +109,10 @@ module Storage
       })
     end
 
+    def get_index_list
+      ReQL::Datum.new(@table.indices.keys)
+    end
+
     def get_all_indices_status
       ReQL::Datum.new(@table.indices.keys.map { |name| get_index_status name })
     end
