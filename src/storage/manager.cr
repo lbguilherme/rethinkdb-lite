@@ -61,6 +61,8 @@ module Storage
     def get_table(db_name, table_name) : AbstractTable?
       if db_name == "rethinkdb"
         case table_name
+        when "server_config"
+          return VirtualServerConfigTable.new(self)
         when "db_config"
           return VirtualDbConfigTable.new(self)
         when "table_config"
