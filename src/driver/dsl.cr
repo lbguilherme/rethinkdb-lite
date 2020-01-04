@@ -233,6 +233,7 @@ module RethinkDB
     term get, GetTerm
     term insert, InsertTerm
     term delete, DeleteTerm
+    term update, UpdateTerm
     term bracket, BracketTerm
     term "do", DoTerm
     term count, CountTerm

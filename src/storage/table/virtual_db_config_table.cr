@@ -1,24 +1,47 @@
 require "./virtual_table"
 
 module Storage
-  class VirtualDbConfigTable < VirtualTable
-    def initialize(@manager : Manager)
-      super("db_config")
+  struct VirtualDbConfigTable < VirtualTable
+    def initialize(manager : Manager)
+      super("db_config", manager)
     end
 
-    def insert(obj : Hash)
-      info = decode(obj)
-      @manager.create_db(info.name, info.id) do |current_info|
-        duplicated_primary_key_error(encode(current_info), obj)
+    def replace(key, durability : ReQL::Durability? = nil)
+      id = extract_uuid({"id" => key}, "id")
+
+      @manager.lock.synchronize do
+        after_commit = nil
+
+        @manager.kv.transaction do |t|
+          existing_info = t.get_db(id)
+          new_row = yield encode(existing_info)
+
+          if new_row.nil?
+            # Delete
+            raise "TODO: Delete database"
+          end
+          info = decode(new_row)
+
+          if existing_info.nil?
+            # Insert
+            if info.name == "rethinkdb" || @manager.databases.has_key?(info.name)
+              raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
+            end
+
+            t.save_db(info)
+
+            after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
+            next
+          end
+
+          if existing_info != info
+            # Update
+            raise "TODO: Update database"
+          end
+        end
+
+        after_commit.try &.call
       end
-    end
-
-    def replace(key, &block : Hash(String, ReQL::Datum) -> Hash(String, ReQL::Datum))
-      raise "TODO"
-    end
-
-    def delete(key) : Bool
-      raise "TODO"
     end
 
     private def encode(info : KeyValueStore::DatabaseInfo)
@@ -32,18 +55,18 @@ module Storage
       info = KeyValueStore::DatabaseInfo.new
       check_extra_keys(obj, {"id", "name"})
       info.id = extract_uuid(obj, "id")
-      info.name = extract_string(obj, "name", "a db name")
+      info.name = extract_db_name(obj, "name")
       info
     end
 
     def get(key)
       id = UUID.new(key.string_value) rescue return nil
-      encode(@manager.get_db(id))
+      encode(@manager.kv.get_db(id))
     end
 
     def scan
-      @manager.databases.each_value do |db|
-        yield encode(db.info)
+      @manager.kv.each_db do |info|
+        yield encode(info)
       end
     end
   end

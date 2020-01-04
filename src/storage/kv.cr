@@ -214,8 +214,8 @@ module Storage
       end
     end
 
-    def transaction(soft_durability : Bool = false)
-      txn = @rocksdb.begin_transaction(soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
+    def transaction(durability : ReQL::Durability = ReQL::Durability::Soft)
+      txn = @rocksdb.begin_transaction(durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
       loop do
         begin
           result = yield Transaction.new(txn)
@@ -223,7 +223,7 @@ module Storage
           return result
         rescue ex
           if ex.is_a?(RocksDB::Error) && ex.message.try &.starts_with? "Resource busy"
-            txn.begin(soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
+            txn.begin(durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
           else
             txn.rollback
             raise ex
@@ -245,12 +245,12 @@ module Storage
       end
     end
 
-    def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, soft_durability : Bool = false)
-      @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data, soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
+    def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft)
+      @rocksdb.put(KeyValueStore.key_for_table_data(table_id, primary_key), data, durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
     end
 
-    def delete_row(table_id : UUID, primary_key : Bytes, soft_durability : Bool = false) : Bytes?
-      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key), soft_durability ? SOFT_DURABILITY : HARD_DURABILITY)
+    def delete_row(table_id : UUID, primary_key : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft) : Bytes?
+      @rocksdb.delete(KeyValueStore.key_for_table_data(table_id, primary_key), durability == ReQL::Durability::Soft ? SOFT_DURABILITY : HARD_DURABILITY)
     end
 
     def each_row(table_id : UUID)
@@ -323,7 +323,7 @@ module Storage
       property db : UUID = UUID.empty
       property name : String = ""
       property primary_key : String = "id"
-      property soft_durability : Bool = false
+      property durability : ReQL::Durability = ReQL::Durability::Hard
 
       def serialize
         io = IO::Memory.new
@@ -333,7 +333,7 @@ module Storage
         io.write(@name.to_slice)
         io.write_bytes(@primary_key.bytesize.to_u32, IO::ByteFormat::LittleEndian)
         io.write(@primary_key.to_slice)
-        io.write_bytes(@soft_durability ? 1u8 : 0u8)
+        io.write_bytes(@durability == ReQL::Durability::Soft ? 1u8 : 0u8)
         io.to_slice
       end
 
@@ -348,7 +348,7 @@ module Storage
         obj.db = UUID.new(db_bytes)
         obj.name = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
         obj.primary_key = io.read_string(io.read_bytes(UInt32, IO::ByteFormat::LittleEndian))
-        obj.soft_durability = io.read_bytes(UInt8) != 0u8
+        obj.durability = io.read_bytes(UInt8) != 0u8 ? ReQL::Durability::Soft : ReQL::Durability::Hard
         obj
       end
     end

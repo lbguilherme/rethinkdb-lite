@@ -43,25 +43,31 @@ module ReQL
         raise OpFailedError.new("Table `#{db_name}.#{table_name}` already exists")
       end
 
-      soft_durability = false
+      descriptor = {
+        "db"   => Datum.new(db_name),
+        "name" => Datum.new(table_name),
+      }
+
       if term.options.has_key? "durability"
         durability = Datum.new(term.options["durability"]).string_value
         case durability
         when "hard"
-          soft_durability = false
+          descriptor["durability"] = Datum.new("hard")
         when "soft"
-          soft_durability = true
+          descriptor["durability"] = Datum.new("soft")
         else
           raise QueryLogicError.new "Durability option `#{durability}` unrecognized (options are \"hard\" and \"soft\")"
         end
       end
 
-      primary_key = "id"
       if term.options.has_key? "primary_key"
-        primary_key = Datum.new(term.options["primary_key"]).string_value
+        descriptor["primary_key"] = Datum.new(Datum.new(term.options["primary_key"]).string_value)
       end
 
-      @manager.create_table(db_name, table_name, primary_key, soft_durability)
+      table_config = @manager.get_table("rethinkdb", "table_config").not_nil!
+
+      writter = TableWriter.new
+      writter.insert(table_config, descriptor)
 
       Datum.new(Hash(String, Datum::Type).new)
     end
