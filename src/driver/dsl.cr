@@ -282,6 +282,9 @@ module RethinkDB
     term branch, BranchTerm
     term error, ErrorTerm
     term js, JsTerm
+    term max, MaxTerm
+    term min, MinTerm
+    term random, RandomTerm
   end
 end
 
