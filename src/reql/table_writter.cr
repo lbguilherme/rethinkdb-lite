@@ -76,8 +76,8 @@ module ReQL
       @tables_created.add(1)
     end
 
-    def create_index(table : Storage::PhysicalTable, name : String, function : Func)
-      table.create_index(name, function)
+    def create_index(table : Storage::PhysicalTable, name : String, function : Func, multi : Bool)
+      table.create_index(name, function, multi)
       @created.add(1)
     end
 

@@ -80,11 +80,12 @@ module Storage
       end
     end
 
-    def create_index(name : String, function : ReQL::Func)
+    def create_index(name : String, function : ReQL::Func, multi : Bool)
       info = KeyValueStore::IndexInfo.new
       info.name = name
       info.table = @table.info.id
       info.function = function
+      info.multi = multi
       @manager.lock.synchronize do
         if @table.indices.has_key?(name)
           raise ReQL::OpFailedError.new("Index `#{name}` already exists on table `#{@table.db_name}.#{@table.info.name}`")

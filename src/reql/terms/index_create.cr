@@ -7,6 +7,7 @@ module ReQL
 
     def compile
       expect_args 2, 3
+      expect_maybe_options "multi"
     end
   end
 
@@ -27,8 +28,13 @@ module ReQL
         raise QueryLogicError.new("Database `rethinkdb` is special; you can't create secondary indexes on the tables in it")
       end
 
+      multi = false
+      if term.options.has_key? "multi"
+        multi = Datum.new(term.options["multi"]).bool_value
+      end
+
       writter = TableWriter.new
-      writter.create_index(storage, name, function)
+      writter.create_index(storage, name, function, multi)
 
       @table_writers.last?.try &.merge(writter)
 
