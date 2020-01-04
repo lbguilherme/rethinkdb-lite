@@ -85,8 +85,11 @@ module Storage
       info.name = name
       info.table = @table.info.id
       info.function = function
-      @manager.kv.save_index(info)
       @manager.lock.synchronize do
+        if @table.indices.has_key?(name)
+          raise ReQL::OpFailedError.new("Index `#{name}` already exists on table `#{@table.db_name}.#{@table.info.name}`")
+        end
+        @manager.kv.save_index(info)
         @table.indices[name] = Manager::Index.new(info)
       end
     end
