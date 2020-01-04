@@ -1,7 +1,7 @@
 # STATUS
 
-- 95x :heavy_check_mark:
-- 126x :x:
+- 98x :heavy_check_mark:
+- 123x :x:
 
 # Connection
 
@@ -39,8 +39,8 @@
 | Term | Support | Notes |
 |-|-|-|
 | sequence.avg() | :x: |  |
-| sequence.contains(value) | :x: |  |
-| sequence.contains(function) | :x: |  |
+| sequence.contains(value) | :heavy_check_mark: |  |
+| sequence.contains(function) | :heavy_check_mark: |  |
 | sequence.count() | :heavy_check_mark: |  |
 | binary.count() | :heavy_check_mark: |  |
 | string.count() | :heavy_check_mark: |  |
@@ -206,7 +206,7 @@
 | table.get_write_hook() | :x: |  |
 | table.index_create(...) | :heavy_check_mark: |  |
 | table.index_drop(name) | :x: |  |
-| table.index_list() | :x: |  |
+| table.index_list() | :heavy_check_mark: |  |
 | table.index_rename(old, new) | :x: |  |
 | table.index_status(...) | :heavy_check_mark: |  |
 | table.index_wait(...) | :x: |  |
