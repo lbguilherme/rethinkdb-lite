@@ -6,6 +6,9 @@ module ReQL
   end
 
   class TableWriter
+    property created = Atomic(Int32).new(0)
+    property tables_created = Atomic(Int32).new(0)
+    property config_changes = [] of String # TODO
     property deleted = Atomic(Int32).new(0)
     property replaced = Atomic(Int32).new(0)
     property skipped = Atomic(Int32).new(0)
@@ -36,7 +39,7 @@ module ReQL
       end
     end
 
-    def insert(table : Storage::AbstractTable, row : Hash(String, Datum), durability : Durability? = nil)
+    private def internal_insert(table : Storage::AbstractTable, row : Hash(String, Datum), durability : Durability? = nil)
       primary_key = table.primary_key
       unless row.has_key? primary_key
         id = UUID.random.to_s
@@ -55,13 +58,22 @@ module ReQL
           raise ReQL::OpFailedError.new("Duplicate primary key `#{primary_key}`:\n#{pretty_old}\n#{pretty_row}")
         end
       end
+    end
 
+    def insert(table : Storage::AbstractTable, row : Hash(String, Datum), durability : Durability? = nil)
+      internal_insert(table, row, durability)
       @inserted.add(1)
     rescue err
       @errors.add(1)
       @mutex.synchronize do
         @first_error ||= err.message
       end
+    end
+
+    def create_table(table : Storage::VirtualTableConfigTable, row : Hash(String, Datum))
+      row["id"] = Datum.new(UUID.random.to_s)
+      internal_insert(table, row)
+      @tables_created.add(1)
     end
 
     def atomic_update(table : Storage::AbstractTable, key : Datum, durability : Durability? = nil)
@@ -99,6 +111,8 @@ module ReQL
     end
 
     def merge(other : TableWriter)
+      @created.add(other.created.get)
+      @tables_created.add(other.tables_created.get)
       @deleted.add(other.deleted.get)
       @replaced.add(other.replaced.get)
       @skipped.add(other.skipped.get)
@@ -108,29 +122,50 @@ module ReQL
       @mutex.synchronize do
         @first_error ||= other.first_error
         @generated_keys += other.generated_keys
+        @config_changes += other.config_changes
       end
     end
 
     def summary
-      result = Hash(String, Datum).new
+      @mutex.synchronize do
+        result = Hash(String, Datum).new
 
-      result["deleted"] = Datum.new(@deleted.get)
-      result["errors"] = Datum.new(@errors.get)
+        if @created.get != 0
+          result["created"] = Datum.new(@created.get)
+        end
 
-      if @first_error
-        result["first_error"] = Datum.new(@first_error)
+        if @tables_created.get != 0
+          result["tables_created"] = Datum.new(@tables_created.get)
+        end
+
+        if @config_changes.size > 0
+          result["config_changes"] = Datum.new(@config_changes)
+        end
+
+        has_normal_write = @deleted.get != 0 || @errors.get != 0 || @first_error != nil ||
+                           @generated_keys.size > 0 || @inserted.get != 0 || @replaced.get != 0 ||
+                           @skipped.get != 0 || @unchanged.get != 0
+
+        if result.size == 0 || has_normal_write
+          result["deleted"] = Datum.new(@deleted.get)
+          result["errors"] = Datum.new(@errors.get)
+
+          if @first_error
+            result["first_error"] = Datum.new(@first_error)
+          end
+
+          if !@generated_keys.empty?
+            result["generated_keys"] = Datum.new(@generated_keys)
+          end
+
+          result["inserted"] = Datum.new(@inserted.get)
+          result["replaced"] = Datum.new(@replaced.get)
+          result["skipped"] = Datum.new(@skipped.get)
+          result["unchanged"] = Datum.new(@unchanged.get)
+        end
+
+        Datum.new(result)
       end
-
-      if !@generated_keys.empty?
-        result["generated_keys"] = Datum.new(@generated_keys)
-      end
-
-      result["inserted"] = Datum.new(@inserted.get)
-      result["replaced"] = Datum.new(@replaced.get)
-      result["skipped"] = Datum.new(@skipped.get)
-      result["unchanged"] = Datum.new(@unchanged.get)
-
-      Datum.new(result)
     end
   end
 end

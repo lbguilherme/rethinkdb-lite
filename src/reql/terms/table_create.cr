@@ -66,12 +66,14 @@ module ReQL
         descriptor["primary_key"] = Datum.new(Datum.new(term.options["primary_key"]).string_value)
       end
 
-      table_config = @manager.get_table("rethinkdb", "table_config").not_nil!
+      table_config = @manager.get_table("rethinkdb", "table_config").as(Storage::VirtualTableConfigTable)
 
       writter = TableWriter.new
-      writter.insert(table_config, descriptor)
+      writter.create_table(table_config, descriptor)
 
-      Datum.new(Hash(String, Datum::Type).new)
+      @table_writers.last?.try &.merge(writter)
+
+      writter.summary
     end
   end
 end
