@@ -1,0 +1,12 @@
+docs
+bin
+lib
+.shards
+.crystal
+
+data
+cov
+src/test.cr
+bench
+spec
+Dockerfile
