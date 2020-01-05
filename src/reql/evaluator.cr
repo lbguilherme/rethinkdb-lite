@@ -1,7 +1,7 @@
 require "./executor/*"
 require "./error"
 require "./term"
-require "./table_writter"
+require "./helpers/*"
 
 module ReQL
   class Evaluator
