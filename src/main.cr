@@ -32,6 +32,11 @@ Signal::INT.trap do
   exit
 end
 
+Signal::TERM.trap do
+  puts "Server got SIGTERM; shutting down..."
+  exit
+end
+
 at_exit do
   puts "Shutting down client connections..."
   webui_server.close
