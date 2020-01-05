@@ -265,6 +265,7 @@ module RethinkDB
     term index_status, IndexStatusTerm
     term insert_at, InsertAtTerm
     term insert, InsertTerm
+    term is_empty, IsEmptyTerm
     term js, JsTerm
     term le, LeTerm
     term limit, LimitTerm
