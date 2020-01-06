@@ -1,4 +1,4 @@
-require "./executor/datum.cr"
+require "../executor/datum.cr"
 
 module ReQL
   def self.encode_key(datum : Datum)

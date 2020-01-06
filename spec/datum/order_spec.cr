@@ -1,6 +1,6 @@
 require "../../src/reql/executor/datum.cr"
 require "../../src/driver/*"
-require "../../src/reql/encoder.cr"
+require "../../src/reql/helpers/encoder.cr"
 require "spec"
 include RethinkDB::DSL
 

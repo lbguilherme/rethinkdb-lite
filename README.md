@@ -93,7 +93,7 @@ Then run:
 
 ```sh
 cd vendor/rethinkdb-webui
-npm install
+npm ci
 npm run build
 cd ../..
 shards

@@ -1,7 +1,7 @@
 # STATUS
 
-- 98x :heavy_check_mark:
-- 123x :x:
+- 106x :heavy_check_mark:
+- 114x :x:
 
 # Connection
 
@@ -79,7 +79,7 @@
 | r.error(err) | :heavy_check_mark: |  |
 | r(value) | :heavy_check_mark: |  |
 | r.expr(value) | :heavy_check_mark: |  |
-| r.for_each(write_function) | :x: | Currently `.map` can be used for writes |
+| r.for_each(write_function) | :heavy_check_mark: |  |
 | r.http(url) | :x: |  |
 | value.info() | :x: |  |
 | r.js(code) | :heavy_check_mark: | Not all return types are supported yet. |
@@ -88,7 +88,7 @@
 | r.range(start) | :heavy_check_mark: |  |
 | r.range(start, end) | :heavy_check_mark: |  |
 | value.to_json_string() | :x: |  |
-| value.type_of() | :x: |  |
+| value.type_of() | :heavy_check_mark: |  |
 | r.uuid() | :heavy_check_mark: |  |
 
 # Cursors
@@ -147,18 +147,17 @@
 | object.merge(object) | :heavy_check_mark: |  |
 | object.merge(function) | :heavy_check_mark: |  |
 | r.object(...) | :heavy_check_mark: |  |
-| sequence.pluck(...) | :x: |  |
-| object.pluck(...) | :x: |  |
+| sequence.pluck(...) | :heavy_check_mark: |  |
+| object.pluck(...) | :heavy_check_mark: |  |
 | array.prepend(value) | :x: |  |
 | array.set_difference(array) | :x: |  |
 | array.set_insert(array) | :x: |  |
 | array.set_intersection(array) | :x: |  |
 | array.set_union(array) | :x: |  |
 | array.splice_at(offset, array) | :heavy_check_mark: |  |
-| sequence.pluck(...) | :x: |  |
 | object.values() | :x: |  |
-| sequence.without(...) | :x: |  |
-| object.without(...) | :x: |  |
+| sequence.without(...) | :heavy_check_mark: |  |
+| object.without(...) | :heavy_check_mark: |  |
 
 # Geo Spatial
 
@@ -274,8 +273,8 @@
 
 | Term | Support | Notes |
 |-|-|-|
-| sequence.concat_map(function) | :x: |  |
-| sequence.is_empty() | :x: |  |
+| sequence.concat_map(function) | :heavy_check_mark: |  |
+| sequence.is_empty() | :heavy_check_mark: |  |
 | sequence.limit(number) | :heavy_check_mark: |  |
 | sequence.map(function) | :heavy_check_mark: |  |
 | sequence.nth(number) | :heavy_check_mark: |  |

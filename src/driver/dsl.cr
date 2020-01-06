@@ -242,6 +242,7 @@ module RethinkDB
     term ceil, CeilTerm
     term change_at, ChangeAtTerm
     term coerce_to, CoerceToTerm
+    term concat_map, ConcatMapTerm
     term contains, ContainsTerm
     term count, CountTerm
     term db_create, DbCreateTerm
@@ -265,6 +266,7 @@ module RethinkDB
     term index_status, IndexStatusTerm
     term insert_at, InsertAtTerm
     term insert, InsertTerm
+    term is_empty, IsEmptyTerm
     term js, JsTerm
     term le, LeTerm
     term limit, LimitTerm
@@ -282,6 +284,7 @@ module RethinkDB
     term object, ObjectTerm
     term or, OrTerm
     term order_by, OrderByTerm
+    term pluck, PluckTerm
     term random, RandomTerm
     term range, RangeTerm
     term round, RoundTerm
@@ -297,6 +300,7 @@ module RethinkDB
     term upcase, UpCaseTerm
     term update, UpdateTerm
     term uuid, UuidTerm
+    term without, WithoutTerm
   end
 end
 

@@ -10,7 +10,7 @@ include RethinkDB::DSL
       # Given that we need to have a high number of threads to make sure there are always some
       # threads available to run Fibers. This is not optimal.
       # Waiting on https://github.com/facebook/rocksdb/issues/3254
-      Crystal::System.cpu_count.to_i * 16
+      Crystal::System.cpu_count.to_i * 4
     end
   end
 {% end %}
@@ -29,6 +29,11 @@ puts "Server #{conn.server["name"].inspect} (#{conn.server["id"]}) ready."
 
 Signal::INT.trap do
   puts "Server got SIGINT; shutting down..."
+  exit
+end
+
+Signal::TERM.trap do
+  puts "Server got SIGTERM; shutting down..."
   exit
 end
 
