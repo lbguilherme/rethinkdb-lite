@@ -10,6 +10,8 @@ module ReQL
       val = val.raw if val.is_a? JSON::Any
 
       @value = case val
+               when AbstractValue::Type
+                 val
                when AbstractValue
                  val.value
                when Array
