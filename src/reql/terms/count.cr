@@ -4,7 +4,7 @@ module ReQL
     infix_inspect "count"
 
     def compile
-      expect_args 1
+      expect_args 1, 2
     end
   end
 
@@ -12,17 +12,28 @@ module ReQL
     def eval(term : CountTerm)
       target = eval(term.args[0])
 
-      case
-      when target.is_a? Stream
-        Datum.new(target.count(Int32::MAX.to_i64))
-      when array = target.array_value?
-        Datum.new(array.size.to_i64)
-      when string = target.string_value?
-        Datum.new(string.size.to_i64)
-      when bytes = target.bytes_value?
-        Datum.new(bytes.size.to_i64)
+      if term.args.size == 1
+        case
+        when target.is_a? Stream
+          Datum.new(target.count(Int32::MAX.to_i64))
+        when array = target.array_value?
+          Datum.new(array.size.to_i64)
+        when string = target.string_value?
+          Datum.new(string.size.to_i64)
+        when bytes = target.bytes_value?
+          Datum.new(bytes.size.to_i64)
+        else
+          raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
+        end
       else
-        raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
+        check = eval(term.args[1]).as_function
+        count = 0
+        target.each do |val|
+          if check.eval(self, {val.as_datum}).value
+            count += 1
+          end
+        end
+        Datum.new(count)
       end
     end
   end
