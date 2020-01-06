@@ -282,6 +282,7 @@ module RethinkDB
     term object, ObjectTerm
     term or, OrTerm
     term order_by, OrderByTerm
+    term pluck, PluckTerm
     term range, RangeTerm
     term round, RoundTerm
     term skip, SkipTerm

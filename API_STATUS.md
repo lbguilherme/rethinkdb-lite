@@ -1,7 +1,7 @@
 # STATUS
 
-- 100x :heavy_check_mark:
-- 121x :x:
+- 104x :heavy_check_mark:
+- 116x :x:
 
 # Connection
 
@@ -147,18 +147,17 @@
 | object.merge(object) | :heavy_check_mark: |  |
 | object.merge(function) | :heavy_check_mark: |  |
 | r.object(...) | :heavy_check_mark: |  |
-| sequence.pluck(...) | :x: |  |
-| object.pluck(...) | :x: |  |
+| sequence.pluck(...) | :heavy_check_mark: |  |
+| object.pluck(...) | :heavy_check_mark: |  |
 | array.prepend(value) | :x: |  |
 | array.set_difference(array) | :x: |  |
 | array.set_insert(array) | :x: |  |
 | array.set_intersection(array) | :x: |  |
 | array.set_union(array) | :x: |  |
 | array.splice_at(offset, array) | :heavy_check_mark: |  |
-| sequence.pluck(...) | :x: |  |
 | object.values() | :x: |  |
-| sequence.without(...) | :x: |  |
-| object.without(...) | :x: |  |
+| sequence.without(...) | :heavy_check_mark: |  |
+| object.without(...) | :heavy_check_mark: |  |
 
 # Geo Spatial
 
