@@ -1,7 +1,7 @@
 # STATUS
 
-- 98x :heavy_check_mark:
-- 123x :x:
+- 100x :heavy_check_mark:
+- 121x :x:
 
 # Connection
 
@@ -274,8 +274,8 @@
 
 | Term | Support | Notes |
 |-|-|-|
-| sequence.concat_map(function) | :x: |  |
-| sequence.is_empty() | :x: |  |
+| sequence.concat_map(function) | :heavy_check_mark: |  |
+| sequence.is_empty() | :heavy_check_mark: |  |
 | sequence.limit(number) | :heavy_check_mark: |  |
 | sequence.map(function) | :heavy_check_mark: |  |
 | sequence.nth(number) | :heavy_check_mark: |  |
