@@ -295,6 +295,7 @@ module RethinkDB
     term upcase, UpCaseTerm
     term update, UpdateTerm
     term uuid, UuidTerm
+    term without, WithoutTerm
   end
 end
 
