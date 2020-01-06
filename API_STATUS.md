@@ -1,7 +1,7 @@
 # STATUS
 
-- 104x :heavy_check_mark:
-- 116x :x:
+- 106x :heavy_check_mark:
+- 114x :x:
 
 # Connection
 
@@ -79,7 +79,7 @@
 | r.error(err) | :heavy_check_mark: |  |
 | r(value) | :heavy_check_mark: |  |
 | r.expr(value) | :heavy_check_mark: |  |
-| r.for_each(write_function) | :x: | Currently `.map` can be used for writes |
+| r.for_each(write_function) | :heavy_check_mark: |  |
 | r.http(url) | :x: |  |
 | value.info() | :x: |  |
 | r.js(code) | :heavy_check_mark: | Not all return types are supported yet. |
@@ -88,7 +88,7 @@
 | r.range(start) | :heavy_check_mark: |  |
 | r.range(start, end) | :heavy_check_mark: |  |
 | value.to_json_string() | :x: |  |
-| value.type_of() | :x: |  |
+| value.type_of() | :heavy_check_mark: |  |
 | r.uuid() | :heavy_check_mark: |  |
 
 # Cursors
