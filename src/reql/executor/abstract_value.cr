@@ -213,6 +213,10 @@ module ReQL
       end
     end
 
+    def float64_value
+      number_value.to_f64
+    end
+
     def as_datum
       Datum.new(value)
     end

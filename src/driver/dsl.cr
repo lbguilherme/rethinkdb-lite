@@ -272,8 +272,10 @@ module RethinkDB
     term limit, LimitTerm
     term lt, LtTerm
     term map, MapTerm
+    term max, MaxTerm
     term maxval, MaxvalTerm
     term merge, MergeTerm
+    term min, MinTerm
     term minval, MinvalTerm
     term mod, ModTerm
     term mul, MulTerm
@@ -283,6 +285,7 @@ module RethinkDB
     term or, OrTerm
     term order_by, OrderByTerm
     term pluck, PluckTerm
+    term random, RandomTerm
     term range, RangeTerm
     term round, RoundTerm
     term skip, SkipTerm

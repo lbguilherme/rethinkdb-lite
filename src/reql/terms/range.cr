@@ -4,7 +4,7 @@ module ReQL
     prefix_inspect "range"
 
     def compile
-      expect_args(0, 2)
+      expect_args 0, 2
     end
   end
 
