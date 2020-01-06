@@ -214,16 +214,7 @@ module ReQL
     end
 
     def float64_value
-      case v = number_value
-      when Int32
-        v.to_f64
-      when Int64
-        v.to_f64
-      when Float64
-        v
-      else
-        raise ReQL::QueryLogicError.new "Number not an Float: #{v}"
-      end
+      number_value.to_f64
     end
 
     def as_datum

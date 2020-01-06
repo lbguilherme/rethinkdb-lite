@@ -4,7 +4,7 @@ module ReQL
     prefix_inspect "random"
 
     def compile
-      expect_args 0,2
+      expect_args 0, 2
       expect_maybe_options "float"
     end
   end
@@ -34,10 +34,8 @@ module ReQL
           Datum.new(Random.rand(min...max))
         end
       else
-        raise "Expected between 0 and 2 arguments but found #{term.args.size}"
+        raise "BUG: Wrong number of arguments"
       end
     end
   end
 end
-
-
