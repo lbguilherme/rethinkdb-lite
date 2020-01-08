@@ -54,8 +54,6 @@ module ReQL
               end
       end
 
-      # p [str, sep, max, arr] if sep == /\s+/ && max == 3
-
       Datum.new(arr.map &.as(Datum::Type))
     end
   end

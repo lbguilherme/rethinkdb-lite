@@ -83,10 +83,6 @@ module Storage
       old_values = index_values(evaluator, index, old_row)
       new_values = index_values(evaluator, index, new_row)
 
-      p [index, key_data, old_row, new_row]
-      p old_values
-      p new_values
-
       # Remove values that are now missing
       (old_values - new_values).each do |(value, counter)|
         t.delete_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), counter, key_data)
