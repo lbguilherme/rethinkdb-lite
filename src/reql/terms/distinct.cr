@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class DistinctTerm < Term
     register_type DISTINCT

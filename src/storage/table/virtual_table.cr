@@ -1,3 +1,5 @@
+require "./abstract_table"
+
 module Storage
   abstract struct VirtualTable < AbstractTable
     def initialize(@name : String, @manager : Manager)

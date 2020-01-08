@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class GetTerm < Term
     register_type GET

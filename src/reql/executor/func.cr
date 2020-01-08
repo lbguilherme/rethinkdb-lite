@@ -1,3 +1,5 @@
+require "./abstract_value"
+
 module ReQL
   abstract struct Func < AbstractValue
     def reql_type

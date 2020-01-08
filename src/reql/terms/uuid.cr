@@ -1,4 +1,5 @@
 require "digest/sha1"
+require "../term"
 
 module ReQL
   class UuidTerm < Term

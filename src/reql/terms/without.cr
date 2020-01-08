@@ -1,4 +1,5 @@
 require "../helpers/object_selection"
+require "../term"
 
 module ReQL
   class WithoutTerm < Term

@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class FuncTerm < Term
     register_type FUNC

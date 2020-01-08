@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class SkipTerm < Term
     register_type SKIP

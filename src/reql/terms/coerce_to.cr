@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class CoerceToTerm < Term
     register_type COERCE_TO

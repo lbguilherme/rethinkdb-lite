@@ -1,3 +1,5 @@
+require "./func"
+
 module ReQL
   struct ReqlFunc < Func
     def reql_type

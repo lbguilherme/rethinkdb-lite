@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class ChangeAtTerm < Term
     register_type CHANGE_AT

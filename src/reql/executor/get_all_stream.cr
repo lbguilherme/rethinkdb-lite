@@ -1,4 +1,5 @@
 require "./stream"
+require "./row_value"
 require "../../storage/*"
 
 module ReQL

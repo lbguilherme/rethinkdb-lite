@@ -1,4 +1,5 @@
 require "uuid"
+require "../term"
 
 module ReQL
   class IndexListTerm < Term

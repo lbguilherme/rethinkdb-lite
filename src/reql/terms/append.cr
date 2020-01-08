@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class AppendTerm < Term
     register_type APPEND

@@ -1,3 +1,5 @@
+require "./abstract_value"
+
 module ReQL
   abstract struct Stream < AbstractValue
     def reql_type

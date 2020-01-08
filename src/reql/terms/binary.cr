@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class BinaryTerm < Term
     register_type BINARY

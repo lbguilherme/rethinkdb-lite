@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class SliceTerm < Term
     register_type SLICE

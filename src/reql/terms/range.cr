@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class RangeTerm < Term
     register_type RANGE

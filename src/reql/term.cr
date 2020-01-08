@@ -1,4 +1,5 @@
 require "./error"
+require "json"
 
 module ReQL
   abstract class Term

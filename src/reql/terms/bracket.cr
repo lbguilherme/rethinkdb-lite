@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class BracketTerm < Term
     register_type BRACKET

@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class EqTerm < Term
     register_type EQ

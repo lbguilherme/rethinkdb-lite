@@ -1,6 +1,7 @@
 require "socket"
 require "json"
 require "../crypto"
+require "./connection"
 
 module RethinkDB
   class RemoteConnection < Connection

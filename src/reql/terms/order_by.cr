@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class OrderByTerm < Term
     register_type ORDER_BY

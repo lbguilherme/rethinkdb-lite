@@ -1,5 +1,7 @@
 require "../helpers/object_selection"
 
+require "../term"
+
 module ReQL
   class PluckTerm < Term
     register_type PLUCK

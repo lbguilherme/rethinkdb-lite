@@ -6,6 +6,12 @@ module ReQL
   end
 
   abstract struct AbstractValue
+  end
+
+  struct Datum < AbstractValue
+  end
+
+  abstract struct AbstractValue
     abstract def value : Type
 
     include Comparable(Object)
@@ -300,3 +306,5 @@ class Hash(K, V)
     other == self
   end
 end
+
+require "./datum"

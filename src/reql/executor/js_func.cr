@@ -1,4 +1,5 @@
 require "../../duktape"
+require "./func"
 
 module ReQL
   struct JsFunc < Func

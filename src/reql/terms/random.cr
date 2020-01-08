@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class RandomTerm < Term
     register_type RANDOM

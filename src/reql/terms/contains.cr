@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class ContainsTerm < Term
     register_type CONTAINS

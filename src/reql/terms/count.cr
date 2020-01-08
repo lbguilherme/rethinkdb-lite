@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class CountTerm < Term
     register_type COUNT

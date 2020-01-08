@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class DbTerm < Term
     register_type DB

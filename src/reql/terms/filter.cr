@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class FilterTerm < Term
     register_type FILTER

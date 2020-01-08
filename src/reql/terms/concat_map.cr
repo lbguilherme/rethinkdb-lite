@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class ConcatMapTerm < Term
     register_type CONCAT_MAP

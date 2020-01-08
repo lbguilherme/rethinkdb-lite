@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class ObjectTerm < Term
     register_type OBJECT

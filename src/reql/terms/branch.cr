@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class BranchTerm < Term
     register_type BRANCH

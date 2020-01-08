@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class FloorTerm < Term
     register_type FLOOR

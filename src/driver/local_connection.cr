@@ -2,6 +2,7 @@ require "socket"
 require "../crypto"
 require "../storage/manager"
 require "../reql/evaluator"
+require "./connection"
 
 module RethinkDB
   class LocalConnection < Connection

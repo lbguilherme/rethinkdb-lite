@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class SplitTerm < Term
     register_type SPLIT

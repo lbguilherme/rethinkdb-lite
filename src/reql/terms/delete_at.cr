@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class DeleteAtTerm < Term
     register_type DELETE_AT

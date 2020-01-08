@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class DoTerm < Term
     register_type FUNCALL

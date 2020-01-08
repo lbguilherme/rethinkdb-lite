@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class SpliceAtTerm < Term
     register_type SPLICE_AT

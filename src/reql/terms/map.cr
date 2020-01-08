@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class MapTerm < Term
     register_type MAP

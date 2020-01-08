@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class InsertAtTerm < Term
     register_type INSERT_AT

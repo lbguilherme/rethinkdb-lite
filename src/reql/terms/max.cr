@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class MaxTerm < Term
     register_type MAX

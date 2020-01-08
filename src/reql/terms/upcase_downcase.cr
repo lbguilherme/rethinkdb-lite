@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class UpCaseTerm < Term
     register_type UPCASE

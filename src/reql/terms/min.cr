@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class MinTerm < Term
     register_type MIN

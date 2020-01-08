@@ -1,6 +1,10 @@
 require "uuid"
 require "file_utils"
 require "rocksdb"
+require "../reql/helpers/table_writter"
+require "../reql/executor/func"
+require "../reql/executor/reql_func"
+require "../reql/terms/var"
 
 module Storage
   class KeyValueStore

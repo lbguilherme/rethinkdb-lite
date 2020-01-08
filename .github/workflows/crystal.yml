@@ -44,3 +44,6 @@ jobs:
 
     - name: Check format
       run: crystal tool format --check
+
+    - name: Ensure every file requires everything it needs to build by itself
+      run: for file in $(find src -name '*.cr'); do echo $file; crystal build --no-codegen $file --error-trace || exit 1; done;

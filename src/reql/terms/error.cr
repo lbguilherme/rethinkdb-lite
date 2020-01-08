@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class ErrorTerm < Term
     register_type ERROR

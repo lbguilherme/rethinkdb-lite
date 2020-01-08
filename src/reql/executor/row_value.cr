@@ -1,4 +1,4 @@
-require "./abstract_value"
+require "./row"
 
 module ReQL
   struct RowValue < Row

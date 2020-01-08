@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class TableCreateTerm < Term
     register_type TABLE_CREATE

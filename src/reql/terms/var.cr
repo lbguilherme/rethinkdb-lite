@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class VarTerm < Term
     register_type VAR

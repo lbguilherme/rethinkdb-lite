@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class ForEachTerm < Term
     register_type FOR_EACH

@@ -1,3 +1,5 @@
+require "../driver/connection"
+
 module RethinkDB
   module Server
     class Client

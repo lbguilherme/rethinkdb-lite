@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class MergeTerm < Term
     register_type MERGE

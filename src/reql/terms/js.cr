@@ -1,4 +1,5 @@
 require "../../duktape"
+require "../term"
 
 module ReQL
   class JsTerm < Term

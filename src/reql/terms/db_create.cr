@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class DbCreateTerm < Term
     register_type DB_CREATE

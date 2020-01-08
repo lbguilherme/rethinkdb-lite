@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class TypeOfTerm < Term
     register_type TYPE_OF

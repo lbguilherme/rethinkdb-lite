@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class SumTerm < Term
     register_type SUM

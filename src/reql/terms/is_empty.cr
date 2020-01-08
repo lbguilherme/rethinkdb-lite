@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class IsEmptyTerm < Term
     register_type IS_EMPTY

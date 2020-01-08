@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class LimitTerm < Term
     register_type LIMIT

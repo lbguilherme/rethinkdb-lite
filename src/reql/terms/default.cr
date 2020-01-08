@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class DefaultTerm < Term
     register_type DEFAULT

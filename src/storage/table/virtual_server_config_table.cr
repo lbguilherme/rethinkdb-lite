@@ -1,3 +1,5 @@
+require "./virtual_table"
+
 module Storage
   struct VirtualServerConfigTable < VirtualTable
     def initialize(manager : Manager)

@@ -1,3 +1,5 @@
+require "../term"
+
 module ReQL
   class AddTerm < Term
     register_type ADD
