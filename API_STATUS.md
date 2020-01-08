@@ -1,7 +1,7 @@
 # STATUS
 
-- 106x :heavy_check_mark:
-- 114x :x:
+- 109x :heavy_check_mark:
+- 110x :x:
 
 # Connection
 
@@ -50,11 +50,10 @@
 | sequence.fold(base, function, {emit, final_emit}) | :x: |  |
 | sequence.group(function, {multi}) | :x: |  |
 | table.group(function{index, multi}) | :x: |  |
-| sequence.max() | :x: |  |
+| sequence.max() | :heavy_check_mark: |  |
 | table.max({index}) | :x: |  |
-| sequence.min() | :x: |  |
+| sequence.min() | :heavy_check_mark: |  |
 | table.min({index}) | :x: |  |
-| reduce.contains(function) | :x: |  |
 | sequence.sum() | :heavy_check_mark: |  |
 | sequence.sum(function) | :x: |  |
 | grouped_stream.ungroup() | :x: |  |
@@ -243,7 +242,7 @@
 | value.ne(value, ...) | :heavy_check_mark: |  |
 | value.not() | :heavy_check_mark: |  |
 | value.or(value, ...) | :heavy_check_mark: |  |
-| r.random() | :x: |  |
+| r.random() | :heavy_check_mark: |  |
 | number.round() | :heavy_check_mark: |  |
 | number.sub(number, ...) | :heavy_check_mark: |  |
 
