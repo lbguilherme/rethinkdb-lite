@@ -12,9 +12,8 @@ module Storage
     PREFIX_DATABASES        = 1u8
     PREFIX_TABLES           = 2u8
     PREFIX_TABLE_DATA       = 3u8
-    TABLE_PREFIX_DATA       = 0u8
-    TABLE_PREFIX_INDICES    = 1u8
-    TABLE_PREFIX_INDEX_DATA = 2u8
+    TABLE_PREFIX_INDICES    = 0u8
+    TABLE_PREFIX_INDEX_DATA = 1u8
 
     # Minimal durability: data it stored in memory only and flushed to disk at some later point.
     # A process crash might cause data loss. A graceful server close (calling .close()) won't lose data.
@@ -52,25 +51,6 @@ module Storage
       io.to_slice
     end
 
-    def self.key_for_table_data(primary_key : Bytes)
-      io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_DATA)
-      io.write(primary_key)
-      io.to_slice
-    end
-
-    def self.key_for_table_data_start()
-      io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_DATA)
-      io.to_slice
-    end
-
-    def self.key_for_table_data_end()
-      io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_DATA + 1u8)
-      io.to_slice
-    end
-
     def self.key_for_table_index(index_id : UUID)
       io = IO::Memory.new
       io.write_bytes(TABLE_PREFIX_INDICES)
@@ -78,13 +58,13 @@ module Storage
       io.to_slice
     end
 
-    def self.key_for_table_index_start()
+    def self.key_for_table_index_start
       io = IO::Memory.new
       io.write_bytes(TABLE_PREFIX_INDICES)
       io.to_slice
     end
 
-    def self.key_for_table_index_end()
+    def self.key_for_table_index_end
       io = IO::Memory.new
       io.write_bytes(TABLE_PREFIX_INDICES + 1u8)
       io.to_slice
@@ -174,6 +154,7 @@ module Storage
     end
 
     @table_data_family_cache = {} of UUID => RocksDB::ColumnFamilyHandle
+
     def table_data_family(id : UUID)
       handle = @table_data_family_cache[id]?
       return handle if handle
@@ -184,6 +165,7 @@ module Storage
     end
 
     @table_metadata_family_cache = {} of UUID => RocksDB::ColumnFamilyHandle
+
     def table_metadata_family(id : UUID)
       handle = @table_metadata_family_cache[id]?
       return handle if handle
@@ -276,9 +258,9 @@ module Storage
 
     def each_index(table_id : UUID)
       options = RocksDB::ReadOptions.new
-      options.iterate_upper_bound = KeyValueStore.key_for_table_index_end()
+      options.iterate_upper_bound = KeyValueStore.key_for_table_index_end
       iter = @rocksdb.iterator(table_metadata_family(table_id), options)
-      iter.seek(KeyValueStore.key_for_table_index_start())
+      iter.seek(KeyValueStore.key_for_table_index_start)
       while iter.valid?
         yield IndexInfo.load(iter.value)
         iter.next
@@ -307,7 +289,7 @@ module Storage
       end
 
       def get_row(table_id : UUID, primary_key : Bytes)
-        bytes = @txn.get_for_update(@kv.table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key))
+        bytes = @txn.get_for_update(@kv.table_data_family(table_id), primary_key)
         if bytes.nil?
           yield nil
         else
@@ -320,11 +302,11 @@ module Storage
       end
 
       def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)
-        @txn.put(@kv.table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key), data)
+        @txn.put(@kv.table_data_family(table_id), primary_key, data)
       end
 
       def delete_row(table_id : UUID, primary_key : Bytes) : Bytes?
-        @txn.delete(@kv.table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key))
+        @txn.delete(@kv.table_data_family(table_id), primary_key)
       end
 
       def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
@@ -402,9 +384,9 @@ module Storage
       if snapshot
         options = RocksDB::ReadOptions.new
         options.snapshot = snapshot
-        bytes = @rocksdb.get(table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key), options)
+        bytes = @rocksdb.get(table_data_family(table_id), primary_key, options)
       else
-        bytes = @rocksdb.get(table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key))
+        bytes = @rocksdb.get(table_data_family(table_id), primary_key)
       end
 
       if bytes.nil?
@@ -419,18 +401,16 @@ module Storage
     end
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft)
-      @rocksdb.put(table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key), data, get_write_options(durability))
+      @rocksdb.put(table_data_family(table_id), primary_key, data, get_write_options(durability))
     end
 
     def delete_row(table_id : UUID, primary_key : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft) : Bytes?
-      @rocksdb.delete(table_data_family(table_id), KeyValueStore.key_for_table_data(primary_key), get_write_options(durability))
+      @rocksdb.delete(table_data_family(table_id), primary_key, get_write_options(durability))
     end
 
     def each_row(table_id : UUID)
       options = RocksDB::ReadOptions.new
-      options.iterate_upper_bound = KeyValueStore.key_for_table_data_end()
       iter = @rocksdb.iterator(table_data_family(table_id), options)
-      iter.seek(KeyValueStore.key_for_table_data_start())
       while iter.valid?
         yield iter.value
         iter.next
