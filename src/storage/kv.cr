@@ -163,7 +163,7 @@ module Storage
       handle = @table_data_family_cache[id]?
       return handle if handle
       name = "table.#{id}.data"
-      handle = @rocksdb.family_handle?("table.#{id}.data")
+      handle = @rocksdb.family_handle?(name)
       handle = @rocksdb.create_column_family(name, @options) unless handle
       @table_data_family_cache[id] = handle
     end
@@ -174,7 +174,7 @@ module Storage
       handle = @table_metadata_family_cache[id]?
       return handle if handle
       name = "table.#{id}.metadata"
-      handle = @rocksdb.family_handle?("table.#{id}.metadata")
+      handle = @rocksdb.family_handle?(name)
       handle = @rocksdb.create_column_family(name, @options) unless handle
       @table_metadata_family_cache[id] = handle
     end
@@ -413,8 +413,8 @@ module Storage
     end
 
     def each_row(table_id : UUID)
-      options = RocksDB::ReadOptions.new
-      iter = @rocksdb.iterator(table_data_family(table_id), options)
+      iter = @rocksdb.iterator(table_data_family(table_id))
+      iter.seek_to_first
       while iter.valid?
         yield iter.value
         iter.next
