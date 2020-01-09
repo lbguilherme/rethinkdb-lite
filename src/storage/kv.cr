@@ -139,7 +139,11 @@ module Storage
 
       FileUtils.mkdir_p path
 
-      families = RocksDB::Database.list_column_families(path, @options).map { |name| {name, @options} }.to_h
+      if File.exists? Path.new(path, "CURRENT")
+        families = RocksDB::Database.list_column_families(path, @options).map { |name| {name, @options} }.to_h
+      else
+        families = {"default" => @options}
+      end
 
       @rocksdb = {% if flag?(:preview_mt) %}
                    RocksDB::TransactionDatabase.open(path, @options, families)
