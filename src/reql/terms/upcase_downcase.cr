@@ -1,31 +1,29 @@
 require "../term"
 
 module ReQL
-  class UpCaseTerm < Term
-    register_type UPCASE
+  class UpcaseTerm < Term
     infix_inspect "upcase"
 
-    def compile
+    def check
       expect_args 1
     end
   end
 
-  class DownCaseTerm < Term
-    register_type DOWNCASE
+  class DowncaseTerm < Term
     infix_inspect "downcase"
 
-    def compile
+    def check
       expect_args 1
     end
   end
 
   class Evaluator
-    def eval(term : UpCaseTerm)
+    def eval(term : UpcaseTerm)
       target = eval(term.args[0]).string_value
       Datum.new(target.upcase)
     end
 
-    def eval(term : DownCaseTerm)
+    def eval(term : DowncaseTerm)
       target = eval(term.args[0]).string_value
       Datum.new(target.downcase)
     end

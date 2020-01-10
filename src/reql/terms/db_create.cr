@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class DbCreateTerm < Term
-    register_type DB_CREATE
     prefix_inspect "db_create"
 
-    def compile
+    def check
       expect_args 1
     end
   end

@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class ConcatMapTerm < Term
-    register_type CONCAT_MAP
     infix_inspect "concat_map"
 
-    def compile
+    def check
       expect_args 2
     end
   end

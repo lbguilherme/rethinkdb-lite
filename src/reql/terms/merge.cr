@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class MergeTerm < Term
-    register_type MERGE
     infix_inspect "merge"
 
-    def compile
+    def check
       expect_args 2
     end
   end

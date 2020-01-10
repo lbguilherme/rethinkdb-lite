@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class GetTerm < Term
-    register_type GET
     infix_inspect "get"
 
-    def compile
+    def check
       expect_args 2
     end
   end

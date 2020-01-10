@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class ContainsTerm < Term
-    register_type CONTAINS
     infix_inspect "contains"
 
-    def compile
+    def check
       expect_args_at_least 2
     end
   end

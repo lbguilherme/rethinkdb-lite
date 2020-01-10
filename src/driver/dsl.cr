@@ -252,7 +252,7 @@ module RethinkDB
     term delete, DeleteTerm
     term distinct, DistinctTerm
     term div, DivTerm
-    term downcase, DownCaseTerm
+    term downcase, DowncaseTerm
     term eq, EqTerm
     term error, ErrorTerm
     term filter, FilterTerm
@@ -297,7 +297,7 @@ module RethinkDB
     term table_create, TableCreateTerm
     term table, TableTerm
     term type_of, TypeOfTerm
-    term upcase, UpCaseTerm
+    term upcase, UpcaseTerm
     term update, UpdateTerm
     term uuid, UuidTerm
     term without, WithoutTerm

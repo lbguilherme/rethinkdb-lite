@@ -2,28 +2,25 @@ require "../term"
 
 module ReQL
   class FloorTerm < Term
-    register_type FLOOR
     infix_inspect "floor"
 
-    def compile
+    def check
       expect_args 1
     end
   end
 
   class CeilTerm < Term
-    register_type CEIL
     infix_inspect "ceil"
 
-    def compile
+    def check
       expect_args 1
     end
   end
 
   class RoundTerm < Term
-    register_type ROUND
     infix_inspect "round"
 
-    def compile
+    def check
       expect_args 1
     end
   end

@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class SumTerm < Term
-    register_type SUM
     infix_inspect "sum"
 
-    def compile
+    def check
       expect_args 1
     end
   end

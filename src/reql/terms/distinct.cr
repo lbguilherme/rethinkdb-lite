@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class DistinctTerm < Term
-    register_type DISTINCT
     infix_inspect "distinct"
 
-    def compile
+    def check
       expect_args 1
     end
   end

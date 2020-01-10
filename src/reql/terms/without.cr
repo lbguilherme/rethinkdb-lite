@@ -3,10 +3,9 @@ require "../term"
 
 module ReQL
   class WithoutTerm < Term
-    register_type WITHOUT
     infix_inspect "without"
 
-    def compile
+    def check
       expect_args_at_least 2
     end
   end

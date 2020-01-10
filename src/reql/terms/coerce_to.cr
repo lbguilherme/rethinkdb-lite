@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class CoerceToTerm < Term
-    register_type COERCE_TO
     infix_inspect "coerce_to"
 
-    def compile
+    def check
       expect_args 2
     end
   end

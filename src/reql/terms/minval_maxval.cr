@@ -2,19 +2,17 @@ require "../term"
 
 module ReQL
   class MinvalTerm < Term
-    register_type MINVAL
     prefix_inspect "minval"
 
-    def compile
+    def check
       expect_args 0
     end
   end
 
   class MaxvalTerm < Term
-    register_type MAXVAL
     prefix_inspect "maxval"
 
-    def compile
+    def check
       expect_args 0
     end
   end

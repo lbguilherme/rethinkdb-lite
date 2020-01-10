@@ -4,10 +4,9 @@ require "../term"
 
 module ReQL
   class PluckTerm < Term
-    register_type PLUCK
     infix_inspect "pluck"
 
-    def compile
+    def check
       expect_args_at_least 2
     end
   end

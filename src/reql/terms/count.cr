@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class CountTerm < Term
-    register_type COUNT
     infix_inspect "count"
 
-    def compile
+    def check
       expect_args 1, 2
     end
   end

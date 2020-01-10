@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class DeleteAtTerm < Term
-    register_type DELETE_AT
     infix_inspect "delete_at"
 
-    def compile
+    def check
       expect_args 2, 3
     end
   end

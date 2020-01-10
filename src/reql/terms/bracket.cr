@@ -2,8 +2,6 @@ require "../term"
 
 module ReQL
   class BracketTerm < Term
-    register_type BRACKET
-
     def inspect(io)
       if @args[0].is_a?(Term)
         @args[0].inspect(io)
@@ -18,7 +16,7 @@ module ReQL
       io << ")"
     end
 
-    def compile
+    def check
       expect_args 2
     end
   end

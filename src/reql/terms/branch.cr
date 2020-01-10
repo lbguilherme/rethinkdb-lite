@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class BranchTerm < Term
-    register_type BRANCH
     infix_inspect "branch"
 
-    def compile
+    def check
       expect_args_at_least 3
       if @args.size % 2 == 0
         raise QueryLogicError.new "Cannot call `branch` term with an even number of arguments."

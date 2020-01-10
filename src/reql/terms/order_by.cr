@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class OrderByTerm < Term
-    register_type ORDER_BY
     infix_inspect "order_by"
 
-    def compile
+    def check
       expect_args 2
     end
   end

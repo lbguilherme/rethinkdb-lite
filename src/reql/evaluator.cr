@@ -25,7 +25,7 @@ module ReQL
       Datum.new(result)
     end
 
-    def eval(val : Bool | String | String | Bytes | Float64 | Int64 | Int32 | Nil)
+    def eval(val : Bool | String | Bytes | Float64 | Int64 | Int32 | Nil)
       Datum.new(val)
     end
   end

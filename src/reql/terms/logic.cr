@@ -2,82 +2,73 @@ require "../term"
 
 module ReQL
   class EqTerm < Term
-    register_type EQ
     infix_inspect "eq"
 
-    def compile
+    def check
       expect_args 2
     end
   end
 
   class NeTerm < Term
-    register_type NE
     infix_inspect "ne"
 
-    def compile
+    def check
       expect_args 2
     end
   end
 
   class GtTerm < Term
-    register_type GT
     infix_inspect "gt"
 
-    def compile
+    def check
       expect_args 2
     end
   end
 
   class GeTerm < Term
-    register_type GE
     infix_inspect "ge"
 
-    def compile
+    def check
       expect_args 2
     end
   end
 
   class LtTerm < Term
-    register_type LT
     infix_inspect "lt"
 
-    def compile
+    def check
       expect_args 2
     end
   end
 
   class LeTerm < Term
-    register_type LE
     infix_inspect "le"
 
-    def compile
+    def check
       expect_args 2
     end
   end
 
   class AndTerm < Term
-    register_type AND
     infix_inspect "and"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end
 
   class OrTerm < Term
-    register_type OR
     infix_inspect "or"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end
 
   class NotTerm < Term
-    register_type NOT
     infix_inspect "not"
 
-    def compile
+    def check
       expect_args 1
     end
   end

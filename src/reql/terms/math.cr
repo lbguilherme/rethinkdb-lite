@@ -2,46 +2,41 @@ require "../term"
 
 module ReQL
   class AddTerm < Term
-    register_type ADD
     infix_inspect "add"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end
 
   class SubTerm < Term
-    register_type SUB
     infix_inspect "sub"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end
 
   class MulTerm < Term
-    register_type MUL
     infix_inspect "mul"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end
 
   class DivTerm < Term
-    register_type DIV
     infix_inspect "div"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end
 
   class ModTerm < Term
-    register_type MOD
     infix_inspect "mod"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end

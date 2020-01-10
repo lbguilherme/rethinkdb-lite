@@ -2,8 +2,6 @@ require "../term"
 
 module ReQL
   class FuncTerm < Term
-    register_type FUNC
-
     def inspect(io)
       vars = @args[0].as(Array)
       body = @args[1]
@@ -17,7 +15,7 @@ module ReQL
       body.inspect(io)
     end
 
-    def compile
+    def check
       expect_args 2
 
       mentioned_variables = Set(Int64).new

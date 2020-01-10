@@ -3,10 +3,9 @@ require "../term"
 
 module ReQL
   class JsTerm < Term
-    register_type JAVASCRIPT
     prefix_inspect "js"
 
-    def compile
+    def check
       expect_args 1
     end
   end

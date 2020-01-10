@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class InsertAtTerm < Term
-    register_type INSERT_AT
     infix_inspect "insert_at"
 
-    def compile
+    def check
       expect_args 3
     end
   end

@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class DefaultTerm < Term
-    register_type DEFAULT
     infix_inspect "default"
 
-    def compile
+    def check
       expect_args 2
     end
   end

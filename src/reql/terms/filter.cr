@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class FilterTerm < Term
-    register_type FILTER
     infix_inspect "filter"
 
-    def compile
+    def check
       expect_args 2
     end
   end

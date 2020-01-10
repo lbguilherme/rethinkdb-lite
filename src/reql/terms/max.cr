@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class MaxTerm < Term
-    register_type MAX
     infix_inspect "max"
 
-    def compile
+    def check
       expect_args 1, 2
     end
   end

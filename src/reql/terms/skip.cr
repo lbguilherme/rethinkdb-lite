@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class SkipTerm < Term
-    register_type SKIP
     infix_inspect "skip"
 
-    def compile
+    def check
       expect_args 2
     end
   end

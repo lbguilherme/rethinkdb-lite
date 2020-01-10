@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class MapTerm < Term
-    register_type MAP
     infix_inspect "map"
 
-    def compile
+    def check
       expect_args 2
     end
   end

@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class DoTerm < Term
-    register_type FUNCALL
     infix_inspect "do"
 
-    def compile
+    def check
       expect_args_at_least 1
     end
   end

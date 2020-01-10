@@ -2,7 +2,6 @@ require "../term"
 
 module ReQL
   class TableCreateTerm < Term
-    register_type TABLE_CREATE
     infix_inspect "table_create"
 
     def inspect(io)
@@ -18,7 +17,7 @@ module ReQL
       io << ")"
     end
 
-    def compile
+    def check
       expect_args 1, 2
       expect_maybe_options "durability", "primary_key"
     end

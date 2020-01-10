@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class SpliceAtTerm < Term
-    register_type SPLICE_AT
     infix_inspect "splice_at"
 
-    def compile
+    def check
       expect_args 3
     end
   end

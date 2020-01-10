@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class ObjectTerm < Term
-    register_type OBJECT
     prefix_inspect "object"
 
-    def compile
+    def check
       if @args.size % 2 != 0
         raise QueryLogicError.new "OBJECT expects an even number of arguments (but found #{@args.size})."
       end

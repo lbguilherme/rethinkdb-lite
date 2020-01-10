@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class IsEmptyTerm < Term
-    register_type IS_EMPTY
     infix_inspect "is_empty"
 
-    def compile
+    def check
       expect_args 1
     end
   end

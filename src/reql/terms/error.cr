@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class ErrorTerm < Term
-    register_type ERROR
     infix_inspect "error"
 
-    def compile
+    def check
       expect_args 1
     end
   end

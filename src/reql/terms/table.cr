@@ -2,7 +2,6 @@ require "../term"
 
 module ReQL
   class TableTerm < Term
-    register_type TABLE
     infix_inspect "table"
 
     def inspect(io)
@@ -18,7 +17,7 @@ module ReQL
       io << ")"
     end
 
-    def compile
+    def check
       expect_args 1, 2
     end
   end

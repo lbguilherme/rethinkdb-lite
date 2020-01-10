@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class LimitTerm < Term
-    register_type LIMIT
     infix_inspect "limit"
 
-    def compile
+    def check
       expect_args 2
     end
   end

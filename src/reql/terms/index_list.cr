@@ -3,10 +3,9 @@ require "../term"
 
 module ReQL
   class IndexListTerm < Term
-    register_type INDEX_LIST
     infix_inspect "index_list"
 
-    def compile
+    def check
       expect_args 1
     end
   end

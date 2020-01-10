@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class RandomTerm < Term
-    register_type RANDOM
     prefix_inspect "random"
 
-    def compile
+    def check
       expect_args 0, 2
       expect_maybe_options "float"
     end

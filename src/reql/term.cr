@@ -10,10 +10,10 @@ module ReQL
 
     def initialize(@args : Array(Type), options : Hash(String, JSON::Any)?)
       @options = options.nil? ? {} of String => JSON::Any : options
-      compile
+      check
     end
 
-    def compile
+    def check
       # subclasses might do work here
     end
 
@@ -32,15 +32,14 @@ module ReQL
       elsif raw.is_a? Array
         type_id = TermType.new(json[0].as_i)
         args = json[1] ? json[1].as_a.map { |e| Term.parse(e).as(Type) } : [] of Type
-        if type_id == TermType::FUNCALL
+        if type_id == TermType::DO
           args.rotate!(1)
         end
         if type_id == TermType::MAKE_ARRAY
           args.as(Type)
-        elsif klass = @@type_to_class[type_id]?
-          klass.new(args, json[2]?.try &.as_h?).as(Type)
         else
-          raise CompileError.new("r.#{type_id.to_s.downcase.gsub(/_(\w)/) { $1.upcase }}() is not yet implemented.")
+          klass = @@type_to_class[type_id]
+          klass.new(args, json[2]?.try &.as_h?).as(Type)
         end
       else
         raw.as(Type)
@@ -60,7 +59,7 @@ module ReQL
       when Term
         type_id = @@class_to_type[term.class].to_i64
         args = term.args.map { |x| Term.encode(x) }
-        if type_id == TermType::FUNCALL.to_i64
+        if type_id == TermType::DO.to_i64
           args.rotate!(-1)
         end
         JSON::Any.new([type_id, args].map { |x| JSON::Any.new(x) })
@@ -195,7 +194,7 @@ module ReQL
     MAKE_ARRAY         =   2
     MAKE_OBJ           =   3
     VAR                =  10
-    JAVASCRIPT         =  11
+    JS                 =  11
     UUID               = 169
     HTTP               = 153
     ERROR              =  12
@@ -290,7 +289,7 @@ module ReQL
     INDEX_RENAME       = 156
     SET_WRITE_HOOK     = 189
     GET_WRITE_HOOK     = 190
-    FUNCALL            =  64
+    DO                 =  64
     BRANCH             =  65
     OR                 =  66
     AND                =  67
@@ -378,4 +377,18 @@ module ReQL
     BIT_SAL            = 195
     BIT_SAR            = 196
   end
+
+  {% for term_type in TermType.constants %}
+    {% class_name = (term_type.stringify.split("_").map(&.capitalize).join("") + "Term").id %}
+    class {{ class_name }} < Term
+      register_type {{ term_type }}
+      infix_inspect {{ term_type.stringify.downcase }}
+    end
+
+    class Evaluator
+      def eval(term : {{ class_name }})
+        raise CompileError.new("Evaluation of r.{{ term_type.stringify.downcase.id }}() is not implemented.")
+      end
+    end
+  {% end %}
 end

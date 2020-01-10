@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class ForEachTerm < Term
-    register_type FOR_EACH
     infix_inspect "for_each"
 
-    def compile
+    def check
       expect_args 2
     end
   end

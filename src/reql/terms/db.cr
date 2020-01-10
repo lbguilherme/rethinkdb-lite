@@ -2,8 +2,6 @@ require "../term"
 
 module ReQL
   class DbTerm < Term
-    register_type DB
-
     def inspect(io)
       io << "r.db("
       @args.each_with_index do |e, i|
@@ -13,7 +11,7 @@ module ReQL
       io << ")"
     end
 
-    def compile
+    def check
       expect_args 1
     end
   end

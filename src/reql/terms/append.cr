@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class AppendTerm < Term
-    register_type APPEND
     infix_inspect "append"
 
-    def compile
+    def check
       expect_args 2
     end
   end

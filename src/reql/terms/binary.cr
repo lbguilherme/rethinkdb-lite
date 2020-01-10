@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class BinaryTerm < Term
-    register_type BINARY
     prefix_inspect "binary"
 
-    def compile
+    def check
       expect_args 1
     end
   end

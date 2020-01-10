@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class MinTerm < Term
-    register_type MIN
     infix_inspect "min"
 
-    def compile
+    def check
       expect_args 1, 2
     end
   end

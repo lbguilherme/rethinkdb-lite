@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class RangeTerm < Term
-    register_type RANGE
     prefix_inspect "range"
 
-    def compile
+    def check
       expect_args 0, 2
     end
   end

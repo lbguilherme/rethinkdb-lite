@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class TypeOfTerm < Term
-    register_type TYPE_OF
     infix_inspect "type_of"
 
-    def compile
+    def check
       expect_args 1
     end
   end

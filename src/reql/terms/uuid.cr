@@ -3,12 +3,11 @@ require "../term"
 
 module ReQL
   class UuidTerm < Term
-    register_type UUID
     prefix_inspect "uuid"
 
     UUID_NAMESPACE = UUID.new("91461c99-f89d-49d2-af96-d8e2e14e9b58").bytes
 
-    def compile
+    def check
       expect_args(0, 1)
     end
   end

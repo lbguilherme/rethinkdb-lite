@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class SplitTerm < Term
-    register_type SPLIT
     infix_inspect "split"
 
-    def compile
+    def check
       expect_args 1, 3
     end
   end

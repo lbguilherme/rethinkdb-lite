@@ -3,10 +3,9 @@ require "../term"
 
 module ReQL
   class UpdateTerm < Term
-    register_type UPDATE
     infix_inspect "update"
 
-    def compile
+    def check
       expect_args 2
     end
   end

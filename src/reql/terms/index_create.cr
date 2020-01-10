@@ -3,10 +3,9 @@ require "../term"
 
 module ReQL
   class IndexCreateTerm < Term
-    register_type INDEX_CREATE
     infix_inspect "index_create"
 
-    def compile
+    def check
       expect_args 2, 3
       expect_maybe_options "multi"
     end

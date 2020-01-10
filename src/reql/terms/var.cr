@@ -2,13 +2,11 @@ require "../term"
 
 module ReQL
   class VarTerm < Term
-    register_type VAR
-
     def inspect(io)
       io << "var_" << @args[0]
     end
 
-    def compile
+    def check
       expect_args 1
     end
   end

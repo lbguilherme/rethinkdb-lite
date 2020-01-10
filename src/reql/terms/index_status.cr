@@ -3,10 +3,9 @@ require "../term"
 
 module ReQL
   class IndexStatusTerm < Term
-    register_type INDEX_STATUS
     infix_inspect "index_status"
 
-    def compile
+    def check
       expect_args 1, 2
     end
   end

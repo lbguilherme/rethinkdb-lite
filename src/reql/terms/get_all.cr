@@ -2,10 +2,9 @@ require "../term"
 
 module ReQL
   class GetAllTerm < Term
-    register_type GET_ALL
     infix_inspect "get_all"
 
-    def compile
+    def check
       expect_args_at_least 2
       expect_maybe_options "index"
     end
