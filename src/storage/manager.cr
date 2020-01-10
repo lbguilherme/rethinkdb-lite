@@ -69,6 +69,8 @@ module Storage
           return VirtualTableConfigTable.new(self)
         when "table_status"
           return VirtualTableStatusTable.new(self)
+        when "stats"
+          return VirtualStatsTable.new(self)
         else
           return nil
         end
