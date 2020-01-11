@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : LimitTerm)
+    def eval_term(term : LimitTerm)
       target = eval(term.args[0])
       limit = eval(term.args[1]).int64_value
 

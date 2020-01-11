@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : ContainsTerm)
+    def eval_term(term : ContainsTerm)
       target = eval(term.args[0])
 
       predicates = term.args[1..-1].map { |arg| eval(arg) }

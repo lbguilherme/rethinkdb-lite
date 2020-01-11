@@ -23,7 +23,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : TableTerm)
+    def eval_term(term : TableTerm)
       db = nil
       table_name = nil
 

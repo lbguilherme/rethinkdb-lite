@@ -42,7 +42,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : AddTerm)
+    def eval_term(term : AddTerm)
       first = eval(term.args[0])
 
       result = first.value
@@ -62,7 +62,7 @@ module ReQL
       return Datum.new(result)
     end
 
-    def eval(term : SubTerm)
+    def eval_term(term : SubTerm)
       first = eval(term.args[0])
 
       result = first.value
@@ -78,7 +78,7 @@ module ReQL
       return Datum.new(result)
     end
 
-    def eval(term : MulTerm)
+    def eval_term(term : MulTerm)
       first = eval(term.args[0])
 
       result = first.value
@@ -104,7 +104,7 @@ module ReQL
       return Datum.new(result)
     end
 
-    def eval(term : DivTerm)
+    def eval_term(term : DivTerm)
       first = eval(term.args[0])
 
       result = first.value
@@ -124,7 +124,7 @@ module ReQL
       return Datum.new(result)
     end
 
-    def eval(term : ModTerm)
+    def eval_term(term : ModTerm)
       first = eval(term.args[0])
 
       result = first.value

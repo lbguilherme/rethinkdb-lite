@@ -74,49 +74,49 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : EqTerm)
+    def eval_term(term : EqTerm)
       a = eval(term.args[0])
       b = eval(term.args[1])
 
       Datum.new(a.as_datum == b.as_datum)
     end
 
-    def eval(term : NeTerm)
+    def eval_term(term : NeTerm)
       a = eval(term.args[0])
       b = eval(term.args[1])
 
       Datum.new(a.as_datum != b.as_datum)
     end
 
-    def eval(term : GtTerm)
+    def eval_term(term : GtTerm)
       a = eval(term.args[0])
       b = eval(term.args[1])
 
       Datum.new(a.as_datum > b.as_datum)
     end
 
-    def eval(term : GeTerm)
+    def eval_term(term : GeTerm)
       a = eval(term.args[0])
       b = eval(term.args[1])
 
       Datum.new(a.as_datum >= b.as_datum)
     end
 
-    def eval(term : LtTerm)
+    def eval_term(term : LtTerm)
       a = eval(term.args[0])
       b = eval(term.args[1])
 
       Datum.new(a.as_datum < b.as_datum)
     end
 
-    def eval(term : LeTerm)
+    def eval_term(term : LeTerm)
       a = eval(term.args[0])
       b = eval(term.args[1])
 
       Datum.new(a.as_datum <= b.as_datum)
     end
 
-    def eval(term : AndTerm)
+    def eval_term(term : AndTerm)
       last = Datum.new(nil)
       term.args.each do |arg|
         last = eval(arg)
@@ -125,7 +125,7 @@ module ReQL
       return last
     end
 
-    def eval(term : OrTerm)
+    def eval_term(term : OrTerm)
       last = Datum.new(nil)
       term.args.each do |arg|
         last = eval(arg)
@@ -134,7 +134,7 @@ module ReQL
       return last
     end
 
-    def eval(term : NotTerm)
+    def eval_term(term : NotTerm)
       Datum.new(!eval(term.args[0]).value)
     end
   end

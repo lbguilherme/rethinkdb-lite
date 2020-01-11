@@ -11,7 +11,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : RandomTerm)
+    def eval_term(term : RandomTerm)
       is_float = (term.options.has_key? "float") && term.options["float"]
       case term.args.size
       when 0

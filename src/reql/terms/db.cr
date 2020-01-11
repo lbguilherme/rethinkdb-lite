@@ -17,7 +17,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : DbTerm)
+    def eval_term(term : DbTerm)
       name = eval(term.args[0]).string_value
 
       unless name =~ /\A[A-Za-z0-9_-]+\Z/

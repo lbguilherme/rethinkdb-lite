@@ -12,7 +12,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : VarTerm)
+    def eval_term(term : VarTerm)
       @vars[term.args[0].as(Int64)]
     end
   end

@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : DoTerm)
+    def eval_term(term : DoTerm)
       func = eval(term.args[-1])
       args = eval(term.args[0..-2]).array_value
       if func.is_a? Func

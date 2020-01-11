@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : CoerceToTerm)
+    def eval_term(term : CoerceToTerm)
       source = eval(term.args[0])
       target_type = eval(term.args[1]).string_value.upcase
       source = source.as_datum

@@ -24,7 +24,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : MergeTerm)
+    def eval_term(term : MergeTerm)
       target = eval(term.args[0])
       func = eval(term.args[1])
 

@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : SliceTerm)
+    def eval_term(term : SliceTerm)
       target = eval(term.args[0])
 
       skip = eval(term.args[1]).int64_value

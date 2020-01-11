@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : RangeTerm)
+    def eval_term(term : RangeTerm)
       case term.args.size
       when 0
         InfiniteRange.new

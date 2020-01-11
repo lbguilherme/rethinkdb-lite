@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : ConcatMapTerm)
+    def eval_term(term : ConcatMapTerm)
       target = eval(term.args[0])
       func = eval(term.args[1]).as_function
 

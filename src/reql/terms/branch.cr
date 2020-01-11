@@ -13,7 +13,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : BranchTerm)
+    def eval_term(term : BranchTerm)
       (term.args.size//2).times do |i|
         cond = eval(term.args[2*i]).as_datum
         if cond.value

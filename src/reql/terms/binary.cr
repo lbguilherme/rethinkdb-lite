@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : BinaryTerm)
+    def eval_term(term : BinaryTerm)
       data = eval(term.args[0])
 
       if data.is_bytes?

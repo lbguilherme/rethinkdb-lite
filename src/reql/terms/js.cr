@@ -11,7 +11,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : JsTerm)
+    def eval_term(term : JsTerm)
       code = eval(term.args[0]).string_value
 
       ctx = Duktape::Context.new

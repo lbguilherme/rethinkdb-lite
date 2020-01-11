@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : DefaultTerm)
+    def eval_term(term : DefaultTerm)
       base = begin
         eval(term.args[0])
       rescue ex : NonExistenceError | UserError

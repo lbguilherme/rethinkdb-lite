@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : DeleteAtTerm)
+    def eval_term(term : DeleteAtTerm)
       arr = eval(term.args[0]).array_value
 
       idx_datum = eval(term.args[1])

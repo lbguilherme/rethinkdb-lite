@@ -13,7 +13,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : UuidTerm)
+    def eval_term(term : UuidTerm)
       if term.args.size == 0
         Datum.new(UUID.random.to_s)
       else

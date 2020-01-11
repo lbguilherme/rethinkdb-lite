@@ -22,7 +22,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : BracketTerm)
+    def eval_term(term : BracketTerm)
       target = eval(term.args[0])
       field = eval(term.args[1]).string_value
 

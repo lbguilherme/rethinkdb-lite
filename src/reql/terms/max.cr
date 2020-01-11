@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : MaxTerm)
+    def eval_term(term : MaxTerm)
       target = eval(term.args[0])
       func = term.args.size == 2 ? eval(term.args[1]).as_function : nil
       best = {value: nil, computed: nil}

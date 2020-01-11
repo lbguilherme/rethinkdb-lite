@@ -10,11 +10,10 @@ module ReQL
 
     def initialize(@args : Array(Type), options : Hash(String, JSON::Any)?)
       @options = options.nil? ? {} of String => JSON::Any : options
-      check
     end
 
     def check
-      # subclasses might do work here
+      # subclasses might run checks here
     end
 
     def self.parse(json : JSON::Any)
@@ -386,7 +385,7 @@ module ReQL
     end
 
     class Evaluator
-      def eval(term : {{ class_name }})
+      def eval_term(term : {{ class_name }})
         raise CompileError.new("Evaluation of r.{{ term_type.stringify.downcase.id }}() is not implemented.")
       end
     end

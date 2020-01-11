@@ -18,12 +18,12 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : UpcaseTerm)
+    def eval_term(term : UpcaseTerm)
       target = eval(term.args[0]).string_value
       Datum.new(target.upcase)
     end
 
-    def eval(term : DowncaseTerm)
+    def eval_term(term : DowncaseTerm)
       target = eval(term.args[0]).string_value
       Datum.new(target.downcase)
     end

@@ -24,7 +24,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : TableCreateTerm)
+    def eval_term(term : TableCreateTerm)
       db_name = ""
       table_name = ""
       case term.args.size

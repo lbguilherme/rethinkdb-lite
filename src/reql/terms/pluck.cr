@@ -12,7 +12,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : PluckTerm)
+    def eval_term(term : PluckTerm)
       target = eval(term.args[0])
       selection = ObjectSelection.new
 

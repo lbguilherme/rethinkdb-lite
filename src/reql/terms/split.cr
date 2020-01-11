@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : SplitTerm)
+    def eval_term(term : SplitTerm)
       str = eval(term.args[0]).string_value
 
       sep = nil

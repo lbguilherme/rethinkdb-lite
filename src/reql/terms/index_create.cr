@@ -12,7 +12,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : IndexCreateTerm)
+    def eval_term(term : IndexCreateTerm)
       table = eval(term.args[0]).as_table
       storage = table.storage
 

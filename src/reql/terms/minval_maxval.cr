@@ -18,11 +18,11 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : MinvalTerm)
+    def eval_term(term : MinvalTerm)
       Datum.new(Minval.new)
     end
 
-    def eval(term : MaxvalTerm)
+    def eval_term(term : MaxvalTerm)
       Datum.new(Maxval.new)
     end
   end

@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : DistinctTerm)
+    def eval_term(term : DistinctTerm)
       target = eval(term.args[0])
 
       if array = target.array_value?

@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : CountTerm)
+    def eval_term(term : CountTerm)
       target = eval(term.args[0])
 
       if term.args.size == 1

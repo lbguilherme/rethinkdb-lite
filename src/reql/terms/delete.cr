@@ -11,7 +11,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : DeleteTerm)
+    def eval_term(term : DeleteTerm)
       source = eval(term.args[0])
 
       writter = TableWriter.new

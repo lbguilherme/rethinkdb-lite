@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : SumTerm)
+    def eval_term(term : SumTerm)
       target = eval(term.args[0])
 
       sum = 0i64

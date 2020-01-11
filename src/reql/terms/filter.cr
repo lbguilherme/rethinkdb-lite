@@ -28,7 +28,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : FilterTerm)
+    def eval_term(term : FilterTerm)
       target = eval(term.args[0])
       func = eval(term.args[1])
 

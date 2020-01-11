@@ -11,7 +11,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : UpdateTerm)
+    def eval_term(term : UpdateTerm)
       source = eval(term.args[0])
       value = eval(term.args[1])
 

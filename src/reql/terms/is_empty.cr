@@ -10,7 +10,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : IsEmptyTerm)
+    def eval_term(term : IsEmptyTerm)
       target = eval(term.args[0])
 
       if target.is_a? Stream

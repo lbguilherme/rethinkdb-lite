@@ -12,7 +12,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : ObjectTerm)
+    def eval_term(term : ObjectTerm)
       obj = Hash(String, Datum).new
 
       (term.args.size // 2).times do |i|

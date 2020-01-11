@@ -47,7 +47,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : FuncTerm)
+    def eval_term(term : FuncTerm)
       ReqlFunc.new(term.args[0].as(Array).map { |x| x.as(Int64) }, term.args[1])
     end
   end

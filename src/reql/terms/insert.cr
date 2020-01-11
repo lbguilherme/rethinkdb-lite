@@ -11,7 +11,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : InsertTerm)
+    def eval_term(term : InsertTerm)
       table = eval(term.args[0]).as_table
       datum = eval(term.args[1])
 

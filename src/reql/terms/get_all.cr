@@ -11,7 +11,7 @@ module ReQL
   end
 
   class Evaluator
-    def eval(term : GetAllTerm)
+    def eval_term(term : GetAllTerm)
       table = eval(term.args[0]).as_table
       keys = eval(term.args[1..-1]).array_value
 
