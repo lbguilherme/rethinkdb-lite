@@ -9,39 +9,37 @@ module Storage
     def replace(key, durability : ReQL::Durability? = nil)
       id = extract_uuid({"id" => key}, "id")
 
-      @manager.lock.synchronize do
-        after_commit = nil
+      after_commit = nil
 
-        @manager.kv.transaction do |t|
-          existing_info = t.get_db(id)
-          new_row = yield encode(existing_info)
+      @manager.kv.transaction do |t|
+        existing_info = t.get_db(id)
+        new_row = yield encode(existing_info)
 
-          if new_row.nil?
-            # Delete
-            raise "TODO: Delete database"
-          end
-          info = decode(new_row)
+        if new_row.nil?
+          # Delete
+          raise "TODO: Delete database"
+        end
+        info = decode(new_row)
 
-          if existing_info.nil?
-            # Insert
-            if info.name == "rethinkdb" || @manager.lock.synchronize { @manager.databases.has_key?(info.name) }
-              raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
-            end
-
-            t.save_db(info)
-
-            after_commit = ->{ @manager.lock.synchronize { @manager.databases[info.name] = Manager::Database.new(info) } }
-            next
+        if existing_info.nil?
+          # Insert
+          if info.name == "rethinkdb" || @manager.lock.synchronize { @manager.databases.has_key?(info.name) }
+            raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
           end
 
-          if existing_info != info
-            # Update
-            raise "TODO: Update database"
-          end
+          t.save_db(info)
+
+          after_commit = ->{ @manager.lock.synchronize { @manager.databases[info.name] = Manager::Database.new(info) } }
+          next
         end
 
-        after_commit.try &.call
+        if existing_info != info
+          # Update
+          raise "TODO: Update database"
+        end
       end
+
+      after_commit.try &.call
     end
 
     private def encode(info : KeyValueStore::DatabaseInfo)

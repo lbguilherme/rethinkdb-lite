@@ -9,52 +9,50 @@ module Storage
     def replace(key, durability : ReQL::Durability? = nil)
       id = extract_uuid({"id" => key}, "id")
 
-      @manager.lock.synchronize do
-        after_commit = nil
+      after_commit = nil
 
-        @manager.kv.transaction do |t|
-          existing_info = t.get_table(id)
-          new_row = yield encode(existing_info)
+      @manager.kv.transaction do |t|
+        existing_info = t.get_table(id)
+        new_row = yield encode(existing_info)
 
-          if new_row.nil?
-            # Delete
-            raise "TODO: Delete table"
-          end
-
-          if new_row["db"]? == "rethinkdb"
-            raise ReQL::OpFailedError.new("Database `rethinkdb` is special; you can't create new tables in it")
-          end
-          info = decode(new_row)
-
-          if existing_info.nil?
-            # Insert
-            db = uninitialized Storage::Manager::Database
-            @manager.lock.synchronize do
-              db = @manager.databases[new_row["db"].string_value]
-              if db.tables.has_key?(info.name)
-                raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
-              end
-            end
-
-            t.save_table(info)
-
-            after_commit = -> do
-              @manager.lock.synchronize do
-                table = db.tables[info.name] = Manager::Table.new(info, db.info.name)
-                table.impl = PhysicalTable.new(@manager, table)
-              end
-            end
-            next
-          end
-
-          if existing_info != info
-            # Update
-            raise "TODO: Update table"
-          end
+        if new_row.nil?
+          # Delete
+          raise "TODO: Delete table"
         end
 
-        after_commit.try &.call
+        if new_row["db"]? == "rethinkdb"
+          raise ReQL::OpFailedError.new("Database `rethinkdb` is special; you can't create new tables in it")
+        end
+        info = decode(new_row)
+
+        if existing_info.nil?
+          # Insert
+          db = uninitialized Storage::Manager::Database
+          @manager.lock.synchronize do
+            db = @manager.databases[new_row["db"].string_value]
+            if db.tables.has_key?(info.name)
+              raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
+            end
+          end
+
+          t.save_table(info)
+
+          after_commit = -> do
+            @manager.lock.synchronize do
+              table = db.tables[info.name] = Manager::Table.new(info, db.info.name)
+              table.impl = PhysicalTable.new(@manager, table)
+            end
+          end
+          next
+        end
+
+        if existing_info != info
+          # Update
+          raise "TODO: Update table"
+        end
       end
+
+      after_commit.try &.call
     end
 
     private def encode(info : KeyValueStore::TableInfo)
