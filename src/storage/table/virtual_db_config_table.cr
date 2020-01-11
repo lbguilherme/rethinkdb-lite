@@ -24,13 +24,13 @@ module Storage
 
           if existing_info.nil?
             # Insert
-            if info.name == "rethinkdb" || @manager.databases.has_key?(info.name)
+            if info.name == "rethinkdb" || @manager.lock.synchronize { @manager.databases.has_key?(info.name) }
               raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
             end
 
             t.save_db(info)
 
-            after_commit = ->{ @manager.databases[info.name] = Manager::Database.new(info) }
+            after_commit = ->{ @manager.lock.synchronize { @manager.databases[info.name] = Manager::Database.new(info) } }
             next
           end
 

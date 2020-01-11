@@ -55,7 +55,7 @@ module Storage
 
     private def extract_db_reference(obj : Hash(String, ReQL::Datum), key : String)
       name = extract_db_name(obj, key)
-      id = @manager.databases[name]?.try &.info.id
+      id = @manager.lock.synchronize { @manager.databases[name]?.try &.info.id }
       if id.nil?
         extract_error "In `#{key}`: Database `#{name}` does not exist"
       end

@@ -28,7 +28,7 @@ module Storage
 
           if existing_info.nil?
             # Insert
-            db = @manager.databases[new_row["db"].string_value]
+            db = @manager.lock.synchronize { @manager.databases[new_row["db"].string_value] }
             if db.tables.has_key?(info.name)
               raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
             end
