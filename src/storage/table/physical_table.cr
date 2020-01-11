@@ -1,8 +1,11 @@
-require "json"
 require "./abstract_table"
+require "../metrics"
 
 module Storage
   struct PhysicalTable < AbstractTable
+    property read_docs_on_table = PerSecondMetric.new
+    property written_docs_on_table = PerSecondMetric.new
+
     def initialize(@manager : Manager, @table : Manager::Table)
     end
 
@@ -11,6 +14,7 @@ module Storage
     end
 
     def get(key)
+      @read_docs_on_table.add(1)
       @manager.kv.get_row(@table.info.id, ReQL.encode_key(key)) do |data|
         data.nil? ? nil : ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
       end
@@ -32,6 +36,7 @@ module Storage
 
         if new_row.nil?
           unless existing_row.nil?
+            @written_docs_on_table.add(1)
             t.delete_row(@table.info.id, key_data)
 
             # TODO: This crashes the compiler
@@ -41,6 +46,7 @@ module Storage
           end
         else
           if existing_row != new_row
+            @written_docs_on_table.add(1)
             t.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
 
             @table.indices.values.each do |index|
@@ -53,6 +59,7 @@ module Storage
 
     def scan
       @manager.kv.each_row(@table.info.id) do |data|
+        @read_docs_on_table.add(1)
         yield ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
       end
     end
@@ -85,11 +92,13 @@ module Storage
 
       # Remove values that are now missing
       (old_values - new_values).each do |(value, counter)|
+        @written_docs_on_table.add(1)
         t.delete_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), counter, key_data)
       end
 
       # Add new values
       (new_values - old_values).each do |(value, counter)|
+        @written_docs_on_table.add(1)
         t.set_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), counter, key_data)
       end
     end
@@ -139,6 +148,7 @@ module Storage
       end
       snapshot = @manager.kv.snapshot
       @manager.kv.each_index_entry(@table.info.id, index.info.id, ReQL.encode_key(index_value_start), ReQL.encode_key(index_value_end), snapshot) do |index_value_data, primary_key_data|
+        @read_docs_on_table.add(2)
         @manager.kv.get_row(@table.info.id, primary_key_data, snapshot) do |row|
           yield ReQL::Datum.unserialize(IO::Memory.new(row)).hash_value if row
         end

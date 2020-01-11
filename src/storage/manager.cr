@@ -4,6 +4,8 @@ require "./kv"
 module Storage
   class Manager
     property databases = {} of String => Database
+    property database_by_id = {} of UUID => Database
+    property table_by_id = {} of UUID => Table
     property kv : KeyValueStore
     property lock = Mutex.new
 
@@ -35,16 +37,15 @@ module Storage
     def initialize(path : String)
       @kv = KeyValueStore.new(path)
 
-      db_by_id = {} of UUID => Database
       @kv.each_db do |info|
         db = Database.new(info)
         @databases[info.name] = db
-        db_by_id[info.id] = db
+        @database_by_id[info.id] = db
       end
 
       @kv.each_table do |info|
-        db = db_by_id[info.db]
-        table = db.tables[info.name] = Table.new(info, db.info.name)
+        db = @database_by_id[info.db]
+        table = @table_by_id[info.id] = db.tables[info.name] = Table.new(info, db.info.name)
         table.impl = PhysicalTable.new(self, table)
 
         @kv.each_index(info.id) do |index_info|

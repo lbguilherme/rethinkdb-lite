@@ -8,7 +8,7 @@ module Storage
 
     private def encode(info : KeyValueStore::TableInfo)
       ReQL::Datum.new({
-        "db"          => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
+        "db"          => @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s,
         "id"          => info.id.to_s,
         "name"        => info.name,
         "raft_leader" => @manager.system_info.name,

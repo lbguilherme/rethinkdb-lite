@@ -29,7 +29,7 @@ module Storage
 
           t.save_db(info)
 
-          after_commit = ->{ @manager.lock.synchronize { @manager.databases[info.name] = Manager::Database.new(info) } }
+          after_commit = ->{ @manager.lock.synchronize { @manager.database_by_id[info.id] = @manager.databases[info.name] = Manager::Database.new(info) } }
           next
         end
 

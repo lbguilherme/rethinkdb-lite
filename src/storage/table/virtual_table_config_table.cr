@@ -37,9 +37,9 @@ module Storage
 
           t.save_table(info)
 
-          after_commit = -> do
+          after_commit = ->do
             @manager.lock.synchronize do
-              table = db.tables[info.name] = Manager::Table.new(info, db.info.name)
+              table = @manager.table_by_id[info.id] = db.tables[info.name] = Manager::Table.new(info, db.info.name)
               table.impl = PhysicalTable.new(@manager, table)
             end
           end
@@ -57,7 +57,7 @@ module Storage
 
     private def encode(info : KeyValueStore::TableInfo)
       ReQL::Datum.new({
-        "db"          => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
+        "db"          => @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s,
         "durability"  => info.durability == ReQL::Durability::Hard ? "hard" : info.durability == ReQL::Durability::Soft ? "soft" : "minimal",
         "id"          => info.id.to_s,
         "indexes"     => [] of String,

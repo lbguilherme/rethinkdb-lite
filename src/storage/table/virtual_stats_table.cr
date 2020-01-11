@@ -40,16 +40,17 @@ module Storage
     end
 
     def get_table(info : KeyValueStore::TableInfo)
+      table_impl = @manager.table_by_id[info.id]?.try &.impl.as?(PhysicalTable)
       ReQL::Datum.new({
         "id" => [
           "table",
           info.id.to_s,
         ],
         "query_engine" => {
-          "read_docs_per_sec"    => 0,
-          "written_docs_per_sec" => 0,
+          "read_docs_per_sec"    => table_impl.try &.read_docs_on_table.per_second || 0,
+          "written_docs_per_sec" => table_impl.try &.written_docs_on_table.per_second || 0,
         },
-        "db"    => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
+        "db"    => @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s,
         "table" => info.name,
       }).hash_value
     end
@@ -85,7 +86,7 @@ module Storage
             "written_bytes_total"   => 0,
           },
         },
-        "db"    => @manager.kv.get_db(info.db).try &.name || info.db.to_s,
+        "db"    => @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s,
         "table" => info.name,
       }).hash_value
     end
