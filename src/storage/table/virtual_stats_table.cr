@@ -59,7 +59,7 @@ module Storage
         "id" => [
           "table_server",
           info.id.to_s,
-          info.id.to_s,
+          @manager.system_info.id.to_s,
         ],
         "query_engine" => {
           "read_docs_per_sec"    => 0,
@@ -108,10 +108,10 @@ module Storage
         return info ? get_table(info) : nil
       end
 
-      if array.size == 3 && array[0] == "table_server" && array[1] == array[2]
+      if array.size == 3 && array[0] == "table_server" && array[2] == @manager.system_info.id.to_s
         id = UUID.new(array[1].string_value) rescue return nil
         info = @manager.kv.get_table(id)
-        return info ? get_table(info) : nil
+        return info ? get_table_server(info) : nil
       end
 
       nil
