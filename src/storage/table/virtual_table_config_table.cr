@@ -28,14 +28,22 @@ module Storage
 
           if existing_info.nil?
             # Insert
-            db = @manager.lock.synchronize { @manager.databases[new_row["db"].string_value] }
-            if db.tables.has_key?(info.name)
-              raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
+            db = uninitialized Storage::Manager::Database
+            @manager.lock.synchronize do
+              db = @manager.databases[new_row["db"].string_value]
+              if db.tables.has_key?(info.name)
+                raise ReQL::OpFailedError.new("Table `#{info.name}` already exists")
+              end
             end
 
             t.save_table(info)
 
-            after_commit = ->{ db.tables[info.name] = Manager::Table.new(info, db.info.name) }
+            after_commit = -> do
+              @manager.lock.synchronize do
+                table = db.tables[info.name] = Manager::Table.new(info, db.info.name)
+                table.impl = PhysicalTable.new(@manager, table)
+              end
+            end
             next
           end
 

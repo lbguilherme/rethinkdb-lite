@@ -19,6 +19,7 @@ module Storage
       property info : KeyValueStore::TableInfo
       property db_name : String
       property indices = Hash(String, Index).new
+      property! impl : AbstractTable
 
       def initialize(@info, @db_name)
       end
@@ -44,6 +45,7 @@ module Storage
       @kv.each_table do |info|
         db = db_by_id[info.db]
         table = db.tables[info.name] = Table.new(info, db.info.name)
+        table.impl = PhysicalTable.new(self, table)
 
         @kv.each_index(info.id) do |index_info|
           table.indices[index_info.name] = Index.new(index_info)
@@ -77,7 +79,7 @@ module Storage
       end
 
       table = @lock.synchronize { @databases[db_name]?.try &.tables[table_name]? }
-      table.nil? ? nil : PhysicalTable.new(self, table)
+      table.try &.impl
     end
 
     def close
