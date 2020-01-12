@@ -36,8 +36,8 @@ def run_reql_spec(conn)
 end
 
 test_local_database
-# test_remote_connection_over_local_database
-# test_remote_connection_over_rethinkdb
+test_remote_connection_over_local_database
+test_remote_connection_over_rethinkdb
 
 def test_local_database
   path = "/tmp/rethinkdb-lite/spec-temp-tables/#{Random::Secure.hex}"
