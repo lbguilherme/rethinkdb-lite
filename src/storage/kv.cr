@@ -418,7 +418,7 @@ module Storage
       iter = @rocksdb.iterator(table_data_family(table_id), read_options)
       iter.seek_to_first
       while iter.valid?
-        yield iter.value
+        yield iter.key, iter.value
         iter.next
       end
     end

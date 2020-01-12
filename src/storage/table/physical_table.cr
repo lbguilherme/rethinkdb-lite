@@ -47,6 +47,7 @@ module Storage
         else
           if existing_row != new_row
             @written_docs_on_table.add(1)
+            new_row.delete(primary_key)
             t.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
 
             @table.indices.values.each do |index|
@@ -58,9 +59,11 @@ module Storage
     end
 
     def scan
-      @manager.kv.each_row(@table.info.id) do |data|
+      @manager.kv.each_row(@table.info.id) do |key, data|
         @read_docs_on_table.add(1)
-        yield ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+        hash = ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+        hash[primary_key] = ReQL.decode_key(key)
+        yield hash
       end
     end
 
