@@ -2,6 +2,22 @@ require "../term"
 
 module ReQL
   class FuncTerm < Term
+    def initialize(args, options)
+      super(args, options)
+
+      mentioned_variables = Set(Int64).new
+      FuncTerm.visit_variables(self) do |var|
+        mentioned_variables.add(var)
+      end
+
+      args = @args[0].as(Array)
+      until args.size == 0 || mentioned_variables.includes? args.last
+        args.pop
+      end
+
+      @args[0] = args
+    end
+
     def inspect(io)
       vars = @args[0].as(Array)
       body = @args[1]
@@ -17,18 +33,6 @@ module ReQL
 
     def check
       expect_args 2
-
-      mentioned_variables = Set(Int64).new
-      FuncTerm.visit_variables(self) do |var|
-        mentioned_variables.add(var)
-      end
-
-      args = @args[0].as(Array)
-      until args.size == 0 || mentioned_variables.includes? args.last
-        args.pop
-      end
-
-      @args[0] = args
     end
 
     def self.visit_variables(term, &block : Int64 ->)
