@@ -16,7 +16,11 @@ module Storage
     def get(key)
       @read_docs_on_table.add(1)
       @manager.kv.get_row(@table.info.id, ReQL.encode_key(key)) do |data|
-        data.nil? ? nil : ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+        if data
+          hash = ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+          hash[primary_key] = key
+          hash
+        end
       end
     end
 
@@ -28,7 +32,9 @@ module Storage
           if existing_row_data.nil?
             nil
           else
-            ReQL::Datum.unserialize(IO::Memory.new(existing_row_data)).hash_value
+            hash = ReQL::Datum.unserialize(IO::Memory.new(existing_row_data)).hash_value
+            hash[primary_key] = key
+            hash
           end
         end
 
@@ -49,6 +55,7 @@ module Storage
             @written_docs_on_table.add(1)
             new_row.delete(primary_key)
             t.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
+            hash[primary_key] = key
 
             @table.indices.values.each do |index|
               update_index_data(t, index, key_data, existing_row, new_row)
