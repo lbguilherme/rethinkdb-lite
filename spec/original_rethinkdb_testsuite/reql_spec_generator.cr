@@ -109,7 +109,7 @@ data["tests"].as_a.each_with_index do |test, i|
       test_id = "##{i + 1}.#{j + 1}"
       puts "  #{ARGV.includes?(test_id) ? "pending" : "it"} \"passes on test #{test_id}: #{subtest.gsub("\\", "\\\\").gsub("\"", "\\\"")}\" do"
       if output.nil?
-        puts "    #{subtest}"
+        puts "    #{subtest}.run(conn#{runopts})"
       elsif output =~ /err\("(\w+)",\s?"(.+?)"[,)]/
         err = $1.gsub("Reql", "ReQL::")
         puts "    expect_raises(#{err}, \"#{$2.gsub("\\\\", "\\")}\") do"
