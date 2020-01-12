@@ -6,8 +6,14 @@ require "./connection"
 
 module RethinkDB
   class LocalConnection < Connection
+    @error_callback : (Exception, ReQL::Term::Type->)?
+
     def initialize(data_path : String)
       @manager = Storage::Manager.new data_path
+    end
+
+    def on_error(&block : Exception, ReQL::Term::Type->)
+      @error_callback = block
     end
 
     def close
@@ -33,6 +39,9 @@ module RethinkDB
       else
         Datum.new result.value, runopts
       end
+    rescue error
+      @error_callback.try &.call(error, term)
+      raise error
     end
 
     def server : JSON::Any

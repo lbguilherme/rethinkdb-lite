@@ -17,6 +17,10 @@ include RethinkDB::DSL
 
 conn = r.local_database("./data")
 
+conn.on_error do |error, term|
+  puts "\n#{error.class}: #{error.message}\n#{term.inspect}"
+end
+
 webui_server = RethinkDB::Server::WebUiServer.new(8080, conn)
 webui_server.start
 
@@ -25,15 +29,15 @@ driver_server.start
 
 puts "Listening for administrative HTTP connections on http://localhost:8080/"
 puts "Listening for client driver connections on port 28015"
-puts "Server #{conn.server["name"].inspect} (#{conn.server["id"]}) ready."
+puts "Server #{conn.server["name"].inspect} (#{conn.server["id"]}) ready.\n"
 
 Signal::INT.trap do
-  puts "Server got SIGINT; shutting down..."
+  puts "\nServer got SIGINT; shutting down..."
   exit
 end
 
 Signal::TERM.trap do
-  puts "Server got SIGTERM; shutting down..."
+  puts "\nServer got SIGTERM; shutting down..."
   exit
 end
 
