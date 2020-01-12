@@ -413,7 +413,9 @@ module Storage
     end
 
     def each_row(table_id : UUID)
-      iter = @rocksdb.iterator(table_data_family(table_id))
+      read_options = RocksDB::ReadOptions.new
+      read_options.readahead_size = 1024 * 1024
+      iter = @rocksdb.iterator(table_data_family(table_id), read_options)
       iter.seek_to_first
       while iter.valid?
         yield iter.value
