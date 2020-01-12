@@ -1,27 +1,30 @@
 class WaitGroup
-  @pending = Atomic(Int64).new(0i64)
+  @pending = Atomic(Int32).new(0)
   @channel = Atomic(Channel(Nil)?).new(nil)
 
-  def add : Nil
-    @pending.add(1i64)
-  end
+  def add(count : Int32 = 1) : Nil
+    pending = @pending.add(count) + count
 
-  def done : Nil
-    pending = @pending.sub(1i64) - 1i64
-    if pending < 0i64
-      raise "finished more times than started"
+    if pending < 0
+      raise "wait group has a negative number of pending jobs"
     end
 
-    if pending == 0i64
+    if pending == 0
       @channel.get.try &.close
     end
   end
 
+  def done : Nil
+    add(-1)
+  end
+
   def wait : Nil
-    return if @pending.get == 0i64
+    return if @pending.get == 0
     ch = @channel.set(Channel(Nil).new)
 
-    if @pending.get == 0i64
+    # Note that another thread might zero @pending after the first check but
+    # before the channel is set. Because of this we need to check again here.
+    if @pending.get == 0
       ch.close
       return
     end
