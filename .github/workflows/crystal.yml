@@ -3,7 +3,7 @@ name: Crystal CI
 on: [push]
 
 jobs:
-  test:
+  spec:
     runs-on: ubuntu-latest
 
     services:
@@ -30,20 +30,35 @@ jobs:
     - name: Install dependencies from shards
       run: shards install
 
-    - name: Build main.cr
-      run: crystal build src/main.cr
-
-    - name: Build main.cr with -Dpreview_mt
-      run: crystal build -Dpreview_mt src/main.cr
-
     - name: Run tests
       run: crystal spec
 
     - name: Run tests with -Dpreview_mt
       run: crystal spec -Dpreview_mt
 
+  checks:
+    runs-on: ubuntu-latest
+
+    container:
+      image: crystallang/crystal:0.32.1
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Install dependencies from shards
+      run: shards install
+
+    - name: Build main.cr
+      run: crystal build --no-codegen src/main.cr
+
+    - name: Build main.cr with -Dpreview_mt
+      run: crystal build --no-codegen -Dpreview_mt src/main.cr
+
     - name: Check format
       run: crystal tool format --check
 
     - name: Ensure every file requires everything it needs to build by itself
       run: for file in $(find src -name '*.cr'); do echo $file; crystal build --no-codegen $file --error-trace || exit 1; done;
+
+    - name: Ensure every file requires everything it needs to build by itself with -Dpreview_mt
+      run: for file in $(find src -name '*.cr'); do echo $file; crystal build --no-codegen -Dpreview_mt $file --error-trace || exit 1; done;
