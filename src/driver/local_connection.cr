@@ -6,13 +6,13 @@ require "./connection"
 
 module RethinkDB
   class LocalConnection < Connection
-    @error_callback : (Exception, ReQL::Term::Type->)?
+    @error_callback : (Exception, ReQL::Term::Type ->)?
 
     def initialize(data_path : String)
       @manager = Storage::Manager.new data_path
     end
 
-    def on_error(&block : Exception, ReQL::Term::Type->)
+    def on_error(&block : Exception, ReQL::Term::Type ->)
       @error_callback = block
     end
 
