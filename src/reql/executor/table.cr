@@ -31,10 +31,6 @@ module ReQL
       RowReference.new(storage, key)
     end
 
-    def count(max)
-      Math.min(max, storage.count)
-    end
-
     def start_reading
       @internal.channel = Channel(RowValue?).new(32)
       s = storage

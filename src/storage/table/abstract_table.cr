@@ -20,14 +20,6 @@ module Storage
       "id"
     end
 
-    def count
-      count = 0i64
-      scan do
-        count += 1i64
-      end
-      count
-    end
-
     abstract def index_scan(index_name : String, index_value_start : ReQL::Datum, index_value_end : ReQL::Datum, &block : Hash(String, ReQL::Datum) ->)
   end
 end
