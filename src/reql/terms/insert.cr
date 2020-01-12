@@ -43,7 +43,7 @@ module ReQL
         channel.send(obj)
         jobs += 1
 
-        if Math.log(jobs + 1, 1.5) > consumers
+        if Math.max(1, Math.log(jobs, 2).floor - 3) > consumers
           consumers += 1
           spawn start_inserter_worker(channel, wait_group, writter, table.storage)
         end
