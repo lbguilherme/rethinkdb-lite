@@ -45,14 +45,23 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Install LibDuktape and LibRocksDB
+      run: |
+        apt-get update && \
+        apt install debian-archive-keyring && \
+        ln -s /usr/share/keyrings/debian-archive*.gpg /etc/apt/trusted.gpg.d/ && \
+        echo "deb http://httpredir.debian.org/debian/ buster main contrib non-free" >> /etc/apt/sources.list && \
+        apt-get update && \
+        apt-get install duktape-dev librocksdb-dev -y
+
     - name: Install dependencies from shards
       run: shards install
 
     - name: Build main.cr
-      run: crystal build --no-codegen src/main.cr
+      run: crystal build src/main.cr
 
     - name: Build main.cr with -Dpreview_mt
-      run: crystal build --no-codegen -Dpreview_mt src/main.cr
+      run: crystal build -Dpreview_mt src/main.cr
 
     - name: Check format
       run: crystal tool format --check
