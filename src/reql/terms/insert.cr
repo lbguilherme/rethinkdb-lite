@@ -1,5 +1,6 @@
 require "uuid"
 require "../term"
+require "../../utils/waitgroup.cr"
 
 module ReQL
   class InsertTerm < Term
@@ -32,13 +33,37 @@ module ReQL
                raise QueryLogicError.new("Expected type OBJECT but found #{datum.reql_type}")
              end
 
+      channel = Channel(Hash(String, Datum)).new(128)
+      wait_group = WaitGroup.new
+      jobs = 0
+      consumers = 0
+
       docs.each do |obj|
-        writter.insert(table.storage, obj)
+        wait_group.add
+        channel.send(obj)
+        jobs += 1
+
+        if Math.log(jobs + 1, 1.5) > consumers
+          consumers += 1
+          spawn start_inserter_worker(channel, wait_group, writter, table.storage)
+        end
       end
+
+      wait_group.wait
+      channel.close
 
       @table_writers.last?.try &.merge(writter)
 
       writter.summary
     end
   end
+end
+
+private def start_inserter_worker(channel, wait_group, writter, storage)
+  while obj = channel.receive
+    writter.insert(storage, obj)
+    wait_group.done
+  end
+rescue Channel::ClosedError
+  return
 end
