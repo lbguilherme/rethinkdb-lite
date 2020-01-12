@@ -55,7 +55,7 @@ module Storage
             @written_docs_on_table.add(1)
             new_row.delete(primary_key)
             t.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
-            hash[primary_key] = key
+            new_row[primary_key] = key
 
             @table.indices.values.each do |index|
               update_index_data(t, index, key_data, existing_row, new_row)

@@ -36,8 +36,8 @@ def run_reql_spec(conn)
 end
 
 test_local_database
-test_remote_connection_over_local_database
-test_remote_connection_over_rethinkdb
+# test_remote_connection_over_local_database
+# test_remote_connection_over_rethinkdb
 
 def test_local_database
   path = "/tmp/rethinkdb-lite/spec-temp-tables/#{Random::Secure.hex}"
@@ -98,7 +98,7 @@ def recursive_match(result, target)
     end
   when Hash
     result.value.should be_a Hash(String, RethinkDB::Datum)
-    (result.hash.keys - target.keys).size.should eq 0
+    result.hash.keys.sort.should eq target.keys.sort
     result.hash.keys.each do |key|
       recursive_match result.hash[key], target[key]
     end
