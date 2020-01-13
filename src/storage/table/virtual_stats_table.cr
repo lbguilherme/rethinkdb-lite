@@ -40,7 +40,7 @@ module Storage
     end
 
     def get_table(info : KeyValueStore::TableInfo)
-      table_impl = @manager.table_by_id[info.id]?.try &.impl.as?(PhysicalTable)
+      table_impl = @manager.lock.synchronize { @manager.table_by_id[info.id]?.try &.impl }
       ReQL::Datum.new({
         "id" => [
           "table",
@@ -50,12 +50,13 @@ module Storage
           "read_docs_per_sec"    => table_impl.try &.read_docs_on_table.per_second || 0,
           "written_docs_per_sec" => table_impl.try &.written_docs_on_table.per_second || 0,
         },
-        "db"    => @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s,
+        "db"    => @manager.lock.synchronize { @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s },
         "table" => info.name,
       }).hash_value
     end
 
     def get_table_server(info : KeyValueStore::TableInfo)
+      table_impl = @manager.lock.synchronize { @manager.table_by_id[info.id]?.try &.impl }
       ReQL::Datum.new({
         "id" => [
           "table_server",
@@ -63,10 +64,10 @@ module Storage
           @manager.system_info.id.to_s,
         ],
         "query_engine" => {
-          "read_docs_per_sec"    => 0,
-          "read_docs_total"      => 0,
-          "written_docs_per_sec" => 0,
-          "written_docs_total"   => 0,
+          "read_docs_per_sec"    => table_impl.try &.read_docs_on_table.per_second || 0,
+          "read_docs_total"      => table_impl.try &.read_docs_on_table.total || 0,
+          "written_docs_per_sec" => table_impl.try &.written_docs_on_table.per_second || 0,
+          "written_docs_total"   => table_impl.try &.written_docs_on_table.total || 0,
         },
         "server"         => @manager.system_info.name,
         "storage_engine" => {
@@ -86,7 +87,7 @@ module Storage
             "written_bytes_total"   => 0,
           },
         },
-        "db"    => @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s,
+        "db"    => @manager.lock.synchronize { @manager.database_by_id[info.db]?.try &.info.name || info.db.to_s },
         "table" => info.name,
       }).hash_value
     end

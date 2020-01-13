@@ -21,7 +21,7 @@ module Storage
       property info : KeyValueStore::TableInfo
       property db_name : String
       property indices = Hash(String, Index).new
-      property! impl : AbstractTable
+      property! impl : PhysicalTable
 
       def initialize(@info, @db_name)
       end
