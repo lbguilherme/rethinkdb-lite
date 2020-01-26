@@ -8,22 +8,28 @@ module ReQL
 
     def value : Type
       start_reading
-      arr = [] of Datum
-      while val = next_val
-        arr << val.as_datum
+      begin
+        arr = [] of Datum
+        while val = next_val
+          arr << val.as_datum
+        end
+        arr
+      ensure
+        finish_reading
       end
-      finish_reading
-      arr
     end
 
     def count(max)
       start_reading
-      count = 0i64
-      while count < max && next_val
-        count += 1i64
+      begin
+        count = 0i64
+        while count < max && next_val
+          count += 1i64
+        end
+        count
+      ensure
+        finish_reading
       end
-      finish_reading
-      count
     end
 
     def skip(count)
@@ -32,10 +38,13 @@ module ReQL
 
     def each
       start_reading
-      while val = next_val
-        yield val
+      begin
+        while val = next_val
+          yield val
+        end
+      ensure
+        finish_reading
       end
-      finish_reading
     end
   end
 end
