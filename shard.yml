@@ -13,6 +13,6 @@ dependencies:
     github: lbguilherme/rocksdb-crystal
     branch: master
 
-crystal: 0.32.1
+crystal: 0.33.0
 
 license: MIT

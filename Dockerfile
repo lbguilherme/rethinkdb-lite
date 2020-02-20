@@ -21,7 +21,7 @@ WORKDIR /webui
 RUN npm ci
 RUN npm run build
 
-FROM crystallang/crystal:0.32.1 AS builder
+FROM crystallang/crystal:0.33.0 AS builder
 COPY --from=duktape /libduktape.a /usr/lib
 COPY --from=rocksdb /librocksdb.a /usr/lib
 COPY --from=webui /webui /app/vendor/rethinkdb-webui
@@ -32,6 +32,6 @@ RUN shards
 COPY src src
 RUN crystal build -Dpreview_mt --release src/main.cr
 
-FROM crystallang/crystal:0.32.1
+FROM crystallang/crystal:0.33.0
 COPY --from=builder /app/main /rethinkdb-lite
 CMD /rethinkdb-lite
