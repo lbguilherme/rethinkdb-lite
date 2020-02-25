@@ -1,7 +1,7 @@
 # STATUS
 
-- 111x :heavy_check_mark:
-- 108x :x:
+- 113x :heavy_check_mark:
+- 106x :x:
 
 # Connection
 
@@ -136,8 +136,8 @@
 | array.change_at(offset, value) | :heavy_check_mark: |       |
 | array.delete_at(offset, end)   | :heavy_check_mark: |       |
 | array.difference(array)        | :x:                |       |
-| object.has_fields(...)         | :x:                |       |
-| sequence.has_fields(...)       | :x:                |       |
+| object.has_fields(...)         | :heavy_check_mark: |       |
+| sequence.has_fields(...)       | :heavy_check_mark: |       |
 | array.insert_at(offset, end)   | :heavy_check_mark: |       |
 | object.keys()                  | :x:                |       |
 | r.literal(value)               | :x:                |       |

@@ -43,5 +43,21 @@ module ReQL
         {field, @partial_fields.has_key?(field) ? @partial_fields[field].select_on_object(value) : value}
       end.to_h)
     end
+
+    def has_on_object(obj : Datum)
+      hash = obj.hash_value?
+      return false unless hash
+
+      @complete_fields.each do |field|
+        return false unless hash.has_key? field
+      end
+
+      @partial_fields.each do |(field, selection)|
+        return false unless hash.has_key? field
+        return false unless selection.has_on_object(hash[field])
+      end
+
+      true
+    end
   end
 end

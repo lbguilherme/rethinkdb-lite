@@ -261,6 +261,7 @@ module RethinkDB
     term ge, GeTerm
     term get, GetTerm
     term gt, GtTerm
+    term has_fields, HasFieldsTerm
     term index_create, IndexCreateTerm
     term index_list, IndexListTerm
     term index_status, IndexStatusTerm
