@@ -1,7 +1,7 @@
 class PerSecondMetric
   @current = Atomic(Int64).new(0i64)
   @previous = Atomic(Int64).new(0i64)
-  @delta_nanoseconds = Atomic(Int64).new(0i64)
+  @delta_nanoseconds = Atomic(Int64).new(1i64)
   @total = Atomic(Int64).new(0i64)
   @last_timer = Time.monotonic
   @finished = false
