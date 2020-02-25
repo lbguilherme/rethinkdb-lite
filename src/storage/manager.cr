@@ -66,6 +66,8 @@ module Storage
         case table_name
         when "server_config"
           return VirtualServerConfigTable.new(self)
+        when "server_status"
+          return VirtualServerStatusTable.new(self)
         when "db_config"
           return VirtualDbConfigTable.new(self)
         when "table_config"
