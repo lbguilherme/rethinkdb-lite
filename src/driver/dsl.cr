@@ -289,6 +289,7 @@ module RethinkDB
     term random, RandomTerm
     term range, RangeTerm
     term round, RoundTerm
+    term sample, SampleTerm
     term skip, SkipTerm
     term slice, SliceTerm
     term splice_at, SpliceAtTerm
