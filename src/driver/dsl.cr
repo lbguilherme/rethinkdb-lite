@@ -290,6 +290,7 @@ module RethinkDB
     term range, RangeTerm
     term round, RoundTerm
     term sample, SampleTerm
+    term set_difference, SetDifferenceTerm
     term skip, SkipTerm
     term slice, SliceTerm
     term splice_at, SpliceAtTerm
