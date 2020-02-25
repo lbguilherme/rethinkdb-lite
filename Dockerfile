@@ -10,12 +10,12 @@ RUN mv out/libduktape.a /libduktape.a
 
 FROM debian AS rocksdb
 RUN apt-get update && apt-get install curl libgflags-dev make g++ -y
-RUN curl -L https://github.com/facebook/rocksdb/archive/v6.5.2.tar.gz | tar xz
-WORKDIR /rocksdb-6.5.2
+RUN curl -L https://github.com/facebook/rocksdb/archive/v6.6.4.tar.gz | tar xz
+WORKDIR /rocksdb-6.6.4
 RUN make static_lib -j6
 RUN mv librocksdb.a /
 
-FROM node AS webui
+FROM node:12 AS webui
 COPY vendor/rethinkdb-webui /webui
 WORKDIR /webui
 RUN npm ci
