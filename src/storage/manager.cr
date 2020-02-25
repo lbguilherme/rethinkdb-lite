@@ -78,6 +78,8 @@ module Storage
           return VirtualStatsTable.new(self)
         when "current_issues"
           return VirtualCurrentIssuesTable.new(self)
+        when "jobs"
+          return VirtualJobsTable.new(self)
         else
           return nil
         end
