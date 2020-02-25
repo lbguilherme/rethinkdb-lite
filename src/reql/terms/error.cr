@@ -2,7 +2,7 @@ require "../term"
 
 module ReQL
   class ErrorTerm < Term
-    infix_inspect "error"
+    prefix_inspect "error"
 
     def check
       expect_args 1
