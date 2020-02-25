@@ -77,7 +77,7 @@ module Storage
 
     private def decode(obj)
       info = KeyValueStore::TableInfo.new
-      check_extra_keys(obj, {"id", "db", "name", "primary_key", "durability"})
+      check_extra_keys(obj, {"id", "db", "name", "primary_key", "durability", "shards"})
       info.id = extract_uuid(obj, "id")
       info.db = extract_db_reference(obj, "db")
       info.name = extract_table_name(obj, "name")
