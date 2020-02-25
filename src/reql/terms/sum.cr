@@ -5,7 +5,7 @@ module ReQL
     infix_inspect "sum"
 
     def check
-      expect_args 1
+      expect_args 1, 2
     end
   end
 
@@ -14,8 +14,15 @@ module ReQL
       target = eval(term.args[0])
 
       sum = 0i64
-      target.each do |e|
-        sum += e.number_value
+      if term.args.size == 1
+        target.each do |e|
+          sum += e.number_value
+        end
+      elsif term.args.size == 2
+        func = eval(term.args[1]).as_function
+        target.each do |e|
+          sum += func.eval(self, {e.as_datum}).number_value
+        end
       end
 
       Datum.new(sum)
