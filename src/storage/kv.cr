@@ -123,12 +123,14 @@ module Storage
     def initialize(path)
       @options = RocksDB::Options.new
       @options.create_if_missing = true
-      @options.paranoid_checks = true
+      @options.paranoid_checks = false
 
       {% if flag?(:preview_mt) %}
-        @options.enable_pipelined_write = true
+        @options.enable_pipelined_write = false
         @options.increase_parallelism(16)
         @options.max_background_jobs = 4
+        @options.unordered_write = true
+        @options.avoid_unnecessary_blocking_io = true
       {% end %}
 
       FileUtils.mkdir_p path

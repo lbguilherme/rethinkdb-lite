@@ -43,7 +43,7 @@ module ReQL
         channel.send(obj)
         jobs += 1
 
-        if Math.max(1, Math.log(jobs, 2).floor - 3) > consumers
+        if Math.max(1, Math.log(jobs, 1.1).floor - 3) > consumers
           consumers += 1
           spawn start_inserter_worker(channel, wait_group, writter, table.storage)
         end
@@ -60,10 +60,8 @@ module ReQL
 end
 
 private def start_inserter_worker(channel, wait_group, writter, storage)
-  while obj = channel.receive
+  while obj = channel.receive?
     writter.insert(storage, obj)
     wait_group.done
   end
-rescue Channel::ClosedError
-  return
 end

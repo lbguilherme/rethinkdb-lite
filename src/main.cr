@@ -10,7 +10,7 @@ include RethinkDB::DSL
       # Given that we need to have a high number of threads to make sure there are always some
       # threads available to run Fibers. This is not optimal.
       # Waiting on https://github.com/facebook/rocksdb/issues/3254
-      Crystal::System.cpu_count.to_i * 4
+      Crystal::System.cpu_count.to_i * 8
     end
   end
 {% end %}
@@ -18,7 +18,9 @@ include RethinkDB::DSL
 conn = r.local_database("./data")
 
 conn.on_error do |error, term|
-  puts "\n#{error.class}: #{error.message}\n#{term.inspect}"
+  puts
+  puts error.inspect_with_backtrace
+  p term
 end
 
 webui_server = RethinkDB::Server::WebUiServer.new(8080, conn)
