@@ -14,7 +14,7 @@ module ReQL
       arr1 = eval(term.args[0]).array_value
       arr2 = eval(term.args[1]).array_value
 
-      Datum.new((arr1 + arr2).uniq)
+      Datum.new((arr1 - arr2).uniq)
     end
   end
 end
