@@ -10,11 +10,15 @@ module Storage
       ReQL::Datum.new({
         "id"           => ["cluster"],
         "query_engine" => {
-          "client_connections"   => 0,
-          "clients_active"       => 0,
-          "queries_per_sec"      => 0,
-          "read_docs_per_sec"    => 0,
-          "written_docs_per_sec" => 0,
+          "client_connections" => 0,
+          "clients_active"     => 0,
+          "queries_per_sec"    => 0,
+          "read_docs_per_sec"  => @manager.lock.synchronize do
+            @manager.table_by_id.values.map(&.impl.read_docs_on_table.per_second).sum
+          end,
+          "written_docs_per_sec" => @manager.lock.synchronize do
+            @manager.table_by_id.values.map(&.impl.written_docs_on_table.per_second).sum
+          end,
         },
       }).hash_value
     end
@@ -26,14 +30,22 @@ module Storage
           @manager.system_info.id.to_s,
         ],
         "query_engine" => {
-          "client_connections"   => 0,
-          "clients_active"       => 0,
-          "queries_per_sec"      => 0,
-          "queries_total"        => 0,
-          "read_docs_per_sec"    => 0,
-          "read_docs_total"      => 0,
-          "written_docs_per_sec" => 0,
-          "written_docs_total"   => 0,
+          "client_connections" => 0,
+          "clients_active"     => 0,
+          "queries_per_sec"    => 0,
+          "queries_total"      => 0,
+          "read_docs_per_sec"  => @manager.lock.synchronize do
+            @manager.table_by_id.values.map(&.impl.read_docs_on_table.per_second).sum
+          end,
+          "read_docs_total" => @manager.lock.synchronize do
+            @manager.table_by_id.values.map(&.impl.read_docs_on_table.total).sum
+          end,
+          "written_docs_per_sec" => @manager.lock.synchronize do
+            @manager.table_by_id.values.map(&.impl.written_docs_on_table.per_second).sum
+          end,
+          "written_docs_total" => @manager.lock.synchronize do
+            @manager.table_by_id.values.map(&.impl.written_docs_on_table.total).sum
+          end,
         },
         "server" => @manager.system_info.name,
       }).hash_value
