@@ -281,6 +281,7 @@ module RethinkDB
     term mul, MulTerm
     term ne, NeTerm
     term not, NotTerm
+    term nth, NthTerm
     term object, ObjectTerm
     term or, OrTerm
     term order_by, OrderByTerm
