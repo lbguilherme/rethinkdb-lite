@@ -3,6 +3,9 @@ require "../metrics"
 
 module Storage
   struct PhysicalTable < AbstractTable
+    MUTEX_SHARDS = 2 << 12
+    @@mutexes : Array(Mutex) = (0...MUTEX_SHARDS).map { Mutex.new }
+
     property read_docs_on_table = PerSecondMetric.new
     property written_docs_on_table = PerSecondMetric.new
 
@@ -27,8 +30,8 @@ module Storage
     def replace(key, durability : ReQL::Durability? = nil)
       key_data = ReQL.encode_key(key)
 
-      @manager.kv.transaction(durability || @table.info.durability) do |t|
-        existing_row = t.get_row(@table.info.id, key_data) do |existing_row_data|
+      @@mutexes[key.hash % MUTEX_SHARDS].synchronize do
+        existing_row = @manager.kv.get_row(@table.info.id, key_data) do |existing_row_data|
           if existing_row_data.nil?
             nil
           else
@@ -43,22 +46,39 @@ module Storage
         if new_row.nil?
           unless existing_row.nil?
             @written_docs_on_table.add(1)
-            t.delete_row(@table.info.id, key_data)
 
-            # TODO: This crashes the compiler
-            # @table.indices.values.each do |index|
-            #   update_index_data(t, index, key_data, existing_row, new_row)
-            # end
+            if @table.indices.empty?
+              @manager.kv.delete_row(@table.info.id, key_data, durability || @table.info.durability)
+            else
+              batch = @manager.kv.create_batch
+              batch.delete_row(@table.info.id, key_data)
+
+              # TODO: This crashes the compiler
+              # @table.indices.values.each do |index|
+              #   update_index_data(batch, index, key_data, existing_row, new_row)
+              # end
+
+              @manager.kv.write_batch(batch, durability || @table.info.durability)
+            end
           end
         else
           if existing_row != new_row
             @written_docs_on_table.add(1)
-            new_row.delete(primary_key)
-            t.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
-            new_row[primary_key] = key
 
-            @table.indices.values.each do |index|
-              update_index_data(t, index, key_data, existing_row, new_row)
+            if @table.indices.empty?
+              @manager.kv.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize, durability || @table.info.durability)
+            else
+              batch = @manager.kv.create_batch
+
+              new_row.delete(primary_key)
+              batch.set_row(@table.info.id, key_data, ReQL::Datum.new(new_row).serialize)
+              new_row[primary_key] = key
+
+              @table.indices.values.each do |index|
+                update_index_data(batch, index, key_data, existing_row, new_row)
+              end
+
+              @manager.kv.write_batch(batch, durability || @table.info.durability)
             end
           end
         end

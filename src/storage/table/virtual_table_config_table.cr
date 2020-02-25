@@ -2,6 +2,8 @@ require "./virtual_table"
 
 module Storage
   struct VirtualTableConfigTable < VirtualTable
+    @@mutex = Mutex.new
+
     def initialize(manager : Manager)
       super("table_config", manager)
     end
@@ -11,8 +13,8 @@ module Storage
 
       after_commit = nil
 
-      @manager.kv.transaction do |t|
-        existing_info = t.get_table(id)
+      @@mutex.synchronize do
+        existing_info = @manager.kv.get_table(id)
         new_row = yield encode(existing_info)
 
         if new_row.nil?
@@ -35,7 +37,7 @@ module Storage
             end
           end
 
-          t.save_table(info)
+          @manager.kv.save_table(info)
 
           after_commit = ->do
             @manager.lock.synchronize do

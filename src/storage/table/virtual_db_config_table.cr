@@ -2,6 +2,8 @@ require "./virtual_table"
 
 module Storage
   struct VirtualDbConfigTable < VirtualTable
+    @@mutex = Mutex.new
+
     def initialize(manager : Manager)
       super("db_config", manager)
     end
@@ -11,8 +13,8 @@ module Storage
 
       after_commit = nil
 
-      @manager.kv.transaction do |t|
-        existing_info = t.get_db(id)
+      @@mutex.synchronize do
+        existing_info = @manager.kv.get_db(id)
         new_row = yield encode(existing_info)
 
         if new_row.nil?
@@ -27,7 +29,7 @@ module Storage
             raise ReQL::OpFailedError.new("Database `#{info.name}` already exists")
           end
 
-          t.save_db(info)
+          @manager.kv.save_db(info)
 
           after_commit = ->{ @manager.lock.synchronize { @manager.database_by_id[info.id] = @manager.databases[info.name] = Manager::Database.new(info) } }
           next

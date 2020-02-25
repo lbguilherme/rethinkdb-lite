@@ -120,12 +120,6 @@ module Storage
 
     property system_info
 
-    {% if flag?(:preview_mt) %}
-      @rocksdb : RocksDB::TransactionDatabase
-    {% else %}
-      @rocksdb : RocksDB::OptimisticTransactionDatabase
-    {% end %}
-
     def initialize(path)
       @options = RocksDB::Options.new
       @options.create_if_missing = true
@@ -145,11 +139,7 @@ module Storage
         families = {"default" => @options}
       end
 
-      @rocksdb = {% if flag?(:preview_mt) %}
-                   RocksDB::TransactionDatabase.open(path, @options, families)
-                 {% else %}
-                   RocksDB::OptimisticTransactionDatabase.open(path, @options, families)
-                 {% end %}
+      @rocksdb = RocksDB::Database.open(path, @options, families)
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
@@ -288,100 +278,38 @@ module Storage
       @rocksdb.snapshot
     end
 
-    class Transaction
-      def initialize(@kv : KeyValueStore, @txn : RocksDB::BaseTransaction)
+    class WriteBatch
+      def initialize(@kv : KeyValueStore)
+        @batch = RocksDB::WriteBatch.new
       end
 
-      def get_row(table_id : UUID, primary_key : Bytes)
-        bytes = @txn.get_for_update(@kv.table_data_family(table_id), primary_key)
-        if bytes.nil?
-          yield nil
-        else
-          begin
-            yield bytes
-          ensure
-            RocksDB.free(bytes)
-          end
-        end
+      def raw_batch
+        @batch
       end
 
       def set_row(table_id : UUID, primary_key : Bytes, data : Bytes)
-        @txn.put(@kv.table_data_family(table_id), primary_key, data)
+        @batch.put(@kv.table_data_family(table_id), primary_key, data)
       end
 
       def delete_row(table_id : UUID, primary_key : Bytes) : Bytes?
-        @txn.delete(@kv.table_data_family(table_id), primary_key)
+        @batch.delete(@kv.table_data_family(table_id), primary_key)
       end
 
       def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @txn.put(@kv.table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0))
+        @batch.put(@kv.table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0))
       end
 
       def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @txn.delete(@kv.table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key))
-      end
-
-      def get_table(id : UUID)
-        bytes = @txn.get(KeyValueStore.key_for_table(id))
-        if bytes.nil?
-          nil
-        else
-          begin
-            TableInfo.load(bytes)
-          ensure
-            RocksDB.free(bytes)
-          end
-        end
-      end
-
-      def save_table(table : TableInfo)
-        @txn.put(KeyValueStore.key_for_table(table.id), table.serialize)
-
-        # Ensure column family exists
-        @kv.table_data_family(table.id)
-        @kv.table_metadata_family(table.id)
-      end
-
-      def get_db(id : UUID)
-        bytes = @txn.get(KeyValueStore.key_for_database(id))
-        if bytes.nil?
-          nil
-        else
-          begin
-            DatabaseInfo.load(bytes)
-          ensure
-            RocksDB.free(bytes)
-          end
-        end
-      end
-
-      def save_db(db : DatabaseInfo)
-        @txn.put(KeyValueStore.key_for_database(db.id), db.serialize)
+        @batch.delete(@kv.table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key))
       end
     end
 
-    def transaction(durability : ReQL::Durability = ReQL::Durability::Soft)
-      options = {% if flag?(:preview_mt) %}
-                  RocksDB::TransactionOptions.new
-                {% else %}
-                  RocksDB::OptimisticTransactionOptions.new
-                {% end %}
-      options.set_snapshot = true
-      txn = @rocksdb.begin_transaction(get_write_options(durability), options)
-      loop do
-        begin
-          result = yield Transaction.new(self, txn)
-          txn.commit
-          return result
-        rescue ex
-          if ex.is_a?(RocksDB::Error) && ex.message.try &.starts_with? "Resource busy"
-            txn.begin(get_write_options(durability))
-          else
-            txn.rollback
-            raise ex
-          end
-        end
-      end
+    def create_batch
+      WriteBatch.new(self)
+    end
+
+    def write_batch(batch, durability : ReQL::Durability = ReQL::Durability::Soft)
+      @rocksdb.write(batch.raw_batch, get_write_options(durability))
     end
 
     def get_row(table_id : UUID, primary_key : Bytes, snapshot : RocksDB::BaseSnapshot? = nil)
@@ -402,6 +330,14 @@ module Storage
           RocksDB.free(bytes)
         end
       end
+    end
+
+    def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+      @rocksdb.put(table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0))
+    end
+
+    def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+      @rocksdb.delete(table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key))
     end
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft)
