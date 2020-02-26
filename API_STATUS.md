@@ -1,7 +1,7 @@
 # STATUS
 
-- 113x :heavy_check_mark:
-- 106x :x:
+- 115x :heavy_check_mark:
+- 104x :x:
 
 # Connection
 
@@ -102,27 +102,27 @@
 
 # Dates and Times
 
-| Term                    | Support | Notes |
-| ----------------------- | ------- | ----- |
-| time.date()             | :x:     |       |
-| time.day_of_week()      | :x:     |       |
-| time.day_of_year()      | :x:     |       |
-| time.day()              | :x:     |       |
-| time.during(start, end) | :x:     |       |
-| r.epoch_time(number)    | :x:     |       |
-| time.hours()            | :x:     |       |
-| time.in_timezone(tz)    | :x:     |       |
-| r.iso8601(string)       | :x:     |       |
-| time.minutes()          | :x:     |       |
-| time.month()            | :x:     |       |
-| time.now()              | :x:     |       |
-| time.seconds()          | :x:     |       |
-| time.time_of_day()      | :x:     |       |
-| r.time(...)             | :x:     |       |
-| time.timezone()         | :x:     |       |
-| time.to_epoch_time()    | :x:     |       |
-| time.to_iso8601()       | :x:     |       |
-| time.year()             | :x:     |       |
+| Term                    | Support            | Notes |
+| ----------------------- | ------------------ | ----- |
+| time.date()             | :x:                |       |
+| time.day_of_week()      | :x:                |       |
+| time.day_of_year()      | :x:                |       |
+| time.day()              | :x:                |       |
+| time.during(start, end) | :x:                |       |
+| r.epoch_time(number)    | :x:                |       |
+| time.hours()            | :x:                |       |
+| time.in_timezone(tz)    | :x:                |       |
+| r.iso8601(string)       | :x:                |       |
+| time.minutes()          | :x:                |       |
+| time.month()            | :x:                |       |
+| time.now()              | :heavy_check_mark: |       |
+| time.seconds()          | :x:                |       |
+| time.time_of_day()      | :x:                |       |
+| r.time(...)             | :x:                |       |
+| time.timezone()         | :x:                |       |
+| time.to_epoch_time()    | :x:                |       |
+| time.to_iso8601()       | :x:                |       |
+| time.year()             | :x:                |       |
 
 # Document Manipulation
 
@@ -152,7 +152,7 @@
 | array.set_difference(array)    | :heavy_check_mark: |       |
 | array.set_insert(array)        | :x:                |       |
 | array.set_intersection(array)  | :x:                |       |
-| array.set_union(array)         | :x:                |       |
+| array.set_union(array)         | :heavy_check_mark: |       |
 | array.splice_at(offset, array) | :heavy_check_mark: |       |
 | object.values()                | :x:                |       |
 | sequence.without(...)          | :heavy_check_mark: |       |
