@@ -17,7 +17,7 @@ module ReQL
         case
         when target.is_a? Stream
           Datum.new(target.count(Int32::MAX.to_i64))
-        when array = target.array_value?
+        when array = target.array_or_set_value?
           Datum.new(array.size.to_i64)
         when string = target.string_value?
           Datum.new(string.size.to_i64)

@@ -134,6 +134,10 @@ private def encode_key(io, arr : Array)
   io.write_byte(BYTE_END)
 end
 
+private def encode_key(io, set : Set)
+  encode_key(io, set.to_a)
+end
+
 private def encode_key(io, hsh : Hash)
   io.write_byte(BYTE_OBJECT)
   hsh.each do |(k, v)|

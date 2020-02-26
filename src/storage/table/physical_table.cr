@@ -104,7 +104,7 @@ module Storage
       if index.info.multi
         set = Set({ReQL::Datum, Int32}).new
         hash = Hash(ReQL::Datum, Int32).new { 0 }
-        computed.array_value?.try &.each do |val|
+        computed.array_or_set_value?.try &.each do |val|
           set << {val, hash[val] += 1}
         end
 

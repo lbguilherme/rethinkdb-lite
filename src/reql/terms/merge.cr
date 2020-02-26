@@ -46,7 +46,7 @@ module ReQL
         MapStream.new(target, ->(val : Datum) {
           Datum.new(ReQL.merge_objects(val.hash_value, block.call(val).value))
         })
-      when array = target.array_value?
+      when array = target.array_or_set_value?
         Datum.new(array.map do |val|
           ReQL.merge_objects(val.hash_value, block.call(val).value)
         end)

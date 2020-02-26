@@ -31,8 +31,8 @@ module ReQL
             raise QueryLogicError.new("Cannot perform has_fields on a non-object non-sequence `#{target.value.inspect}`")
           end
         })
-      when .is_array?
-        Datum.new(target.array_value.select do |val|
+      when .is_array_or_set?
+        Datum.new(target.array_or_set_value.select do |val|
           case val
           when .is_array?
             raise QueryLogicError.new("Cannot perform has_fields on a sequence of sequences")

@@ -50,7 +50,7 @@ module ReQL
         FilterStream.new(target, ->(val : Datum) {
           block.call(val)
         })
-      when array = target.array_value
+      when array = target.array_or_set_value
         Datum.new(array.select do |val|
           block.call(val).value
         end)

@@ -16,7 +16,7 @@ module ReQL
 
     include Comparable(Object)
 
-    alias Type = Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | String | Nil | Maxval | Minval | Bytes
+    alias Type = Array(Datum) | Set(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | String | Nil | Maxval | Minval | Bytes
 
     # Comparison
 
@@ -113,7 +113,7 @@ module ReQL
 
     private def encode_as_json(val : Type)
       case val
-      when Array
+      when Array, Set
         JSON::Any.new(val.map { |x| encode_as_json(x.value).as(JSON::Any) })
       when Hash
         hash = {} of String => JSON::Any
@@ -140,7 +140,7 @@ module ReQL
     end
 
     def each
-      array = array_value?
+      array = array_or_set_value?
 
       unless array
         raise QueryLogicError.new("Cannot convert #{reql_type} to SEQUENCE")
@@ -155,7 +155,7 @@ module ReQL
           raise QueryLogicError.new("Expected type #{{{expected_reql_type}}} but found #{reql_type}.")
         end
 
-        value.as({{type}})
+        {{"value_as_#{method_name.id}".id}}
       end
 
       def {{"#{method_name.id}_value?".id}}
@@ -163,7 +163,7 @@ module ReQL
           return nil
         end
 
-        value.as({{type}})
+        {{"value_as_#{method_name.id}".id}}
       end
 
       def {{"#{method_name.id}_or_nil_value".id}}
@@ -175,6 +175,10 @@ module ReQL
           raise QueryLogicError.new("Expected type #{{{expected_reql_type}}} but found #{reql_type}.")
         end
 
+        {{"value_as_#{method_name.id}".id}}
+      end
+
+      private def {{"value_as_#{method_name.id}".id}}
         value.as({{type}})
       end
 
@@ -186,6 +190,8 @@ module ReQL
     value_cast(string, String, "STRING")
     value_cast(hash, Hash, "OBJECT")
     value_cast(array, Array, "ARRAY")
+    value_cast(set, Set, "ARRAY")
+    value_cast(array_or_set, Array(Datum) | Set(Datum), "ARRAY")
     value_cast(bytes, Bytes, "BINARY")
     value_cast(bool, Bool, "BOOL")
     value_cast(number, Int32 | Int64 | Float64, "NUMBER")
@@ -196,6 +202,14 @@ module ReQL
 
     def is_hash?
       {"OBJECT", "ROW"}.includes? reql_type
+    end
+
+    private def value_as_array
+      value.as(Array(Datum) | Set(Datum)).to_a
+    end
+
+    private def value_as_set
+      value.as(Array(Datum) | Set(Datum)).to_set
     end
 
     def int64_value

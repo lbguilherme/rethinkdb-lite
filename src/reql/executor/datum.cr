@@ -6,13 +6,15 @@ module ReQL
   struct Datum < AbstractValue
     property value : AbstractValue::Type
 
-    def initialize(val : Array | Tuple | Hash | Bool | Float64 | Int32 | Int64 | Maxval | Minval | String | Nil | Bytes | JSON::Any | AbstractValue)
+    def initialize(val : Array | Tuple | Set | Hash | Bool | Float64 | Int32 | Int64 | Maxval | Minval | String | Nil | Bytes | JSON::Any | AbstractValue)
       val = val.raw if val.is_a? JSON::Any
 
       @value = case val
                when AbstractValue
                  val.value
-               when Array
+               when Set(Datum)
+                 val
+               when Array, Set
                  val.map { |e| Datum.new(e).as(Datum) }
                when Tuple
                  val.map { |e| Datum.new(e).as(Datum) }.to_a
@@ -51,7 +53,7 @@ module ReQL
 
     def reql_type
       case value
-      when Array
+      when Array, Set
         "ARRAY"
       when Hash
         "OBJECT"

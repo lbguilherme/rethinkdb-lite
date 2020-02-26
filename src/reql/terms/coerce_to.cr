@@ -32,7 +32,7 @@ module ReQL
         case
         when hash = source.hash_value?
           return Datum.new(hash.to_json)
-        when array = source.array_value?
+        when array = source.array_or_set_value?
           return Datum.new(array.to_json)
         when number = source.number_value?
           return Datum.new(number.to_s)
@@ -47,7 +47,7 @@ module ReQL
         end
       when "OBJECT"
         case
-        when array = source.array_value?
+        when array = source.array_or_set_value?
           obj = {} of String => Datum
           array.each do |pair|
             pair = pair.array_value

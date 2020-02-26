@@ -12,7 +12,7 @@ module ReQL
       "STREAM"
     end
 
-    def initialize(@table : Storage::AbstractTable, @keys : Array(Datum), @index : String)
+    def initialize(@table : Storage::AbstractTable, @keys : Array(Datum) | Set(Datum), @index : String)
       @internal = InternalData.new
     end
 

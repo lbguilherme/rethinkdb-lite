@@ -13,8 +13,8 @@ module ReQL
     def eval_term(term : DistinctTerm)
       target = eval(term.args[0])
 
-      if array = target.array_value?
-        Datum.new(array.uniq)
+      if array = target.array_or_set_value?
+        Datum.new(array.to_set)
       else
         raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
       end

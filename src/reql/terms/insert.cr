@@ -19,7 +19,7 @@ module ReQL
       writter = TableWriter.new
 
       docs = case
-             when array = datum.array_value?
+             when array = datum.array_or_set_value?
                array.map do |e|
                  if hash = e.hash_value?
                    hash

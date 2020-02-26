@@ -19,7 +19,7 @@ module ReQL
         ConcatMapStream.new(target, ->(val : Datum) {
           return func.eval(self, {val}).as_datum
         })
-      when array = target.array_value?
+      when array = target.array_or_set_value?
         Datum.new(array.flat_map do |val|
           func.eval(self, {val}).array_value
         end)

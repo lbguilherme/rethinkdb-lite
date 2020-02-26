@@ -36,7 +36,7 @@ module ReQL
         return Datum.new(bytes.empty?)
       end
 
-      return Datum.new(target.array_value.empty?)
+      return Datum.new(target.array_or_set_value.empty?)
     end
   end
 end

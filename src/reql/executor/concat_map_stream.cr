@@ -29,7 +29,7 @@ module ReQL
         end
       else
         if val = @stream.object.next_val
-          @current = @func.call(val.as_datum).array_value.each
+          @current = @func.call(val.as_datum).array_or_set_value.each
           next_val
         else
           nil

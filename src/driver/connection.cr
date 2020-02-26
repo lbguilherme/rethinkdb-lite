@@ -27,13 +27,13 @@ module RethinkDB
   struct Datum
     getter value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil | Bytes
 
-    def initialize(value : ReQL::Datum | Datum | Array | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
+    def initialize(value : ReQL::Datum | Datum | Array | Set | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
       case value
       when ReQL::Datum
         initialize(value.value, runopts)
       when Datum
         @value = value.@value
-      when Array
+      when Array, Set
         @value = value.map { |x| Datum.new(x.is_a?(JSON::Any) ? x.raw : x, runopts).as Datum }
       when Hash
         obj = {} of String => Datum
