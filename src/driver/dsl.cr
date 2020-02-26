@@ -105,10 +105,6 @@ module RethinkDB
       end
 
       def run(conn, runopts : Hash = {} of String => Nil)
-        if_defined(Spec) do
-          ReQL::Term.encode(ReQL::Term.parse(ReQL::Term.encode(@val))).should ::eq ReQL::Term.encode(@val)
-        end
-
         conn.run(@val, RunOpts.new(runopts))
       end
 
