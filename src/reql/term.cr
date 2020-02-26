@@ -27,7 +27,7 @@ module ReQL
           Base64.decode(hash["data"].as(String)).as(Type)
         elsif hash["$reql_type$"]? == "TIME" && hash["epoch_time"]?.is_a? Float64 | Int64 && hash["timezone"]?.is_a? String
           epoch = hash["epoch_time"].as(Float64 | Int64)
-          seconds = epoch.to_i64
+          unix_seconds = epoch.to_i64
           nanoseconds = (epoch * 1e9 % 1_000_000_000).to_i32 % 1_000_000_000
           location = if match = hash["timezone"].as?(String).try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
                        sign = match["sign"]
@@ -38,7 +38,7 @@ module ReQL
                      else
                        Time::Location::UTC
                      end
-          (Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
+          (Time.unix(unix_seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
         else
           hash.as(Type)
         end

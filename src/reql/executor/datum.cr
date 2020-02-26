@@ -51,7 +51,7 @@ module ReQL
                      raise QueryLogicError.new "Invalid time pseudotype: illegal `#{extra_keys[0]}` key."
                    end
                    epoch = Datum.new(val["epoch_time"]).float64_value
-                   seconds = epoch.to_i64
+                   unix_seconds = epoch.to_i64
                    nanoseconds = (epoch * 1e9 % 1_000_000_000).to_i32 % 1_000_000_000
                    location = if match = Datum.new(val["timezone"]).string_value?.try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
                                 sign = match["sign"]
@@ -62,7 +62,7 @@ module ReQL
                               else
                                 Time::Location::UTC
                               end
-                   (Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
+                   (Time.unix(unix_seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
                  else
                    hash = {} of String => Datum
                    val.each do |(k, v)|

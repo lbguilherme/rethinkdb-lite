@@ -11,7 +11,7 @@ module RethinkDB
   module DSL
     module R
       @@next_var_i = 1i64
-      alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Nil | R
+      alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Nil | Time | R
 
       def self.reset_next_var_i
         @@next_var_i = 1i64
