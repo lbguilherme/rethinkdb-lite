@@ -64,7 +64,6 @@ module RethinkDB
             "$reql_type$" => Datum.new("TIME", runopts),
             "epoch_time"  => Datum.new(value.to_unix_f, runopts),
             "timezone"    => Datum.new(value.zone.format, runopts),
-            "location"    => Datum.new(value.location.name, runopts),
           }
         end
       else
@@ -88,7 +87,6 @@ module RethinkDB
           "$reql_type$" => Datum.new("TIME", RunOpts.new),
           "epoch_time"  => Datum.new(value.to_unix_f, RunOpts.new),
           "timezone"    => Datum.new(value.zone.format, RunOpts.new),
-          "location"    => Datum.new(value.location.name, RunOpts.new),
         }.to_json(io)
       else
         value.to_json(io)

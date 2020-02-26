@@ -46,25 +46,21 @@ module ReQL
                    unless val.has_key? "timezone"
                      raise QueryLogicError.new "Invalid time pseudotype: lacking `timezone` key."
                    end
-                   extra_keys = val.keys - ["$reql_type$", "epoch_time", "timezone", "location"]
+                   extra_keys = val.keys - ["$reql_type$", "epoch_time", "timezone"]
                    if extra_keys.size > 0
                      raise QueryLogicError.new "Invalid time pseudotype: illegal `#{extra_keys[0]}` key."
                    end
                    epoch = Datum.new(val["epoch_time"]).float64_value
                    seconds = epoch.to_i64
                    nanoseconds = (epoch * 1e9 % 1_000_000_000).to_i32 % 1_000_000_000
-                   location = if name = Datum.new(val["location"]).string_value?
-                                Time::Location.load(name)
+                   location = if match = Datum.new(val["timezone"]).string_value?.try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
+                                sign = match["sign"]
+                                hours = match["hours"].to_i
+                                minutes = match["minutes"].to_i
+                                seconds = (match["seconds"]? || 0).to_i
+                                Time::Location.fixed((sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60 + seconds))
                               else
-                                if match = Datum.new(val["timezone"]).string_value?.try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
-                                  sign = match["sign"]
-                                  hours = match["hours"].to_i
-                                  minutes = match["minutes"].to_i
-                                  seconds = (match["seconds"]? || 0).to_i
-                                  Time::Location.fixed((sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60 + seconds))
-                                else
-                                  Time::Location::UTC
-                                end
+                                Time::Location::UTC
                               end
                    (Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
                  else

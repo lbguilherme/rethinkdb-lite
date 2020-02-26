@@ -29,18 +29,14 @@ module ReQL
           epoch = hash["epoch_time"].as(Float64 | Int64)
           seconds = epoch.to_i64
           nanoseconds = (epoch * 1e9 % 1_000_000_000).to_i32 % 1_000_000_000
-          location = if (name = hash["location"]?).is_a? String && hash["timezone"] != hash["location"]?
-                       Time::Location.load(name)
+          location = if match = hash["timezone"].as?(String).try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
+                       sign = match["sign"]
+                       hours = match["hours"].to_i
+                       minutes = match["minutes"].to_i
+                       seconds = (match["seconds"]? || 0).to_i
+                       Time::Location.fixed((sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60 + seconds))
                      else
-                       if match = hash["timezone"].as?(String).try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
-                         sign = match["sign"]
-                         hours = match["hours"].to_i
-                         minutes = match["minutes"].to_i
-                         seconds = (match["seconds"]? || 0).to_i
-                         Time::Location.fixed((sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60 + seconds))
-                       else
-                         Time::Location::UTC
-                       end
+                       Time::Location::UTC
                      end
           (Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
         else

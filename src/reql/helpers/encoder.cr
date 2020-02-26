@@ -74,9 +74,8 @@ private def decode_key(io)
   when BYTE_TIME
     seconds = io.read_bytes(Int64, IO::ByteFormat::BigEndian)
     nanoseconds = io.read_bytes(Int32, IO::ByteFormat::BigEndian)
-    location_name = io.gets('\0', true).not_nil!
     location_offset = io.read_bytes(Int32, IO::ByteFormat::BigEndian)
-    location = location_offset == 0 ? Time::Location.load(location_name) : Time::Location.fixed(location_name, location_offset)
+    location = location_offset == 0 ? Time::Location::UTC : Time::Location.fixed(location_offset)
     ReQL::Datum.new((Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location))
   else
     raise "BUG: Unexpected byte at decode_key"
@@ -130,9 +129,7 @@ private def encode_key(io, time : Time)
   io.write_byte(BYTE_TIME)
   io.write_bytes(time.to_unix.to_i64, IO::ByteFormat::BigEndian)
   io.write_bytes(time.nanosecond.to_i, IO::ByteFormat::BigEndian)
-  io << time.location.name
-  io.write_byte(BYTE_END)
-  io.write_bytes(time.location.fixed? ? time.offset.to_i : 0, IO::ByteFormat::BigEndian)
+  io.write_bytes(time.offset.to_i, IO::ByteFormat::BigEndian)
 end
 
 private def encode_key(io, str : String)

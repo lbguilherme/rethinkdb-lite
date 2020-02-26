@@ -140,7 +140,6 @@ module ReQL
           "$reql_type$" => JSON::Any.new("TIME"),
           "epoch_time"  => JSON::Any.new(val.to_unix_f),
           "timezone"    => JSON::Any.new(val.zone.format),
-          "location"    => JSON::Any.new(val.location.name),
         })
       when Int32
         JSON::Any.new(val.to_i64)
