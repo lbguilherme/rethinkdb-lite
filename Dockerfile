@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install curl libgflags-dev make g++ -y
 RUN curl -L https://github.com/facebook/rocksdb/archive/v6.6.4.tar.gz | tar xz
 WORKDIR /rocksdb-6.6.4
 RUN make static_lib -j6
+RUN make install-headers
 RUN mv librocksdb.a /
 
 FROM node:12 AS webui
@@ -24,7 +25,7 @@ RUN npm run build
 FROM crystallang/crystal:0.33.0 AS builder
 COPY --from=duktape /libduktape.a /usr/lib
 COPY --from=rocksdb /librocksdb.a /usr/lib
-COPY --from=webui /webui /app/vendor/rethinkdb-webui
+COPY --from=rocksdb /usr/local/include/rocksdb /usr/include/rocksdb
 RUN ls -lhs /usr/lib/librocksdb.a
 WORKDIR /app
 COPY shard.yml shard.lock ./
@@ -34,4 +35,5 @@ RUN crystal build -Dpreview_mt --release src/main.cr
 
 FROM crystallang/crystal:0.33.0
 COPY --from=builder /app/main /rethinkdb-lite
-CMD /rethinkdb-lite
+COPY --from=webui /webui /vendor/rethinkdb-webui
+CMD ["/rethinkdb-lite"]
