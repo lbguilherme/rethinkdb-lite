@@ -21,11 +21,11 @@ jobs:
       - name: Install LibDuktape and LibRocksDB
         run: |
           apt-get update && \
-          apt install debian-archive-keyring && \
-          ln -s /usr/share/keyrings/debian-archive*.gpg /etc/apt/trusted.gpg.d/ && \
-          echo "deb http://httpredir.debian.org/debian/ buster main contrib non-free" >> /etc/apt/sources.list && \
-          apt-get update && \
-          apt-get install duktape-dev librocksdb-dev -y
+          apt-get install wget libgflags2.2 libsnappy1v5 duktape-dev -y && \
+          wget https://launchpad.net/~hnakamur/+archive/ubuntu/rocksdb/+files/librocksdb6.5_6.5.2-1ppa2~bionic_amd64.deb && \
+          wget https://launchpad.net/~hnakamur/+archive/ubuntu/rocksdb/+files/librocksdb-dev_6.5.2-1ppa2~bionic_amd64.deb && \
+          apt install ./librocksdb6.5_6.5.2-1ppa2~bionic_amd64.deb -y && \
+          apt install ./librocksdb-dev_6.5.2-1ppa2~bionic_amd64.deb -y
 
       - name: Install dependencies from shards
         run: shards install
@@ -48,11 +48,11 @@ jobs:
       - name: Install LibDuktape and LibRocksDB
         run: |
           apt-get update && \
-          apt install debian-archive-keyring && \
-          ln -s /usr/share/keyrings/debian-archive*.gpg /etc/apt/trusted.gpg.d/ && \
-          echo "deb http://httpredir.debian.org/debian/ buster main contrib non-free" >> /etc/apt/sources.list && \
-          apt-get update && \
-          apt-get install duktape-dev librocksdb-dev -y
+          apt-get install wget libgflags2.2 libsnappy1v5 duktape-dev -y && \
+          wget https://launchpad.net/~hnakamur/+archive/ubuntu/rocksdb/+files/librocksdb6.5_6.5.2-1ppa2~bionic_amd64.deb && \
+          wget https://launchpad.net/~hnakamur/+archive/ubuntu/rocksdb/+files/librocksdb-dev_6.5.2-1ppa2~bionic_amd64.deb && \
+          apt install ./librocksdb6.5_6.5.2-1ppa2~bionic_amd64.deb -y && \
+          apt install ./librocksdb-dev_6.5.2-1ppa2~bionic_amd64.deb -y
 
       - name: Install dependencies from shards
         run: shards install
