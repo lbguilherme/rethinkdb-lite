@@ -3,7 +3,7 @@ require "json"
 
 module ReQL
   abstract class Term
-    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes
+    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes | Time
 
     getter args
     getter options : Hash(String, JSON::Any)
@@ -25,6 +25,24 @@ module ReQL
         end
         if hash["$reql_type$"]? == "BINARY" && hash["data"]?.is_a? String
           Base64.decode(hash["data"].as(String)).as(Type)
+        elsif hash["$reql_type$"]? == "TIME" && hash["epoch_time"]?.is_a? Float64 | Int64 && hash["timezone"]?.is_a? String
+          epoch = hash["epoch_time"].as(Float64 | Int64)
+          seconds = epoch.to_i64
+          nanoseconds = (epoch * 1e9 % 1_000_000_000).to_i32 % 1_000_000_000
+          location = if (name = hash["location"]?).is_a? String && hash["timezone"] != hash["location"]?
+                       Time::Location.load(name)
+                     else
+                       if match = hash["timezone"].as?(String).try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
+                         sign = match["sign"]
+                         hours = match["hours"].to_i
+                         minutes = match["minutes"].to_i
+                         seconds = (match["seconds"]? || 0).to_i
+                         Time::Location.fixed((sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60 + seconds))
+                       else
+                         Time::Location::UTC
+                       end
+                     end
+          (Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
         else
           hash.as(Type)
         end
@@ -68,6 +86,12 @@ module ReQL
         JSON::Any.new(Hash(String, JSON::Any){
           "$reql_type$" => JSON::Any.new("BINARY"),
           "data"        => JSON::Any.new(Base64.strict_encode(term)),
+        })
+      when Time
+        JSON::Any.new({
+          "$reql_type$" => JSON::Any.new("TIME"),
+          "epoch_time"  => JSON::Any.new(term.to_unix_f),
+          "timezone"    => JSON::Any.new(term.zone.format),
         })
       else
         JSON::Any.new(term)

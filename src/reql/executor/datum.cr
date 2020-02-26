@@ -6,7 +6,7 @@ module ReQL
   struct Datum < AbstractValue
     property value : AbstractValue::Type
 
-    def initialize(val : Array | Tuple | Set | Hash | Bool | Float64 | Int32 | Int64 | Maxval | Minval | String | Nil | Bytes | JSON::Any | AbstractValue)
+    def initialize(val : Array | Tuple | Set | Hash | Bool | Float64 | Int32 | Int64 | Maxval | Minval | String | Nil | Bytes | Time | JSON::Any | AbstractValue)
       val = val.raw if val.is_a? JSON::Any
 
       @value = case val
@@ -39,6 +39,34 @@ module ReQL
                      raise QueryLogicError.new "Invalid binary pseudotype: illegal `#{extra_keys[0]}` key."
                    end
                    Base64.decode(Datum.new(val["data"]).string_value)
+                 elsif val["$reql_type$"]? == "TIME"
+                   unless val.has_key? "epoch_time"
+                     raise QueryLogicError.new "Invalid time pseudotype: lacking `epoch_time` key."
+                   end
+                   unless val.has_key? "timezone"
+                     raise QueryLogicError.new "Invalid time pseudotype: lacking `timezone` key."
+                   end
+                   extra_keys = val.keys - ["$reql_type$", "epoch_time", "timezone", "location"]
+                   if extra_keys.size > 0
+                     raise QueryLogicError.new "Invalid time pseudotype: illegal `#{extra_keys[0]}` key."
+                   end
+                   epoch = Datum.new(val["epoch_time"]).float64_value
+                   seconds = epoch.to_i64
+                   nanoseconds = (epoch * 1e9 % 1_000_000_000).to_i32 % 1_000_000_000
+                   location = if name = Datum.new(val["location"]).string_value?
+                                Time::Location.load(name)
+                              else
+                                if match = Datum.new(val["timezone"]).string_value?.try &.match(/(?<sign>\+|-)(?<hours>\d\d):?(?<minutes>\d\d):?(?<seconds>\d\d)?/)
+                                  sign = match["sign"]
+                                  hours = match["hours"].to_i
+                                  minutes = match["minutes"].to_i
+                                  seconds = (match["seconds"]? || 0).to_i
+                                  Time::Location.fixed((sign == "-" ? -1 : 1) * (hours * 3600 + minutes * 60 + seconds))
+                                else
+                                  Time::Location::UTC
+                                end
+                              end
+                   (Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location)
                  else
                    hash = {} of String => Datum
                    val.each do |(k, v)|

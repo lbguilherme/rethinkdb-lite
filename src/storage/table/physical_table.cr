@@ -116,6 +116,7 @@ module Storage
 
     def update_index_data(t, index, key_data, old_row, new_row)
       evaluator = ReQL::Evaluator.new(@manager)
+      evaluator.now = Time.unix(0)
 
       old_values = index_values(evaluator, index, old_row)
       new_values = index_values(evaluator, index, new_row)

@@ -25,11 +25,7 @@ module RethinkDB
         x.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : Int32, max_depth)
-        x.as(ReQL::Term::Type)
-      end
-
-      def self.convert_type(x : Bytes, max_depth)
+      def self.convert_type(x : Int32 | Bytes | Time, max_depth)
         x.as(ReQL::Term::Type)
       end
 

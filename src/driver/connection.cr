@@ -56,6 +56,17 @@ module RethinkDB
             "data"        => Datum.new(Base64.strict_encode(value), runopts),
           }
         end
+      when Time
+        if runopts.native_binary
+          @value = value
+        else
+          @value = Hash(String, Datum){
+            "$reql_type$" => Datum.new("TIME", runopts),
+            "epoch_time"  => Datum.new(value.to_unix_f, runopts),
+            "timezone"    => Datum.new(value.zone.format, runopts),
+            "location"    => Datum.new(value.location.name, runopts),
+          }
+        end
       else
         @value = value
       end
@@ -71,6 +82,13 @@ module RethinkDB
         Hash(String, Datum){
           "$reql_type$" => Datum.new("BINARY", RunOpts.new),
           "data"        => Datum.new(Base64.strict_encode(value), RunOpts.new),
+        }.to_json(io)
+      when Time
+        Hash(String, Datum){
+          "$reql_type$" => Datum.new("TIME", RunOpts.new),
+          "epoch_time"  => Datum.new(value.to_unix_f, RunOpts.new),
+          "timezone"    => Datum.new(value.zone.format, RunOpts.new),
+          "location"    => Datum.new(value.location.name, RunOpts.new),
         }.to_json(io)
       else
         value.to_json(io)

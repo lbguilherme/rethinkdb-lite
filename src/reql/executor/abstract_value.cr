@@ -16,7 +16,7 @@ module ReQL
 
     include Comparable(Object)
 
-    alias Type = Array(Datum) | Set(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | String | Nil | Maxval | Minval | Bytes
+    alias Type = Array(Datum) | Set(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | String | Nil | Maxval | Minval | Bytes | Time
 
     # Comparison
 
@@ -32,6 +32,9 @@ module ReQL
         return type_order(a) <=> type_order(b)
       end
 
+      a = a.to_a if a.is_a? Set
+      b = b.to_a if b.is_a? Set
+
       case {a, b}
       when {Maxval, Maxval}  ; return 0
       when {Minval, Minval}  ; return 0
@@ -46,6 +49,7 @@ module ReQL
       when {Int32, Float64}  ; return a.to_f64 <=> b
       when {Int32, Int64}    ; return a.to_i64 <=> b
       when {Int32, Int32}    ; return a <=> b
+      when {Time, Time}      ; return a <=> b
       when {Bool, Bool}
         return 0 if a == b
         return 1 if a && !b
@@ -88,14 +92,15 @@ module ReQL
     private def type_order(value)
       case value
       when Minval               ; 1
-      when Array                ; 2
+      when Array, Set           ; 2
       when Bool                 ; 3
       when Nil                  ; 4
       when Float64, Int32, Int64; 5
       when Hash                 ; 6
       when Bytes                ; 7
-      when String               ; 8
-      when Maxval               ; 9
+      when Time                 ; 8
+      when String               ; 9
+      when Maxval               ; 10
       else
         raise "BUG: Missing order for #{value.class}"
       end
@@ -129,6 +134,13 @@ module ReQL
         JSON::Any.new({
           "$reql_type$" => JSON::Any.new("BINARY"),
           "data"        => JSON::Any.new(Base64.strict_encode(val)),
+        })
+      when Time
+        JSON::Any.new({
+          "$reql_type$" => JSON::Any.new("TIME"),
+          "epoch_time"  => JSON::Any.new(val.to_unix_f),
+          "timezone"    => JSON::Any.new(val.zone.format),
+          "location"    => JSON::Any.new(val.location.name),
         })
       when Int32
         JSON::Any.new(val.to_i64)

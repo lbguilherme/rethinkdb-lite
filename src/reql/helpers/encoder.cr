@@ -22,7 +22,9 @@ private BYTE_DOUBLE_NEGATIVE = 0x50u8
 private BYTE_DOUBLE_POSITIVE = 0x51u8
 private BYTE_OBJECT          = 0x60u8
 private BYTE_BYTES           = 0x70u8
-private BYTE_STRING          = 0x80u8
+private BYTE_GEO             = 0x80u8 # TODO
+private BYTE_TIME            = 0x90u8
+private BYTE_STRING          = 0xA0u8
 private BYTE_MAXVAL          = 0xFEu8
 private BYTE_END             = 0x00u8
 
@@ -69,6 +71,13 @@ private def decode_key(io)
     ReQL::Datum.new(io.gets('\0', true).not_nil!)
   when BYTE_BYTES
     ReQL::Datum.new(Base64.decode(io.gets('\0', true).not_nil!))
+  when BYTE_TIME
+    seconds = io.read_bytes(Int64, IO::ByteFormat::BigEndian)
+    nanoseconds = io.read_bytes(Int32, IO::ByteFormat::BigEndian)
+    location_name = io.gets('\0', true).not_nil!
+    location_offset = io.read_bytes(Int32, IO::ByteFormat::BigEndian)
+    location = location_offset == 0 ? Time::Location.load(location_name) : Time::Location.fixed(location_name, location_offset)
+    ReQL::Datum.new((Time.unix(seconds) + Time::Span.new(nanoseconds: nanoseconds)).in(location))
   else
     raise "BUG: Unexpected byte at decode_key"
   end
@@ -115,6 +124,15 @@ private def encode_key(io, bytes : Bytes)
   io.write_byte(BYTE_BYTES)
   Base64.strict_encode(bytes, io)
   io.write_byte(BYTE_END)
+end
+
+private def encode_key(io, time : Time)
+  io.write_byte(BYTE_TIME)
+  io.write_bytes(time.to_unix.to_i64, IO::ByteFormat::BigEndian)
+  io.write_bytes(time.nanosecond.to_i, IO::ByteFormat::BigEndian)
+  io << time.location.name
+  io.write_byte(BYTE_END)
+  io.write_bytes(time.location.fixed? ? time.offset.to_i : 0, IO::ByteFormat::BigEndian)
 end
 
 private def encode_key(io, str : String)
