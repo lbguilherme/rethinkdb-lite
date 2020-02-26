@@ -32,8 +32,9 @@ COPY shard.yml shard.lock ./
 RUN shards
 COPY src src
 RUN crystal build -Dpreview_mt --release src/main.cr
+RUN strip /app/main
 
 FROM crystallang/crystal:0.33.0
 COPY --from=builder /app/main /rethinkdb-lite
-COPY --from=webui /webui /vendor/rethinkdb-webui
+COPY --from=webui /webui/dist /vendor/rethinkdb-webui/dist
 CMD ["/rethinkdb-lite"]
