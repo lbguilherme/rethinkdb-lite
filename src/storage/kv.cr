@@ -123,14 +123,21 @@ module Storage
     def initialize(path)
       @options = RocksDB::Options.new
       @options.create_if_missing = true
+
+      # This is supposed to improve perfomance. (does it?)
       @options.paranoid_checks = false
+
+      # This is required to injest SST files for index building
+      @options.allow_ingest_behind = true
 
       {% if flag?(:preview_mt) %}
         @options.enable_pipelined_write = false
         @options.increase_parallelism(16)
         @options.max_background_jobs = 4
-        @options.unordered_write = true
-        @options.avoid_unnecessary_blocking_io = true
+
+        # Older RocksDB 5.17 doesn't support those.
+        # @options.unordered_write = true
+        # @options.avoid_unnecessary_blocking_io = true
       {% end %}
 
       FileUtils.mkdir_p path
