@@ -49,7 +49,12 @@ module Storage
         table.impl = PhysicalTable.new(self, table)
 
         @kv.each_index(info.id) do |index_info|
-          table.indices[index_info.name] = Index.new(index_info)
+          index = Index.new(index_info)
+          table.indices[index_info.name] = index
+
+          unless index_info.ready
+            spawn table.impl.build_index(index)
+          end
         end
       end
 
