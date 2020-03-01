@@ -179,6 +179,12 @@ module Storage
       @table_metadata_family_cache[table_id] = handle
     end
 
+    def drop_index_data(table_id : UUID, index_id : UUID)
+      name = "table.#{table_id}.index.#{index_id}"
+      @rocksdb.drop_column_family(name)
+      @table_index_family_cache.delete({table_id, index_id})
+    end
+
     def close
       @rocksdb.close
     end

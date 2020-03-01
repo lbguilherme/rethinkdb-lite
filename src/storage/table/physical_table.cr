@@ -173,7 +173,7 @@ module Storage
       @manager.lock.synchronize do
         # Check if index was dropped while it was building (doesn't exist anymore or was recreated)
         unless @table.indices[index.info.name]? == index
-          # TODO: Discard the data we have saved above
+          @manager.kv.drop_index_data(@table.info.id, index.info.id)
           return
         end
 
