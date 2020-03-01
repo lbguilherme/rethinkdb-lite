@@ -1,7 +1,7 @@
 # STATUS
 
-- 115x :heavy_check_mark:
-- 104x :x:
+- 116x :heavy_check_mark:
+- 103x :x:
 
 # Connection
 
@@ -207,7 +207,7 @@
 | table.index_list()             | :heavy_check_mark: |       |
 | table.index_rename(old, new)   | :x:                |       |
 | table.index_status(...)        | :heavy_check_mark: |       |
-| table.index_wait(...)          | :x:                |       |
+| table.index_wait(...)          | :heavy_check_mark: |       |
 | table.set_write_hook(function) | :x:                |       |
 | db.table_create(name)          | :heavy_check_mark: |       |
 | db.table_list()                | :x:                |       |
