@@ -27,7 +27,7 @@ module RethinkDB
   struct Datum
     getter value : Array(Datum) | Bool | Float64 | Hash(String, Datum) | Int64 | Int32 | Time | String | Nil | Bytes
 
-    def initialize(value : ReQL::Datum | Datum | Array | Set | Bool | Float64 | Hash | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
+    def initialize(value : ReQL::Datum | Datum | Array | Set | Bool | Float64 | Hash | NamedTuple | Int64 | Int32 | Time | String | Nil | Bytes | ReQL::Maxval | ReQL::Minval, runopts : RunOpts)
       case value
       when ReQL::Datum
         initialize(value.value, runopts)
@@ -35,10 +35,16 @@ module RethinkDB
         @value = value.@value
       when Array, Set
         @value = value.map { |x| Datum.new(x.is_a?(JSON::Any) ? x.raw : x, runopts).as Datum }
-      when Hash
+      when Hash, NamedTuple
         obj = {} of String => Datum
-        value.each do |(k, v)|
-          obj[k.to_s] = Datum.new(v.is_a?(JSON::Any) ? v.raw : v, runopts)
+        if value.is_a? Hash
+          value.each do |(k, v)|
+            obj[k.to_s] = Datum.new(v.is_a?(JSON::Any) ? v.raw : v, runopts)
+          end
+        else
+          value.each do |k, v|
+            obj[k.to_s] = Datum.new(v.is_a?(JSON::Any) ? v.raw : v, runopts)
+          end
         end
         if runopts.native_binary && obj["$reql_type$"]? == "BINARY"
           @value = Base64.decode(obj["data"].string)
