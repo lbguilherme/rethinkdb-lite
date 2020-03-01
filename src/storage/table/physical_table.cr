@@ -154,11 +154,19 @@ module Storage
 
     def build_index(index : Manager::Index)
       @manager.kv.build_index(@table.info.id, index.info.id) do |builder|
+        evaluator = ReQL::Evaluator.new(@manager)
+        evaluator.now = Time.unix(0)
+
         @manager.kv.each_row(@table.info.id) do |key, data|
           @read_docs_on_table.add(1)
           hash = ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
           hash[primary_key] = ReQL.decode_key(key)
-          update_index_data(builder, index, key, nil, hash)
+
+          values = index_values(evaluator, index, hash)
+          values.each do |(value, counter)|
+            @written_docs_on_table.add(1)
+            builder.set_index_entry(@table.info.id, index.info.id, ReQL.encode_key(value), counter, key)
+          end
         end
       end
 
