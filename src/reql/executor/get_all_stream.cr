@@ -23,13 +23,13 @@ module ReQL
         spawn do
           begin
             if @index == @table.primary_key
-              channel.try { |ch| @table.get(key).try { |row| ch.send RowValue.new(@table, row) } }
+              @table.get(key).try { |row| channel.send RowValue.new(@table, row) }
             else
               @table.index_scan(@index, key, key) do |row|
-                channel.try &.send RowValue.new(@table, row)
+                channel.send RowValue.new(@table, row)
               end
             end
-            channel.try &.send nil
+            channel.send nil
           rescue Channel::ClosedError
           end
         end
