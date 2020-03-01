@@ -20,6 +20,50 @@ describe RethinkDB do
 
     r.table("test0").index_list.run(conn).should eq ["field2"]
   end
+
+  it "created index operates on new data with get_all" do
+    r.table_create("test1").run(conn)
+    r.table("test1").count.run(conn).should eq 0
+    r.table("test1").index_status.count.run(conn).should eq 0
+
+    r.table("test1").index_create("name").run(conn)
+    r.table("test1").index_create("namelen") { |x| x["name"].count }.run(conn)
+    r.table("test1").index_create("namelen_and_id", multi: true) { |x| [x["name"].count, x["id"]] }.run(conn)
+    r.table("test1").insert({id: 1, name: "Hey"}).run(conn)
+    r.table("test1").insert({id: 2, name: "haha"}).run(conn)
+    r.table("test1").insert({id: 3, name: "Aho"}).run(conn)
+    r.table("test1").insert({id: 4, name: "Aho"}).run(conn)
+
+    r.table("test1").count.run(conn).should eq 4
+    r.table("test1").get_all("Hey", index: "name").run(conn).datum.should eq [{"id" => 1, "name" => "Hey"}]
+
+    result = r.table("test1").get_all("Aho", index: "name").run(conn).datum.array
+    result.size.should eq 2
+    result.should contain ({"id" => 3, "name" => "Aho"})
+    result.should contain ({"id" => 4, "name" => "Aho"})
+
+    result = r.table("test1").get_all(3, index: "namelen").run(conn).datum.array
+    result.size.should eq 3
+    result.should contain ({"id" => 1, "name" => "Hey"})
+    result.should contain ({"id" => 3, "name" => "Aho"})
+    result.should contain ({"id" => 4, "name" => "Aho"})
+
+    result = r.table("test1").get_all(3, 4, index: "namelen").run(conn).datum.array
+    result.size.should eq 4
+    result.should contain ({"id" => 1, "name" => "Hey"})
+    result.should contain ({"id" => 2, "name" => "haha"})
+    result.should contain ({"id" => 3, "name" => "Aho"})
+    result.should contain ({"id" => 4, "name" => "Aho"})
+
+    result = r.table("test1").get_all(3, index: "namelen_and_id").run(conn).datum.array
+    result.size.should eq 4
+    result.should contain ({"id" => 1, "name" => "Hey"})
+    result.should contain ({"id" => 3, "name" => "Aho"})
+    result.should contain ({"id" => 4, "name" => "Aho"})
+    result.select { |x| x == {"id" => 3, "name" => "Aho"} }.size.should eq 2
+
+    r.table("test1").get_all(2, index: "namelen_and_id").run(conn).datum.should eq [{"id" => 2, "name" => "haha"}]
+  end
 end
 
 Spec.after_suite { conn.close }

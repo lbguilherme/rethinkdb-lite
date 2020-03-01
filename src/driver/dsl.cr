@@ -252,6 +252,7 @@ module RethinkDB
     term for_each, ForEachTerm
     term ge, GeTerm
     term get, GetTerm
+    term get_all, GetAllTerm
     term gt, GtTerm
     term has_fields, HasFieldsTerm
     term index_create, IndexCreateTerm
