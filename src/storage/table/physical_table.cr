@@ -181,7 +181,11 @@ module Storage
       @manager.kv.each_index_entry(@table.info.id, index.info.id, ReQL.encode_key(index_value_start), ReQL.encode_key(index_value_end), snapshot) do |index_value_data, primary_key_data|
         @read_docs_on_table.add(2)
         @manager.kv.get_row(@table.info.id, primary_key_data, snapshot) do |row|
-          yield ReQL::Datum.unserialize(IO::Memory.new(row)).hash_value if row
+          if row
+            hash = ReQL::Datum.unserialize(IO::Memory.new(row)).hash_value
+            hash[primary_key] = ReQL.decode_key(primary_key_data)
+            yield hash
+          end
         end
       end
     end
