@@ -153,7 +153,7 @@ module Storage
     end
 
     def build_index(index : Manager::Index)
-      @manager.kv.build_index(@table.info.id) do |builder|
+      @manager.kv.build_index(@table.info.id, index.info.id) do |builder|
         @manager.kv.each_row(@table.info.id) do |key, data|
           @read_docs_on_table.add(1)
           hash = ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value

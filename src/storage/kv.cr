@@ -8,12 +8,10 @@ require "../reql/terms/var"
 
 module Storage
   class KeyValueStore
-    PREFIX_SYSTEM_INFO      = 0u8
-    PREFIX_DATABASES        = 1u8
-    PREFIX_TABLES           = 2u8
-    PREFIX_TABLE_DATA       = 3u8
-    TABLE_PREFIX_INDICES    = 0u8
-    TABLE_PREFIX_INDEX_DATA = 1u8
+    PREFIX_SYSTEM_INFO   = 0u8
+    PREFIX_DATABASES     = 1u8
+    PREFIX_TABLES        = 2u8
+    TABLE_PREFIX_INDICES = 0u8
 
     # Minimal durability: data it stored in memory only and flushed to disk at some later point.
     # A process crash might cause data loss. A graceful server close (calling .close()) won't lose data.
@@ -70,11 +68,8 @@ module Storage
       io.to_slice
     end
 
-    def self.key_for_table_index_entry(index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+    def self.key_for_table_index_entry(index_value : Bytes, counter : Int32, primary_key : Bytes)
       io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_INDEX_DATA)
-      io.write(index_id.bytes.to_slice)
-      io.write_bytes(0u8)
       io.write(index_value)
       io.write_bytes(0u8)
       io.write_bytes(counter, IO::ByteFormat::LittleEndian)
@@ -83,21 +78,15 @@ module Storage
       io.to_slice
     end
 
-    def self.key_for_table_index_entry_start(index_id : UUID, index_value : Bytes)
+    def self.key_for_table_index_entry_start(index_value : Bytes)
       io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_INDEX_DATA)
-      io.write(index_id.bytes.to_slice)
-      io.write_bytes(0u8)
       io.write(index_value)
       io.write_bytes(0u8)
       io.to_slice
     end
 
-    def self.key_for_table_index_entry_end(index_id : UUID, index_value : Bytes)
+    def self.key_for_table_index_entry_end(index_value : Bytes)
       io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_INDEX_DATA)
-      io.write(index_id.bytes.to_slice)
-      io.write_bytes(0u8)
       io.write(index_value)
       io.write_bytes(1u8)
       io.to_slice
@@ -111,7 +100,7 @@ module Storage
       io.seek(index_entry_key.size - 4 - primary_key.size)
       io.read_fully(primary_key)
 
-      index_value = Bytes.new(index_entry_key.size - 1 - 16 - 1 - 1 - primary_key.size - 4 - 4)
+      index_value = Bytes.new(index_entry_key.size - 1 - primary_key.size - 4 - 4)
       io.seek(1 + 16 + 1)
       io.read_fully(index_value)
 
@@ -159,24 +148,35 @@ module Storage
 
     @table_data_family_cache = {} of UUID => RocksDB::ColumnFamilyHandle
 
-    def table_data_family(id : UUID)
-      handle = @table_data_family_cache[id]?
+    def table_data_family(table_id : UUID)
+      handle = @table_data_family_cache[table_id]?
       return handle if handle
-      name = "table.#{id}.data"
+      name = "table.#{table_id}.data"
       handle = @rocksdb.family_handle?(name)
       handle = @rocksdb.create_column_family(name, @options) unless handle
-      @table_data_family_cache[id] = handle
+      @table_data_family_cache[table_id] = handle
+    end
+
+    @table_index_family_cache = {} of {UUID, UUID} => RocksDB::ColumnFamilyHandle
+
+    def table_index_family(table_id : UUID, index_id : UUID)
+      handle = @table_index_family_cache[{table_id, index_id}]?
+      return handle if handle
+      name = "table.#{table_id}.index.#{index_id}"
+      handle = @rocksdb.family_handle?(name)
+      handle = @rocksdb.create_column_family(name, @options) unless handle
+      @table_index_family_cache[{table_id, index_id}] = handle
     end
 
     @table_metadata_family_cache = {} of UUID => RocksDB::ColumnFamilyHandle
 
-    def table_metadata_family(id : UUID)
-      handle = @table_metadata_family_cache[id]?
+    def table_metadata_family(table_id : UUID)
+      handle = @table_metadata_family_cache[table_id]?
       return handle if handle
-      name = "table.#{id}.metadata"
+      name = "table.#{table_id}.metadata"
       handle = @rocksdb.family_handle?(name)
       handle = @rocksdb.create_column_family(name, @options) unless handle
-      @table_metadata_family_cache[id] = handle
+      @table_metadata_family_cache[table_id] = handle
     end
 
     def close
@@ -273,10 +273,10 @@ module Storage
 
     def each_index_entry(table_id : UUID, index_id : UUID, index_value_start : Bytes, index_value_end : Bytes, snapshot : RocksDB::BaseSnapshot? = nil)
       options = RocksDB::ReadOptions.new
-      options.iterate_upper_bound = KeyValueStore.key_for_table_index_entry_end(index_id, index_value_end)
+      options.iterate_upper_bound = KeyValueStore.key_for_table_index_entry_end(index_value_end)
       options.snapshot = snapshot if snapshot
-      iter = @rocksdb.iterator(table_metadata_family(table_id), options)
-      iter.seek(KeyValueStore.key_for_table_index_entry_start(index_id, index_value_start))
+      iter = @rocksdb.iterator(table_index_family(table_id, index_id), options)
+      iter.seek(KeyValueStore.key_for_table_index_entry_start(index_value_start))
       while iter.valid?
         index_value, primary_key = KeyValueStore.decompose_index_entry_key(iter.key)
         yield index_value, primary_key
@@ -306,11 +306,11 @@ module Storage
       end
 
       def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @batch.put(@kv.table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0))
+        @batch.put(@kv.table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0))
       end
 
       def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @batch.delete(@kv.table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key))
+        @batch.delete(@kv.table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key))
       end
     end
 
@@ -343,11 +343,11 @@ module Storage
     end
 
     def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-      @rocksdb.put(table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0))
+      @rocksdb.put(table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0))
     end
 
     def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-      @rocksdb.delete(table_metadata_family(table_id), KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key))
+      @rocksdb.delete(table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key))
     end
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft)
@@ -381,7 +381,7 @@ module Storage
       end
 
       def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @tmp.put(KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0), MINIMAL_DURABILITY)
+        @tmp.put(KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0), MINIMAL_DURABILITY)
       end
 
       def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
@@ -414,7 +414,7 @@ module Storage
       end
     end
 
-    def build_index(table_id : UUID)
+    def build_index(table_id : UUID, index_id : UUID)
       builder = IndexBuilder.new(self)
 
       yield builder
@@ -426,7 +426,7 @@ module Storage
         ingest_options = RocksDB::IngestExternalFileOptions.new
         ingest_options.ingest_behind = true
         ingest_options.move_files = true
-        @rocksdb.ingest_external_file(table_metadata_family(table_id), [sst_file], ingest_options)
+        @rocksdb.ingest_external_file(table_index_family(table_id, index_id), [sst_file], ingest_options)
         FileUtils.rm_rf sst_file
       end
     end
