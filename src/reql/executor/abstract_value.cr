@@ -211,6 +211,10 @@ module ReQL
       {"ARRAY", "STREAM", "TABLE"}.includes? reql_type
     end
 
+    def is_array_or_set?
+      {"ARRAY", "STREAM", "TABLE"}.includes? reql_type
+    end
+
     def is_hash?
       {"OBJECT", "ROW"}.includes? reql_type
     end
