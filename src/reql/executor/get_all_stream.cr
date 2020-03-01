@@ -5,7 +5,7 @@ require "../../storage/*"
 module ReQL
   struct GetAllStream < Stream
     class InternalData
-      property channels = [] of Channel(RowValue?)
+      property channels = [] of Channel(RowValue | Nil | Exception)
     end
 
     def reql_type
@@ -18,7 +18,7 @@ module ReQL
 
     def start_reading
       @keys.each do |key|
-        channel = Channel(RowValue?).new(16)
+        channel = Channel(RowValue | Nil | Exception).new(16)
         @internal.channels << channel
         spawn do
           begin
@@ -31,6 +31,8 @@ module ReQL
             end
             channel.send nil
           rescue Channel::ClosedError
+          rescue error
+            channel.send error
           end
         end
       end
@@ -39,12 +41,19 @@ module ReQL
     def next_val
       return nil if @internal.channels.empty?
       idx, val = Channel.select(@internal.channels.map &.receive_select_action?)
-      unless val
+
+      case val
+      when Nil
         @internal.channels[idx].try &.close
         @internal.channels.reject! &.closed?
         return next_val
+      when Exception
+        @internal.channels[idx].try &.close
+        @internal.channels.reject! &.closed?
+        raise val
+      else
+        val
       end
-      val
     end
 
     def finish_reading
