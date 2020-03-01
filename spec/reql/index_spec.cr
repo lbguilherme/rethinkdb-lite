@@ -64,6 +64,24 @@ describe RethinkDB do
 
     r.table("test1").get_all(2, index: "namelen_and_id").run(conn).datum.should eq [{"id" => 2, "name" => "haha"}]
   end
+
+  it "can create index on existing data" do
+    r.table_create("test2").run(conn)
+    r.table("test2").count.run(conn).should eq 0
+    r.table("test2").index_status.count.run(conn).should eq 0
+
+    r.table("test2").insert({id: 1, name: "Hey"}).run(conn)
+    r.table("test2").insert({id: 2, name: "Hi"}).run(conn)
+    r.table("test2").index_create("name").run(conn)
+
+    r.table("test2").index_status("name").run(conn).datum.hash["ready"].should be_false
+    until r.table("test2").index_status("name").run(conn).datum.hash["ready"] == true
+      sleep 0.1
+    end
+    r.table("test2").index_status("name").run(conn).datum.hash["ready"].should be_true
+
+    r.table("test2").get_all("Hi", index: "name").run(conn).datum.should eq [{"id" => 2, "name" => "Hi"}]
+  end
 end
 
 Spec.after_suite { conn.close }

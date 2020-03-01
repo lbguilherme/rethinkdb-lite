@@ -53,10 +53,9 @@ module Storage
               batch = @manager.kv.create_batch
               batch.delete_row(@table.info.id, key_data)
 
-              # TODO: This crashes the compiler
-              # @table.indices.values.each do |index|
-              #   update_index_data(batch, index, key_data, existing_row, new_row)
-              # end
+              @table.indices.values.each do |index|
+                update_index_data(batch, index, key_data, existing_row, new_row)
+              end
 
               @manager.kv.write_batch(batch, durability || @table.info.durability)
             end
@@ -94,10 +93,10 @@ module Storage
       end
     end
 
-    private def index_values(evaluator, index, row)
+    private def index_values(evaluator, index, row) : Set({ReQL::Datum, Int32})
       computed = row.try { |row| index.info.function.eval(evaluator, {ReQL::Datum.new(row)}).as_datum rescue nil }
 
-      if computed.nil?
+      if computed.nil? || computed == nil
         return Set({ReQL::Datum, Int32}).new
       end
 
@@ -105,12 +104,13 @@ module Storage
         set = Set({ReQL::Datum, Int32}).new
         hash = Hash(ReQL::Datum, Int32).new { 0 }
         computed.array_or_set_value?.try &.each do |val|
-          set << {val, hash[val] += 1}
+          set << {val, hash[val] += 1} unless val == nil
         end
 
         set
       else
-        [{computed, 1}].to_set
+        # https://github.com/crystal-lang/crystal/issues/8868
+        [{computed.as(ReQL::Datum), 1}].to_set
       end
     end
 
@@ -140,12 +140,37 @@ module Storage
       info.table = @table.info.id
       info.function = function
       info.multi = multi
+      index = Manager::Index.new(info)
       @manager.lock.synchronize do
         if @table.indices.has_key?(name)
           raise ReQL::OpFailedError.new("Index `#{name}` already exists on table `#{@table.db_name}.#{@table.info.name}`")
         end
         @manager.kv.save_index(info)
-        @table.indices[name] = Manager::Index.new(info)
+        @table.indices[name] = index
+      end
+
+      spawn build_index(index)
+    end
+
+    def build_index(index : Manager::Index)
+      @manager.kv.build_index(@table.info.id) do |builder|
+        @manager.kv.each_row(@table.info.id) do |key, data|
+          @read_docs_on_table.add(1)
+          hash = ReQL::Datum.unserialize(IO::Memory.new(data)).hash_value
+          hash[primary_key] = ReQL.decode_key(key)
+          update_index_data(builder, index, key, nil, hash)
+        end
+      end
+
+      @manager.lock.synchronize do
+        # Check if index was dropped while it was building (doesn't exist anymore or was recreated)
+        unless @table.indices[index.info.name]? == index
+          # TODO: Discard the data we have saved above
+          return
+        end
+
+        index.info.ready = true
+        @manager.kv.save_index(index.info)
       end
     end
 

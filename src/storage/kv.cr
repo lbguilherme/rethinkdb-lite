@@ -119,8 +119,9 @@ module Storage
     end
 
     property system_info
+    getter database_path
 
-    def initialize(path)
+    def initialize(@database_path : String)
       @options = RocksDB::Options.new
       @options.create_if_missing = true
 
@@ -140,15 +141,15 @@ module Storage
         # @options.avoid_unnecessary_blocking_io = true
       {% end %}
 
-      FileUtils.mkdir_p path
+      FileUtils.mkdir_p @database_path
 
-      if File.exists? Path.new(path, "CURRENT")
-        families = RocksDB::Database.list_column_families(path, @options).map { |name| {name, @options} }.to_h
+      if File.exists? Path.new(@database_path, "CURRENT")
+        families = RocksDB::Database.list_column_families(@database_path, @options).map { |name| {name, @options} }.to_h
       else
         families = {"default" => @options}
       end
 
-      @rocksdb = RocksDB::Database.open(path, @options, families)
+      @rocksdb = RocksDB::Database.open(@database_path, @options, families)
 
       system_info_bytes = @rocksdb.get(KeyValueStore.key_for_system_info)
       @system_info = system_info_bytes.nil? ? SystemInfo.new : SystemInfo.load(system_info_bytes)
@@ -365,6 +366,68 @@ module Storage
       while iter.valid?
         yield iter.key, iter.value
         iter.next
+      end
+    end
+
+    class IndexBuilder
+      def initialize(@kv : KeyValueStore)
+        options = RocksDB::Options.new
+        options.create_if_missing = true
+        options.paranoid_checks = false
+
+        @tmp_path = File.join(@kv.database_path, "tmp", Random::Secure.hex)
+        FileUtils.mkdir_p @tmp_path
+        @tmp = RocksDB::Database.open(@tmp_path, options)
+      end
+
+      def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+        @tmp.put(KeyValueStore.key_for_table_index_entry(index_id, index_value, counter, primary_key), Bytes.new(0), MINIMAL_DURABILITY)
+      end
+
+      def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
+      end
+
+      def produce_sst_file
+        sst_file_path = File.join(@kv.database_path, "tmp", Random::Secure.hex + "_sst")
+        sst_file_writer = RocksDB::SstFileWriter.new(RocksDB::EnvOptions.new, RocksDB::Options.new)
+        sst_file_writer.open(sst_file_path)
+
+        iter = @tmp.iterator
+        iter.seek_to_first
+
+        # Empty index
+        return nil unless iter.valid?
+
+        while iter.valid?
+          sst_file_writer.put(iter.key, iter.value)
+          iter.next
+          Fiber.yield
+        end
+
+        sst_file_writer.finish
+        sst_file_path
+      end
+
+      def close
+        @tmp.close
+        FileUtils.rm_rf @tmp_path
+      end
+    end
+
+    def build_index(table_id : UUID)
+      builder = IndexBuilder.new(self)
+
+      yield builder
+
+      sst_file = builder.produce_sst_file
+      builder.close
+
+      if sst_file
+        ingest_options = RocksDB::IngestExternalFileOptions.new
+        ingest_options.ingest_behind = true
+        ingest_options.move_files = true
+        @rocksdb.ingest_external_file(table_metadata_family(table_id), [sst_file], ingest_options)
+        FileUtils.rm_rf sst_file
       end
     end
 
