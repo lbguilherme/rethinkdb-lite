@@ -74,11 +74,8 @@ describe RethinkDB do
     r.table("test2").insert({id: 2, name: "Hi"}).run(conn)
     r.table("test2").index_create("name").run(conn)
 
-    r.table("test2").index_status("name").run(conn).datum.hash["ready"].should be_false
-    until r.table("test2").index_status("name").run(conn).datum.hash["ready"] == true
-      sleep 0.1
-    end
-    r.table("test2").index_status("name").run(conn).datum.hash["ready"].should be_true
+    r.table("test2").index_status("name").run(conn).datum.array[0].hash["ready"].should be_false
+    r.table("test2").index_wait("name").run(conn).datum.array[0].hash["ready"].should be_true
 
     r.table("test2").get_all("Hi", index: "name").run(conn).datum.should eq [{"id" => 2, "name" => "Hi"}]
   end

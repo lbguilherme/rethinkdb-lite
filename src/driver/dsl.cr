@@ -258,6 +258,7 @@ module RethinkDB
     term index_create, IndexCreateTerm
     term index_list, IndexListTerm
     term index_status, IndexStatusTerm
+    term index_wait, IndexWaitTerm
     term insert_at, InsertAtTerm
     term insert, InsertTerm
     term is_empty, IsEmptyTerm
