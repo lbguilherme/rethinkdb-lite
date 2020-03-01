@@ -437,6 +437,10 @@ module Storage
       end
     end
 
+    def estimated_table_count(table_id : UUID)
+      @rocksdb.property_int(table_data_family(table_id), "rocksdb.estimate-num-keys").not_nil!.to_i64
+    end
+
     struct SystemInfo
       property id : UUID = UUID.random
       property data_version : UInt8 = 0

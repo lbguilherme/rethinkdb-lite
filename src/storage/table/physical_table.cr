@@ -222,5 +222,9 @@ module Storage
         end
       end
     end
+
+    def estimated_count
+      @manager.kv.estimated_table_count(@table.info.id)
+    end
   end
 end
