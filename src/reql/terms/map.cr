@@ -5,26 +5,29 @@ module ReQL
     infix_inspect "map"
 
     def check
-      expect_args 2
+      expect_args_at_least 2
     end
   end
 
   class Evaluator
     def eval_term(term : MapTerm)
-      target = eval(term.args[0])
-      func = eval(term.args[1]).as_function
+      targets = term.args[0..-2].map { |arg| eval(arg) }
+      func = eval(term.args[-1]).as_function
 
-      case
-      when target.is_a? Stream
-        MapStream.new(target, ->(val : Datum) {
-          return func.eval(self, {val}).as_datum
+      if targets.any? &.is_a? Stream
+        streams = targets.map { |target| target.is_a?(Stream) ? target : ArrayStream.new(target.array_value) }
+        MapStream.new(streams, ->(vals : Array(Datum)) {
+          return func.eval(self, vals).as_datum
         })
-      when array = target.array_or_set_value?
-        Datum.new(array.map do |val|
-          func.eval(self, {val}).value
-        end)
       else
-        raise QueryLogicError.new("Cannot convert #{target.reql_type} to SEQUENCE")
+        arrays = targets.map &.array_value
+        result = [] of Datum
+        i = 0
+        while arrays.all? { |array| i < array.size }
+          result << func.eval(self, arrays.map(&.[i])).as_datum
+          i += 1
+        end
+        Datum.new(result)
       end
     end
   end
