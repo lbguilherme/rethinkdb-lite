@@ -1,7 +1,7 @@
 # STATUS
 
-- 116x :heavy_check_mark:
-- 103x :x:
+- 118x :heavy_check_mark:
+- 101x :x:
 
 # Connection
 
@@ -194,7 +194,7 @@
 | ----------------- | ------------------ | ----- |
 | r.db_create(name) | :heavy_check_mark: |       |
 | r.db_drop(name)   | :x:                |       |
-| r.db_list()       | :x:                |       |
+| r.db_list()       | :heavy_check_mark: |       |
 
 # Manipulating Tables
 
@@ -210,7 +210,7 @@
 | table.index_wait(...)          | :heavy_check_mark: |       |
 | table.set_write_hook(function) | :x:                |       |
 | db.table_create(name)          | :heavy_check_mark: |       |
-| db.table_list()                | :x:                |       |
+| db.table_list()                | :heavy_check_mark: |       |
 
 # Math and Logic
 
