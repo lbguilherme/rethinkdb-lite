@@ -94,27 +94,27 @@ module ReQL
       end
     end
 
-    macro expect_args(count)
-      if @args.size != {{count}}
-        raise CompileError.new "Expected #{ {{count}}} arguments but found #{@args.size}."
+    def expect_args(count)
+      if @args.size != count
+        raise CompileError.new "Expected #{count} arguments but found #{@args.size}."
       end
     end
 
-    macro expect_args(min, max)
-      if @args.size < {{min}} || @args.size > {{max}}
-        raise CompileError.new "Expected between #{ {{min}}} and #{ {{max}}} arguments but found #{@args.size}."
+    def expect_args(min, max)
+      if @args.size < min || @args.size > max
+        raise CompileError.new "Expected between #{min} and #{max} arguments but found #{@args.size}."
       end
     end
 
-    macro expect_args_at_least(count)
-      if @args.size < {{count}}
-        raise CompileError.new "Expected #{ {{count}} } or more arguments but found #{@args.size}."
+    def expect_args_at_least(count)
+      if @args.size < count
+        raise CompileError.new "Expected #{count} or more arguments but found #{@args.size}."
       end
     end
 
-    macro expect_maybe_options(*args)
+    def expect_maybe_options(*args)
       begin
-        extra_options = @options.keys - {{ args }}.to_a
+        extra_options = @options.keys - args.to_a
         unless extra_options.empty?
           raise CompileError.new "Unrecognized optional argument `#{extra_options[0]}`"
         end
