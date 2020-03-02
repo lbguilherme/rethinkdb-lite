@@ -24,7 +24,7 @@ module ReQL
       self <=> other.value
     end
 
-    def <=>(other)
+    def <=>(other) : Int32
       a = value
       b = other
 
@@ -40,13 +40,13 @@ module ReQL
       when {Minval, Minval}  ; return 0
       when {Nil, Nil}        ; return 0
       when {String, String}  ; return a <=> b
-      when {Float64, Float64}; return a <=> b
-      when {Float64, Int64}  ; return a <=> b.to_f64
-      when {Float64, Int32}  ; return a <=> b.to_f64
-      when {Int64, Float64}  ; return a.to_f64 <=> b
+      when {Float64, Float64}; return a <=> b || 0
+      when {Float64, Int64}  ; return a <=> b.to_f64 || 0
+      when {Float64, Int32}  ; return a <=> b.to_f64 || 0
+      when {Int64, Float64}  ; return a.to_f64 <=> b || 0
       when {Int64, Int64}    ; return a <=> b
       when {Int64, Int32}    ; return a <=> b.to_i64
-      when {Int32, Float64}  ; return a.to_f64 <=> b
+      when {Int32, Float64}  ; return a.to_f64 <=> b || 0
       when {Int32, Int64}    ; return a.to_i64 <=> b
       when {Int32, Int32}    ; return a <=> b
       when {Time, Time}      ; return a <=> b
