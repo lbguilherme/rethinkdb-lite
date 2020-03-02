@@ -13,9 +13,9 @@ module Storage
         "process" => {
           "argv"          => ARGV,
           "pid"           => Process.pid,
-          "cache_size_mb" => 0,
+          "cache_size_mb" => 1024,
           "version"       => "dev",
-          # "time_started"  => Time.now,
+          "time_started"  => @manager.start_time,
 
         },
         "network" => {
@@ -25,7 +25,7 @@ module Storage
           "reql_port"           => 0,
           "connected_to"        => {} of String => String,
           "hostname"            => System.hostname,
-          # "time_connected"      => Time.now,
+          "time_connected"      => @manager.start_time,
         },
       }).hash_value
     end

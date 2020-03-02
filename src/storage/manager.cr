@@ -8,6 +8,7 @@ module Storage
     property table_by_id = {} of UUID => Table
     property kv : KeyValueStore
     property lock = Mutex.new
+    getter start_time = Time.utc
 
     class Database
       property info : KeyValueStore::DatabaseInfo
