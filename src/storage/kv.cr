@@ -50,7 +50,7 @@ module Storage
     end
 
     def self.key_for_table_index(table_id : UUID, index_id : UUID)
-      io = IO::Memory.new
+      io = IO::Memory.new(34)
       io.write_bytes(PREFIX_INDICES)
       io.write(table_id.bytes.to_slice)
       io.write_bytes(0u8)
@@ -59,7 +59,7 @@ module Storage
     end
 
     def self.key_for_table_index_start(table_id : UUID)
-      io = IO::Memory.new
+      io = IO::Memory.new(18)
       io.write_bytes(PREFIX_INDICES)
       io.write(table_id.bytes.to_slice)
       io.write_bytes(0u8)
@@ -67,7 +67,7 @@ module Storage
     end
 
     def self.key_for_table_index_end(table_id : UUID)
-      io = IO::Memory.new
+      io = IO::Memory.new(18)
       io.write_bytes(PREFIX_INDICES)
       io.write(table_id.bytes.to_slice)
       io.write_bytes(1u8)
@@ -75,7 +75,7 @@ module Storage
     end
 
     def self.key_for_table_index_entry(index_value : Bytes, counter : Int32, primary_key : Bytes)
-      io = IO::Memory.new
+      io = IO::Memory.new(index_value.size + 5 + primary_key.size + 4)
       io.write(index_value)
       io.write_bytes(0u8)
       io.write_bytes(counter, IO::ByteFormat::LittleEndian)
@@ -85,14 +85,14 @@ module Storage
     end
 
     def self.key_for_table_index_entry_start(index_value : Bytes)
-      io = IO::Memory.new
+      io = IO::Memory.new(index_value.size + 1)
       io.write(index_value)
       io.write_bytes(0u8)
       io.to_slice
     end
 
     def self.key_for_table_index_entry_end(index_value : Bytes)
-      io = IO::Memory.new
+      io = IO::Memory.new(index_value.size + 1)
       io.write(index_value)
       io.write_bytes(1u8)
       io.to_slice
