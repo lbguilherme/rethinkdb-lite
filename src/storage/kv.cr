@@ -139,7 +139,9 @@ module Storage
       FileUtils.mkdir_p @database_path
 
       if File.exists? Path.new(@database_path, "CURRENT")
-        families = RocksDB::Database.list_column_families(@database_path, @options).map { |name| {name, @options} }.to_h
+        families = RocksDB::Database.list_column_families(@database_path, @options).map do |name|
+          {name, @options}
+        end.to_h
       else
         families = {"default" => @options}
       end
@@ -152,32 +154,19 @@ module Storage
       migrate
     end
 
-    @table_data_family_cache = {} of UUID => RocksDB::ColumnFamilyHandle
-
     def table_data_family(table_id : UUID)
-      handle = @table_data_family_cache[table_id]?
-      return handle if handle
-      name = "table.#{table_id}.data"
-      handle = @rocksdb.family_handle?(name)
-      handle = @rocksdb.create_column_family(name, @options) unless handle
-      @table_data_family_cache[table_id] = handle
+      name = "table_data.#{table_id}"
+      @rocksdb.family_handle?(name) || @rocksdb.create_column_family(name, @options)
     end
 
-    @table_index_family_cache = {} of {UUID, UUID} => RocksDB::ColumnFamilyHandle
-
     def table_index_family(table_id : UUID, index_id : UUID)
-      handle = @table_index_family_cache[{table_id, index_id}]?
-      return handle if handle
-      name = "table.#{table_id}.index.#{index_id}"
-      handle = @rocksdb.family_handle?(name)
-      handle = @rocksdb.create_column_family(name, @options) unless handle
-      @table_index_family_cache[{table_id, index_id}] = handle
+      name = "table_index.#{table_id}.#{index_id}"
+      @rocksdb.family_handle?(name) || @rocksdb.create_column_family(name, @options)
     end
 
     def drop_index_data(table_id : UUID, index_id : UUID)
-      name = "table.#{table_id}.index.#{index_id}"
-      @rocksdb.drop_column_family(name)
-      @table_index_family_cache.delete({table_id, index_id})
+      name = "table_index.#{table_id}.#{index_id}"
+      @rocksdb.drop_column_family(name) if @rocksdb.family_handle?(name)
     end
 
     def close
