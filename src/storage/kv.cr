@@ -404,6 +404,8 @@ module Storage
     end
 
     def build_index(table_id : UUID, index_id : UUID)
+      drop_index_data(table_id, index_id)
+
       builder = IndexBuilder.new(self)
 
       yield builder
