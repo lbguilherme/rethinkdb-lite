@@ -8,10 +8,10 @@ require "../reql/terms/var"
 
 module Storage
   class KeyValueStore
-    PREFIX_SYSTEM_INFO   = 0u8
-    PREFIX_DATABASES     = 1u8
-    PREFIX_TABLES        = 2u8
-    TABLE_PREFIX_INDICES = 0u8
+    PREFIX_SYSTEM_INFO = 0u8
+    PREFIX_DATABASES   = 1u8
+    PREFIX_TABLES      = 2u8
+    PREFIX_INDICES     = 3u8
 
     # Minimal durability: data it stored in memory only and flushed to disk at some later point.
     # A process crash might cause data loss. A graceful server close (calling .close()) won't lose data.
@@ -49,22 +49,28 @@ module Storage
       io.to_slice
     end
 
-    def self.key_for_table_index(index_id : UUID)
+    def self.key_for_table_index(table_id : UUID, index_id : UUID)
       io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_INDICES)
+      io.write_bytes(PREFIX_INDICES)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(0u8)
       io.write(index_id.bytes.to_slice)
       io.to_slice
     end
 
-    def self.key_for_table_index_start
+    def self.key_for_table_index_start(table_id : UUID)
       io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_INDICES)
+      io.write_bytes(PREFIX_INDICES)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(0u8)
       io.to_slice
     end
 
-    def self.key_for_table_index_end
+    def self.key_for_table_index_end(table_id : UUID)
       io = IO::Memory.new
-      io.write_bytes(TABLE_PREFIX_INDICES + 1u8)
+      io.write_bytes(PREFIX_INDICES)
+      io.write(table_id.bytes.to_slice)
+      io.write_bytes(1u8)
       io.to_slice
     end
 
@@ -168,17 +174,6 @@ module Storage
       @table_index_family_cache[{table_id, index_id}] = handle
     end
 
-    @table_metadata_family_cache = {} of UUID => RocksDB::ColumnFamilyHandle
-
-    def table_metadata_family(table_id : UUID)
-      handle = @table_metadata_family_cache[table_id]?
-      return handle if handle
-      name = "table.#{table_id}.metadata"
-      handle = @rocksdb.family_handle?(name)
-      handle = @rocksdb.create_column_family(name, @options) unless handle
-      @table_metadata_family_cache[table_id] = handle
-    end
-
     def drop_index_data(table_id : UUID, index_id : UUID)
       name = "table.#{table_id}.index.#{index_id}"
       @rocksdb.drop_column_family(name)
@@ -248,7 +243,6 @@ module Storage
 
       # Ensure column family exists
       table_data_family(table.id)
-      table_metadata_family(table.id)
     end
 
     def each_table
@@ -263,14 +257,14 @@ module Storage
     end
 
     def save_index(index : IndexInfo)
-      @rocksdb.put(table_metadata_family(index.table), KeyValueStore.key_for_table_index(index.id), index.serialize, HARD_DURABILITY)
+      @rocksdb.put(KeyValueStore.key_for_table_index(index.table, index.id), index.serialize, HARD_DURABILITY)
     end
 
     def each_index(table_id : UUID)
       options = RocksDB::ReadOptions.new
-      options.iterate_upper_bound = KeyValueStore.key_for_table_index_end
-      iter = @rocksdb.iterator(table_metadata_family(table_id), options)
-      iter.seek(KeyValueStore.key_for_table_index_start)
+      options.iterate_upper_bound = KeyValueStore.key_for_table_index_end(table_id)
+      iter = @rocksdb.iterator(options)
+      iter.seek(KeyValueStore.key_for_table_index_start(table_id))
       while iter.valid?
         yield IndexInfo.load(iter.value)
         iter.next
