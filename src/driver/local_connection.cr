@@ -34,7 +34,7 @@ module RethinkDB
 
     def run(term : ReQL::Term::Type, runopts : RunOpts) : RethinkDB::Cursor | RethinkDB::Datum
       evaluator = ReQL::Evaluator.new(@manager, @worker)
-      result = evaluator.eval term
+      result = @manager.job_manager.run_query(evaluator, term)
 
       case result
       when ReQL::Stream

@@ -1,5 +1,6 @@
 require "./table/*"
 require "./kv"
+require "../reql/jobs/job_manager"
 
 module Storage
   class Manager
@@ -9,6 +10,7 @@ module Storage
     property kv : KeyValueStore
     property lock = Mutex.new
     getter start_time = Time.utc
+    getter job_manager = ReQL::JobManager.new
 
     class Database
       property info : KeyValueStore::DatabaseInfo
