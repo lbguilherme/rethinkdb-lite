@@ -155,17 +155,17 @@ module Storage
     end
 
     def table_data_family(table_id : UUID)
-      name = "table_data.#{table_id}"
+      name = "table.#{table_id}"
       @rocksdb.family_handle?(name) || @rocksdb.create_column_family(name, @options)
     end
 
-    def table_index_family(table_id : UUID, index_id : UUID)
-      name = "table_index.#{table_id}.#{index_id}"
+    def table_index_family(index_id : UUID)
+      name = "index.#{index_id}"
       @rocksdb.family_handle?(name) || @rocksdb.create_column_family(name, @options)
     end
 
-    def drop_index_data(table_id : UUID, index_id : UUID)
-      name = "table_index.#{table_id}.#{index_id}"
+    def drop_index_data(index_id : UUID)
+      name = "index.#{index_id}"
       @rocksdb.drop_column_family(name) if @rocksdb.family_handle?(name)
     end
 
@@ -264,7 +264,7 @@ module Storage
       options = RocksDB::ReadOptions.new
       options.iterate_upper_bound = KeyValueStore.key_for_table_index_entry_end(index_value_end)
       options.snapshot = snapshot if snapshot
-      iter = @rocksdb.iterator(table_index_family(table_id, index_id), options)
+      iter = @rocksdb.iterator(table_index_family(index_id), options)
       iter.seek(KeyValueStore.key_for_table_index_entry_start(index_value_start))
       while iter.valid?
         index_value, primary_key = KeyValueStore.decompose_index_entry_key(iter.key)
@@ -295,11 +295,11 @@ module Storage
       end
 
       def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @batch.put(@kv.table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0))
+        @batch.put(@kv.table_index_family(index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0))
       end
 
       def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-        @batch.delete(@kv.table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key))
+        @batch.delete(@kv.table_index_family(index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key))
       end
     end
 
@@ -332,11 +332,11 @@ module Storage
     end
 
     def set_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-      @rocksdb.put(table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0))
+      @rocksdb.put(table_index_family(index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key), Bytes.new(0))
     end
 
     def delete_index_entry(table_id : UUID, index_id : UUID, index_value : Bytes, counter : Int32, primary_key : Bytes)
-      @rocksdb.delete(table_index_family(table_id, index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key))
+      @rocksdb.delete(table_index_family(index_id), KeyValueStore.key_for_table_index_entry(index_value, counter, primary_key))
     end
 
     def set_row(table_id : UUID, primary_key : Bytes, data : Bytes, durability : ReQL::Durability = ReQL::Durability::Soft)
@@ -404,7 +404,7 @@ module Storage
     end
 
     def build_index(table_id : UUID, index_id : UUID)
-      drop_index_data(table_id, index_id)
+      drop_index_data(index_id)
 
       builder = IndexBuilder.new(self)
 
@@ -417,7 +417,7 @@ module Storage
         ingest_options = RocksDB::IngestExternalFileOptions.new
         ingest_options.ingest_behind = true
         ingest_options.move_files = true
-        @rocksdb.ingest_external_file(table_index_family(table_id, index_id), [sst_file], ingest_options)
+        @rocksdb.ingest_external_file(table_index_family(index_id), [sst_file], ingest_options)
         FileUtils.rm_rf sst_file
       end
     end
