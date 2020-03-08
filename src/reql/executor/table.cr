@@ -1,11 +1,12 @@
 require "./stream"
 require "./row_value"
 require "../../storage/*"
+require "../jobs/table_scan_job"
 
 module ReQL
   struct Table < Stream
     class InternalData
-      property channel : Channel(RowValue | Nil | Exception)?
+      property table_scan : ReQL::TableScanJob?
     end
 
     def reql_type
@@ -32,31 +33,19 @@ module ReQL
     end
 
     def start_reading
-      @internal.channel = Channel(RowValue | Nil | Exception).new(32)
-      s = storage
-      spawn do
-        begin
-          s.scan do |row|
-            @internal.channel.try &.send RowValue.new(s, row)
-          end
-          @internal.channel.try &.send nil
-        rescue Channel::ClosedError
-        rescue error
-          @internal.channel.try &.send error
-        end
-      end
+      @internal.table_scan = ReQL::TableScanJob.new(@manager.job_manager, storage)
     end
 
     def next_val
-      val = @internal.channel.try &.receive?
+      val = @internal.table_scan.try &.receive
 
       case val
-      when Nil
-        @internal.channel.try &.close
-        @internal.channel = nil
+      when ReQL::TableScanJob::FinishedScan
+        @internal.table_scan.try &.finish_job
+        @internal.table_scan = nil
       when Exception
-        @internal.channel.try &.close
-        @internal.channel = nil
+        @internal.table_scan.try &.finish_job
+        @internal.table_scan = nil
         raise val
       else
         val
@@ -64,8 +53,8 @@ module ReQL
     end
 
     def finish_reading
-      @internal.channel.try &.close
-      @internal.channel = nil
+      @internal.table_scan.try &.finish_job
+      @internal.table_scan = nil
     end
 
     def as_table

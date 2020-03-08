@@ -3,6 +3,7 @@ require "../crypto"
 require "../storage/manager"
 require "../reql/evaluator"
 require "../reql/worker"
+require "../reql/jobs/query_job"
 require "./connection"
 
 module RethinkDB
@@ -34,7 +35,7 @@ module RethinkDB
 
     def run(term : ReQL::Term::Type, runopts : RunOpts) : RethinkDB::Cursor | RethinkDB::Datum
       evaluator = ReQL::Evaluator.new(@manager, @worker)
-      result = @manager.job_manager.run_query(evaluator, term)
+      result = ReQL::QueryJob.new(@manager.job_manager, evaluator, term).result
 
       case result
       when ReQL::Stream

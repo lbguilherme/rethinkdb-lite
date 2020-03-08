@@ -16,6 +16,14 @@ module Storage
       @table.info.primary_key
     end
 
+    def name : String
+      @table.info.name
+    end
+
+    def db_name : String
+      @table.db_name
+    end
+
     def get(key)
       @read_docs_on_table.add(1)
       @manager.kv.get_row(@table.info.id, ReQL.encode_key(key)) do |data|

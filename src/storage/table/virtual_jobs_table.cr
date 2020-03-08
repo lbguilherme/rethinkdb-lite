@@ -1,4 +1,5 @@
 require "./virtual_table"
+require "../../reql/jobs/*"
 
 module Storage
   struct VirtualJobsTable < VirtualTable
@@ -24,6 +25,9 @@ module Storage
         "type"         => job.type,
         "info"         => job.is_a?(ReQL::QueryJob) ? {
           "query" => job.term.inspect,
+        } : job.is_a?(ReQL::TableScanJob) ? {
+          "table" => job.table.name,
+          "db"    => job.table.db_name,
         } : nil,
       }).hash_value
     end

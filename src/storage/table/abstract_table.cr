@@ -21,5 +21,8 @@ module Storage
     end
 
     abstract def index_scan(index_name : String, index_value_start : ReQL::Datum, index_value_end : ReQL::Datum, &block : Hash(String, ReQL::Datum) ->)
+
+    abstract def name : String
+    abstract def db_name : String
   end
 end

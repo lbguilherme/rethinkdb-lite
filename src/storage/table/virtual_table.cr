@@ -2,7 +2,13 @@ require "./abstract_table"
 
 module Storage
   abstract struct VirtualTable < AbstractTable
+    getter name : String
+
     def initialize(@name : String, @manager : Manager)
+    end
+
+    def db_name : String
+      "rethinkdb"
     end
 
     def replace(key, durability : ReQL::Durability? = nil, &block : Hash(String, ReQL::Datum)? -> Hash(String, ReQL::Datum)?)
