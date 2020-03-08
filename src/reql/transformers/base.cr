@@ -24,11 +24,10 @@ abstract struct ReQL::Transformer
   end
 
   protected def transform(hsh : Hash) : ReQL::Term::Type
-    result = {} of String => ReQL::Term::Type
     hsh.each do |(k, v)|
-      result[k] = transform(v)
+      hsh[k] = transform(v)
     end
-    result.as(ReQL::Term::Type)
+    hsh
   end
 
   protected def transform(val : Bool | String | Bytes | Float64 | Int64 | Int32 | Time | Nil) : ReQL::Term::Type
@@ -36,8 +35,7 @@ abstract struct ReQL::Transformer
   end
 
   protected def transform(term : ReQL::Term) : ReQL::Term::Type
-    term = term.dup
-    term.args = term.args.map { |e| transform(e).as(ReQL::Term::Type) }
+    term.args.map! { |e| transform(e) }
     term
   end
 end

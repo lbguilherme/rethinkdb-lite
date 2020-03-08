@@ -7,36 +7,33 @@ struct ReQL::GroupTransformer < ReQL::Transformer
   end
 
   protected def transform(term : ReQL::Term) : ReQL::Term::Type
-    args = term.args.map { |e| transform(e).as(ReQL::Term::Type) }
+    term = super(term)
 
     if term.is_a? ReQL::UngroupTerm
-      return term.class.new(args, term.options)
+      return term
     end
 
-    idx = args.index { |arg| arg.is_a? ReQL::GroupTerm }
-    return term.class.new(args, term.options) unless idx
+    idx = term.args.index { |arg| arg.is_a? ReQL::GroupTerm }
+    return term unless idx
 
-    group_args = args[idx].as(ReQL::GroupTerm).args
+    group = term.args[idx].as(ReQL::GroupTerm)
 
-    if group_args.size == 2
+    if group.args.size == 2
       var = R.make_var_i
-      args[idx] = ReQL::VarTerm.new([var.as(ReQL::Term::Type)])
-      group_args << ReQL::FuncTerm.new([
+      term.args[idx] = ReQL::VarTerm.new([var.as(ReQL::Term::Type)])
+      group.args << ReQL::FuncTerm.new([
         ReQL::MakeArrayTerm.new([var.as(ReQL::Term::Type)]).as(ReQL::Term::Type),
-        term.class.new(args, term.options).as(ReQL::Term::Type),
+        term.as(ReQL::Term::Type),
       ]).as(ReQL::Term::Type)
 
-      return ReQL::GroupTerm.new(group_args)
-    elsif group_args.size == 3 && (func = group_args[2].as?(ReQL::FuncTerm))
-      args[idx] = func.args[1]
-      group_args[2] = ReQL::FuncTerm.new([
-        func.args[0].as(ReQL::Term::Type),
-        term.class.new(args, term.options).as(ReQL::Term::Type),
-      ])
+      return group
+    elsif group.args.size == 3 && (func = group.args[2].as?(ReQL::FuncTerm))
+      term.args[idx] = func.args[1]
+      func.args[1] = term
 
-      return ReQL::GroupTerm.new(group_args)
+      return group
     else
-      return term.class.new(args, term.options)
+      return term
     end
   end
 end

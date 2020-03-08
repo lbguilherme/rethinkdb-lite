@@ -28,16 +28,13 @@ struct ReQL::SimplifyVariablesTransformer < ReQL::TransformerWithVisitor
   end
 
   protected def transform(term : ReQL::VarTerm) : ReQL::Term::Type
-    ReQL::VarTerm.new([@mapping[term.args[0].as(Int64)].as(ReQL::Term::Type)])
+    term.args[0] = @mapping[term.args[0].as(Int64)]
+    term
   end
 
   protected def transform(term : ReQL::FuncTerm) : ReQL::Term::Type
     term = super(term).as(ReQL::FuncTerm)
-    ReQL::FuncTerm.new([
-      ReQL::MakeArrayTerm.new(
-        term.args[0].as(ReQL::MakeArrayTerm).args.map { |arg| @mapping[arg.as(Int64)].as(ReQL::Term::Type) }
-      ).as(ReQL::Term::Type),
-      term.args[1].as(ReQL::Term::Type),
-    ])
+    term.args[0].as(MakeArrayTerm).args.map! { |arg| @mapping[arg.as(Int64)] }
+    term
   end
 end
