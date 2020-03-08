@@ -1,6 +1,6 @@
 require "uuid"
 require "../term"
-require "../../utils/waitgroup.cr"
+require "../../utils/wait_group.cr"
 
 module ReQL
   class InsertTerm < Term
@@ -15,8 +15,6 @@ module ReQL
     def eval_term(term : InsertTerm)
       table = eval(term.args[0]).as_table
       datum = eval(term.args[1])
-
-      writter = TableWriter.new
 
       docs = case
              when array = datum.array_or_set_value?
@@ -33,35 +31,14 @@ module ReQL
                raise QueryLogicError.new("Expected type OBJECT but found #{datum.reql_type}")
              end
 
-      channel = Channel(Hash(String, Datum)).new(128)
-      wait_group = WaitGroup.new
-      jobs = 0
-      consumers = 0
-
-      docs.each do |obj|
-        wait_group.add
-        channel.send(obj)
-        jobs += 1
-
-        if Math.max(1, Math.log(jobs, 1.1).floor - 3) > consumers
-          consumers += 1
-          spawn start_inserter_worker(channel, wait_group, writter, table.storage)
+      perform_writes do |writer, worker|
+        wait_group = WaitGroup.new
+        docs.each do |obj|
+          wait_group.add
+          @worker.not_nil!.insert(wait_group, writer, table.storage, obj)
         end
+        wait_group.wait
       end
-
-      wait_group.wait
-      channel.close
-
-      @table_writers.last?.try &.merge(writter)
-
-      writter.summary
     end
-  end
-end
-
-private def start_inserter_worker(channel, wait_group, writter, storage)
-  while obj = channel.receive?
-    writter.insert(storage, obj)
-    wait_group.done
   end
 end

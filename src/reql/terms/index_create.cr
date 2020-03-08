@@ -33,12 +33,9 @@ module ReQL
         multi = Datum.new(term.options["multi"]).bool_value
       end
 
-      writter = TableWriter.new
-      writter.create_index(storage, name, function, multi)
-
-      @table_writers.last?.try &.merge(writter)
-
-      writter.summary
+      perform_writes do |writer|
+        writer.create_index(storage, name, function, multi)
+      end
     end
   end
 end

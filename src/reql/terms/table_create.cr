@@ -69,12 +69,9 @@ module ReQL
 
       table_config = @manager.get_table("rethinkdb", "table_config").as(Storage::VirtualTableConfigTable)
 
-      writter = TableWriter.new
-      writter.create_table(table_config, descriptor)
-
-      @table_writers.last?.try &.merge(writter)
-
-      writter.summary
+      perform_writes do |writer|
+        writer.create_table(table_config, descriptor)
+      end
     end
   end
 end

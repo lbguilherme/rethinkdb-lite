@@ -2,6 +2,7 @@ require "socket"
 require "../crypto"
 require "../storage/manager"
 require "../reql/evaluator"
+require "../reql/worker"
 require "./connection"
 
 module RethinkDB
@@ -10,6 +11,7 @@ module RethinkDB
 
     def initialize(data_path : String)
       @manager = Storage::Manager.new data_path
+      @worker = ReQL::Worker.new
     end
 
     def on_error(&block : Exception, ReQL::Term::Type ->)
@@ -17,6 +19,7 @@ module RethinkDB
     end
 
     def close
+      @worker.close
       @manager.close
     end
 
@@ -30,7 +33,7 @@ module RethinkDB
     end
 
     def run(term : ReQL::Term::Type, runopts : RunOpts) : RethinkDB::Cursor | RethinkDB::Datum
-      evaluator = ReQL::Evaluator.new(@manager)
+      evaluator = ReQL::Evaluator.new(@manager, @worker)
       result = evaluator.eval term
 
       case result

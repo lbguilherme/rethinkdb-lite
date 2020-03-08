@@ -1,7 +1,8 @@
-require "./executor/*"
 require "./error"
-require "./term"
+require "./executor/*"
 require "./helpers/*"
+require "./term"
+require "./worker"
 
 module ReQL
   class Evaluator
@@ -9,7 +10,27 @@ module ReQL
     property table_writers = [] of TableWriter
     property now = Time.utc
 
-    def initialize(@manager : Storage::Manager)
+    def initialize(@manager : Storage::Manager, @worker : Worker? = nil)
+    end
+
+    def perform_writes
+      worker = @worker
+
+      unless worker
+        raise QueryLogicError.new "Cannot perform writes on this context."
+      end
+
+      writer = TableWriter.new
+      @table_writers << writer
+
+      begin
+        yield writer, worker
+      ensure
+        @table_writers.pop
+      end
+
+      @table_writers.last?.try &.merge(writer)
+      writer.summary
     end
 
     def eval(arr : Array) : AbstractValue

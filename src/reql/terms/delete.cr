@@ -14,43 +14,27 @@ module ReQL
     def eval_term(term : DeleteTerm)
       source = eval(term.args[0])
 
-      writter = TableWriter.new
-
-      if source.is_array?
-        channel = Channel({Storage::AbstractTable, Datum}).new(128)
-        wait_group = WaitGroup.new
-        jobs = 0
-        consumers = 0
-
-        source.each do |obj|
-          row = obj.as_row
-          wait_group.add
-          channel.send({row.table, row.key})
-          jobs += 1
-
-          if Math.max(1, Math.log(jobs, 1.1).floor - 3) > consumers
-            consumers += 1
-            spawn start_deleter_worker(channel, wait_group, writter)
+      perform_writes do |writer, worker|
+        if source.is_array?
+          wait_group = WaitGroup.new
+          source.each do |obj|
+            row = obj.as_row
+            wait_group.add
+            worker.delete(wait_group, writer, row.table, row.key)
           end
+          wait_group.wait
+        else
+          row = source.as_row
+          writer.delete(row.table, row.key)
         end
-
-        wait_group.wait
-        channel.close
-      else
-        row = source.as_row
-        writter.delete(row.table, row.key)
       end
-
-      @table_writers.last?.try &.merge(writter)
-
-      writter.summary
     end
   end
 end
 
-private def start_deleter_worker(channel, wait_group, writter)
+private def start_deleter_worker(channel, wait_group, writer)
   while pair = channel.receive?
-    writter.delete(pair[0], pair[1])
+    writer.delete(pair[0], pair[1])
     wait_group.done
   end
 end

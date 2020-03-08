@@ -19,10 +19,11 @@ module ReQL
 
       db_config = @manager.get_table("rethinkdb", "db_config").not_nil!
 
-      writter = TableWriter.new
-      writter.insert(db_config, {
-        "name" => Datum.new(name),
-      })
+      perform_writes do |writer|
+        writer.insert(db_config, {
+          "name" => Datum.new(name),
+        })
+      end
 
       Datum.new(Hash(String, Datum::Type).new)
     end
