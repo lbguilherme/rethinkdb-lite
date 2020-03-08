@@ -158,14 +158,17 @@ module RethinkDB
 
         response_channel = Channel({UInt64, String}).new(32)
         spawn do
-          while tup = response_channel.receive?
-            query_token = tup[0]
-            answer_json = tup[1]
+          begin
+            while tuple = response_channel.try &.receive?
+              query_token, answer_json = tuple
 
-            sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
-            sock.write_bytes(answer_json.bytesize, IO::ByteFormat::LittleEndian)
-            sock.write(answer_json.to_slice)
-            sock.flush
+              sock.write_bytes(query_token, IO::ByteFormat::LittleEndian)
+              sock.write_bytes(answer_json.bytesize, IO::ByteFormat::LittleEndian)
+              sock.write(answer_json.to_slice)
+              sock.flush
+            end
+          rescue
+            sock.close
           end
         end
 
@@ -176,7 +179,7 @@ module RethinkDB
           query_bytes = Bytes.new(query_length)
           sock.read_fully(query_bytes)
 
-          spawn execute_query(client.not_nil!, query_bytes, query_token, response_channel)
+          spawn execute_query(client.not_nil!, query_bytes, query_token, response_channel.not_nil!)
         end
       rescue IO::EOFError
         # This is expected when client closes the connection
@@ -186,6 +189,7 @@ module RethinkDB
         client.try &.close rescue nil
         sock.close rescue nil
         @client_sockets.delete sock
+        response_channel.try &.close
       end
 
       def execute_query(client, query_bytes, query_token, response_channel)
