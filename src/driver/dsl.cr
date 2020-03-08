@@ -185,7 +185,10 @@ module RethinkDB
       end
     end
 
-    macro term(name, term_class)
+    {% for term_type in ReQL::TermType.constants %}
+      {% name = term_type.stringify.downcase %}
+      {% term_class = (term_type.stringify.split("_").map(&.capitalize).join("") + "Term").id %}
+
       struct R{{name.id}}
         include R
 
@@ -222,83 +225,7 @@ module RethinkDB
           R{{name.id}}.new(self, *args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
         end
       end
-    end
-
-    term "do", DoTerm
-    term add, AddTerm
-    term and, AndTerm
-    term append, AppendTerm
-    term binary, BinaryTerm
-    term bracket, BracketTerm
-    term branch, BranchTerm
-    term ceil, CeilTerm
-    term change_at, ChangeAtTerm
-    term coerce_to, CoerceToTerm
-    term concat_map, ConcatMapTerm
-    term contains, ContainsTerm
-    term count, CountTerm
-    term db_create, DbCreateTerm
-    term db, DbTerm
-    term default, DefaultTerm
-    term delete_at, DeleteAtTerm
-    term delete, DeleteTerm
-    term distinct, DistinctTerm
-    term div, DivTerm
-    term downcase, DowncaseTerm
-    term eq, EqTerm
-    term error, ErrorTerm
-    term filter, FilterTerm
-    term floor, FloorTerm
-    term for_each, ForEachTerm
-    term ge, GeTerm
-    term get, GetTerm
-    term get_all, GetAllTerm
-    term gt, GtTerm
-    term has_fields, HasFieldsTerm
-    term index_create, IndexCreateTerm
-    term index_list, IndexListTerm
-    term index_status, IndexStatusTerm
-    term index_wait, IndexWaitTerm
-    term insert_at, InsertAtTerm
-    term insert, InsertTerm
-    term is_empty, IsEmptyTerm
-    term js, JsTerm
-    term le, LeTerm
-    term limit, LimitTerm
-    term lt, LtTerm
-    term map, MapTerm
-    term max, MaxTerm
-    term maxval, MaxvalTerm
-    term merge, MergeTerm
-    term min, MinTerm
-    term minval, MinvalTerm
-    term mod, ModTerm
-    term mul, MulTerm
-    term ne, NeTerm
-    term not, NotTerm
-    term nth, NthTerm
-    term object, ObjectTerm
-    term or, OrTerm
-    term order_by, OrderByTerm
-    term pluck, PluckTerm
-    term random, RandomTerm
-    term range, RangeTerm
-    term round, RoundTerm
-    term sample, SampleTerm
-    term set_difference, SetDifferenceTerm
-    term skip, SkipTerm
-    term slice, SliceTerm
-    term splice_at, SpliceAtTerm
-    term split, SplitTerm
-    term sub, SubTerm
-    term sum, SumTerm
-    term table_create, TableCreateTerm
-    term table, TableTerm
-    term type_of, TypeOfTerm
-    term upcase, UpcaseTerm
-    term update, UpdateTerm
-    term uuid, UuidTerm
-    term without, WithoutTerm
+    {% end %}
   end
 end
 
