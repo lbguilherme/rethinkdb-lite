@@ -10,11 +10,11 @@ end
 module RethinkDB
   module DSL
     module R
-      @@next_var_i = 1i64
+      @@next_var_i = Atomic(Int64).new(1i64)
       alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Nil | Time | R
 
       def self.reset_next_var_i
-        @@next_var_i = 1i64
+        @@next_var_i.set(1i64)
       end
 
       def self.convert_type(x : R, max_depth)
@@ -89,9 +89,7 @@ module RethinkDB
       end
 
       def self.make_var_i
-        i = @@next_var_i
-        @@next_var_i += 1
-        i
+        @@next_var_i.add(1)
       end
 
       def self.expr(*args)
