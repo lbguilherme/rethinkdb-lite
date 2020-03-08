@@ -410,4 +410,10 @@ module ReQL
       end
     end
   {% end %}
+
+  class MakeArrayTerm < Term
+    def inspect(io)
+      @args.inspect(io)
+    end
+  end
 end

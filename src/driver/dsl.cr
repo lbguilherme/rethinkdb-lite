@@ -42,7 +42,7 @@ module RethinkDB
       end
 
       def self.convert_type(x : Array)
-        x.map { |y| convert_type(y).as(ReQL::Term::Type) }.as(ReQL::Term::Type)
+        ReQL::MakeArrayTerm.new(x.map { |y| convert_type(y).as(ReQL::Term::Type) }).as(ReQL::Term::Type)
       end
 
       def self.convert_type(x : Hash)

@@ -1,5 +1,5 @@
 require "../term"
-require "./transformer"
+require "./base"
 
 struct ReQL::GroupTransformer < ReQL::Transformer
   protected def should_transform(term : ReQL::GroupTerm)

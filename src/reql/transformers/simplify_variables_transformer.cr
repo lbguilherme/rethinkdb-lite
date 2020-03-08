@@ -1,5 +1,5 @@
 require "../term"
-require "./transformer_with_visitor"
+require "./base"
 
 struct ReQL::SimplifyVariablesTransformer < ReQL::TransformerWithVisitor
   @variables = Set(Int64).new

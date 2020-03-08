@@ -20,7 +20,7 @@ module ReQL
       LibDuktape.config_buffer(ctx, -1, @bytecode.to_unsafe, @bytecode.size)
       LibDuktape.load_function(ctx)
       args.each do |arg|
-        ctx.push_datum arg
+        ctx.push_datum arg.as_datum
       end
       LibDuktape.call(ctx, args.size)
 

@@ -20,7 +20,7 @@ module ReQL
         raise QueryLogicError.new("Function expects 1 arguments, but only #{args.size} available")
       end
 
-      obj = args[0].hash_value
+      obj = args[0].as_datum.hash_value
 
       if obj.has_key? @field
         obj[@field]

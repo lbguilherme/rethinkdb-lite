@@ -23,12 +23,25 @@ module ReQL
         raise "BUG: Wrong number of arguments"
       end
 
-      db = @manager.databases[db_name]?
-      unless db
-        raise QueryLogicError.new "Database `#{db_name}` does not exist."
-      end
+      if db_name == "rethinkdb"
+        Datum.new([
+          "server_config",
+          "server_status",
+          "db_config",
+          "table_config",
+          "table_status",
+          "stats",
+          "current_issues",
+          "jobs",
+        ])
+      else
+        db = @manager.databases[db_name]?
+        unless db
+          raise QueryLogicError.new "Database `#{db_name}` does not exist."
+        end
 
-      Datum.new(db.tables.keys)
+        Datum.new(db.tables.keys)
+      end
     end
   end
 end
