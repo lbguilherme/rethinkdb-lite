@@ -12,7 +12,7 @@ module ReQL
   class Evaluator
     def eval_term(term : DoTerm)
       func = eval(term.args[-1])
-      args = eval(term.args[0..-2]).array_value
+      args = term.args[0..-2].map { |arg| eval(arg) }
       if func.is_a? Func
         func.eval(self, args)
       else

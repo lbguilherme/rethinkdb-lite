@@ -17,58 +17,50 @@ module RethinkDB
         @@next_var_i.set(1i64)
       end
 
-      def self.convert_type(x : R, max_depth)
+      def self.convert_type(x : R)
         x.val.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : ReQL::Term, max_depth)
+      def self.convert_type(x : ReQL::Term)
         x.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : Int32 | Bytes | Time, max_depth)
+      def self.convert_type(x : Int32 | Bytes | Time)
         x.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : JSON::Any, max_depth)
-        convert_type(x.raw, max_depth)
+      def self.convert_type(x : JSON::Any)
+        convert_type(x.raw)
       end
 
-      def self.convert_type(x : Int, max_depth)
+      def self.convert_type(x : Int)
         x.to_i64.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : Float, max_depth)
+      def self.convert_type(x : Float)
         x.to_f64.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : Array, max_depth)
-        if max_depth <= 0
-          raise ReQL::DriverCompileError.new "Maximum expression depth exceeded (you can override this with `r.expr(X, MAX_DEPTH)`)"
-        end
-
-        x.map { |y| convert_type(y, max_depth - 1).as(ReQL::Term::Type) }.as(ReQL::Term::Type)
+      def self.convert_type(x : Array)
+        x.map { |y| convert_type(y).as(ReQL::Term::Type) }.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : Hash, max_depth)
-        if max_depth <= 0
-          raise ReQL::DriverCompileError.new "Maximum expression depth exceeded (you can override this with `r.expr(X, MAX_DEPTH)`)"
-        end
-
+      def self.convert_type(x : Hash)
         h = {} of String => ReQL::Term::Type
         x.each do |(k, v)|
           unless k.is_a? String || k.is_a? Symbol
             raise ReQL::CompileError.new "Object keys must be strings or symbols."
           end
-          h[k.to_s] = convert_type v, max_depth - 1
+          h[k.to_s] = convert_type v
         end
         h.as(ReQL::Term::Type)
       end
 
-      def self.convert_type(x : NamedTuple, max_depth)
-        convert_type x.to_h, max_depth
+      def self.convert_type(x : NamedTuple)
+        convert_type x.to_h
       end
 
-      def self.convert_type(x : Bool | Float64 | Int64 | String | ReQL::Term | Nil, max_depth)
+      def self.convert_type(x : Bool | Float64 | Int64 | String | ReQL::Term | Nil)
         x.as(ReQL::Term::Type)
       end
 
@@ -171,15 +163,24 @@ module RethinkDB
       R
     end
 
-    def r(val, max_depth : Int = 20)
-      RExpr.new(val, max_depth)
+    def r(&block : R, R, R, R, R, R, R -> X) forall X
+      vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
+      vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)])).as(R) }
+      ReQL::FuncTerm.new([
+        ReQL::MakeArrayTerm.new(vari.to_a.map(&.as(ReQL::Term::Type))).as(ReQL::Term::Type),
+        R.convert_type(block.call(*vars)).as(ReQL::Term::Type),
+      ]).as(ReQL::Term::Type)
+    end
+
+    def r(val)
+      RExpr.new(val)
     end
 
     struct RExpr
       include R
 
-      def initialize(val, max_depth)
-        @val = R.convert_type(val, max_depth)
+      def initialize(val)
+        @val = R.convert_type(val)
       end
     end
 
@@ -192,16 +193,18 @@ module RethinkDB
 
         def initialize(*args, **options)
           @val = ReQL::{{term_class}}.new(
-            args.to_a.map { |x| R.convert_type(x, 20).as(ReQL::Term::Type) },
+            args.to_a.map { |x| R.convert_type(x).as(ReQL::Term::Type) },
             options.to_h.map { |k, v| {k.to_s, R.to_json_any(v)}.as({String, JSON::Any}) }.to_h
           )
         end
 
-        def initialize(*args, **options, &block : Int32, R, R, R, R, R, R, R -> ReQL::Term::Type)
-          max_depth = 1000
+        def initialize(*args, **options, &block : R, R, R, R, R, R, R -> ReQL::Term::Type)
           vari = {R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i, R.make_var_i}.map(&.as(ReQL::Term::Type))
-          vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)], nil), max_depth).as(R) }
-          block = ReQL::FuncTerm.new([vari.to_a.map(&.as(ReQL::Term::Type)).as(ReQL::Term::Type), block.call(max_depth - 1, *vars)].map(&.as(ReQL::Term::Type)), nil).as(ReQL::Term::Type)
+          vars = vari.map { |i| RExpr.new(ReQL::VarTerm.new([i.as(ReQL::Term::Type)])).as(R) }
+          block = ReQL::FuncTerm.new([
+            ReQL::MakeArrayTerm.new(vari.to_a.map(&.as(ReQL::Term::Type))).as(ReQL::Term::Type),
+            block.call(*vars).as(ReQL::Term::Type),
+          ]).as(ReQL::Term::Type)
           initialize(*args, block, **options)
         end
       end
@@ -216,11 +219,11 @@ module RethinkDB
         end
 
         def self.{{name.id}}(*args, **options, &block : R, R, R, R, R, R, R -> X) forall X
-          R{{name.id}}.new(*args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
+          R{{name.id}}.new(*args, **options) { |a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g)) }
         end
 
         def {{name.id}}(*args, **options, &block : R, R, R, R, R, R, R -> X) forall X
-          R{{name.id}}.new(self, *args, **options) { |max_depth, a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g), max_depth) }
+          R{{name.id}}.new(self, *args, **options) { |a, b, c, d, e, f, g| R.convert_type(block.call(a, b, c, d, e, f, g)) }
         end
       end
     {% end %}

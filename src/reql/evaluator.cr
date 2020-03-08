@@ -6,7 +6,7 @@ require "./worker"
 
 module ReQL
   class Evaluator
-    property vars = {} of Int64 => Datum
+    property vars = {} of Int64 => AbstractValue
     property table_writers = [] of TableWriter
     property now = Time.utc
 
@@ -33,12 +33,6 @@ module ReQL
       writer.summary
     end
 
-    def eval(arr : Array) : AbstractValue
-      Datum.new(arr.map do |e|
-        Datum.new(eval(e).value)
-      end)
-    end
-
     def eval(hsh : Hash) : AbstractValue
       result = {} of String => Datum
       hsh.each do |(k, v)|
@@ -54,6 +48,10 @@ module ReQL
     def eval(term : Term) : AbstractValue
       term.check
       eval_term(term)
+    end
+
+    def eval_term(term : MakeArrayTerm) : AbstractValue
+      Datum.new(term.args.map { |arg| eval(arg) })
     end
   end
 end

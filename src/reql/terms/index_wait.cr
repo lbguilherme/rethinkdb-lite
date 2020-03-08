@@ -14,7 +14,7 @@ module ReQL
     def eval_term(term : IndexWaitTerm)
       table = eval(term.args[0]).as_table
       storage = table.storage
-      indices = eval(term.args[1..-1]).array_or_set_value if term.args.size > 1
+      indices = term.args[1..-1].map { |arg| eval(arg) } if term.args.size > 1
 
       while true
         list = if term.args.size == 1

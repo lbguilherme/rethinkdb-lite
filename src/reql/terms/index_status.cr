@@ -22,7 +22,7 @@ module ReQL
           Datum.new([] of Datum)
         end
       else
-        Datum.new(eval(term.args[1..-1]).array_or_set_value.map do |name|
+        Datum.new(term.args[1..-1].map { |arg| eval(arg) }.map do |name|
           name = name.string_value
           result = if storage.is_a? Storage::PhysicalTable
                      storage.get_index_status(name)

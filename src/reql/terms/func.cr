@@ -2,7 +2,7 @@ require "../term"
 
 module ReQL
   class FuncTerm < Term
-    def initialize(args, options)
+    def initialize(args, options = nil)
       super(args, options)
 
       mentioned_variables = Set(Int64).new
@@ -10,16 +10,14 @@ module ReQL
         mentioned_variables.add(var)
       end
 
-      args = @args[0].as(Array)
+      args = @args[0].as(MakeArrayTerm).args
       until args.size == 0 || mentioned_variables.includes? args.last
         args.pop
       end
-
-      @args[0] = args
     end
 
     def inspect(io)
-      vars = @args[0].as(Array)
+      vars = @args[0].as(MakeArrayTerm).args
       body = @args[1]
       if vars.size == 1
         io << "var_" << vars[0] << " => "
@@ -52,7 +50,7 @@ module ReQL
 
   class Evaluator
     def eval_term(term : FuncTerm)
-      ReqlFunc.new(term.args[0].as(Array).map { |x| x.as(Int64) }, term.args[1])
+      ReqlFunc.new(term.args[0].as(MakeArrayTerm).args.map { |x| x.as(Int64) }, term.args[1])
     end
   end
 end

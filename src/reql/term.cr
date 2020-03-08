@@ -3,13 +3,17 @@ require "json"
 
 module ReQL
   abstract class Term
-    alias Type = Array(Type) | Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes | Time
+    alias Type = Bool | Float64 | Hash(String, Type) | Int64 | Int32 | String | Term | Nil | Bytes | Time
 
-    getter args
+    property args
     getter options : Hash(String, JSON::Any)
 
-    def initialize(@args : Array(Type), options : Hash(String, JSON::Any)?)
+    def initialize(@args : Array(Type), options : Hash(String, JSON::Any)? = nil)
       @options = options.nil? ? {} of String => JSON::Any : options
+    end
+
+    def ==(other : self)
+      @args == other.args && @options == other.options
     end
 
     def check
@@ -48,12 +52,8 @@ module ReQL
         if type_id == TermType::DO
           args.rotate!(1)
         end
-        if type_id == TermType::MAKE_ARRAY
-          args.as(Type)
-        else
-          klass = @@type_to_class[type_id]
-          klass.new(args, json[2]?.try &.as_h?).as(Type)
-        end
+        klass = @@type_to_class[type_id]
+        klass.new(args, json[2]?.try &.as_h?).as(Type)
       else
         raw.as(Type)
       end
