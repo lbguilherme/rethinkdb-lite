@@ -47,4 +47,5 @@ abstract struct ReQL::Transformer
   end
 end
 
+require "./transformer_with_visitor"
 require "./*"

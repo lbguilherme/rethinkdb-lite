@@ -232,54 +232,54 @@ end
 
 class Object
   def +(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).add(other)
+    RethinkDB::DSL::RExpr.new(self).add(other)
   end
 
   def -(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).sub(other)
+    RethinkDB::DSL::RExpr.new(self).sub(other)
   end
 
   def *(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).mul(other)
+    RethinkDB::DSL::RExpr.new(self).mul(other)
   end
 
   def /(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).div(other)
+    RethinkDB::DSL::RExpr.new(self).div(other)
   end
 
   def %(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).mod(other)
+    RethinkDB::DSL::RExpr.new(self).mod(other)
   end
 
   def ==(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).eq(other)
+    RethinkDB::DSL::RExpr.new(self).eq(other)
   end
 
   def !=(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).ne(other)
+    RethinkDB::DSL::RExpr.new(self).ne(other)
   end
 
   def >(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).gt(other)
+    RethinkDB::DSL::RExpr.new(self).gt(other)
   end
 
   def >=(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).ge(other)
+    RethinkDB::DSL::RExpr.new(self).ge(other)
   end
 
   def <(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).lt(other)
+    RethinkDB::DSL::RExpr.new(self).lt(other)
   end
 
   def <=(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).le(other)
+    RethinkDB::DSL::RExpr.new(self).le(other)
   end
 
   def &(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).and(other)
+    RethinkDB::DSL::RExpr.new(self).and(other)
   end
 
   def |(other : RethinkDB::DSL::R)
-    RethinkDB::DSL::RExpr.new(self, 1).or(other)
+    RethinkDB::DSL::RExpr.new(self).or(other)
   end
 end
