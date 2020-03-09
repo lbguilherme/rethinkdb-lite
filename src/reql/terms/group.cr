@@ -1,11 +1,26 @@
 require "../term"
 
+private def each_group(value : ReQL::Datum, multi : Bool)
+  if multi
+    if array = value.array_value?
+      array.each do |e|
+        yield e
+      end
+    else
+      yield value
+    end
+  else
+    yield value
+  end
+end
+
 module ReQL
   class GroupTerm < Term
     infix_inspect "group"
 
     def check
       expect_args 2, 3
+      expect_maybe_options "multi"
     end
   end
 
@@ -13,6 +28,11 @@ module ReQL
     def eval_term(term : GroupTerm)
       target = eval(term.args[0])
       group_func = eval(term.args[1]).as_function
+
+      multi = false
+      if term.options.has_key? "multi"
+        multi = Datum.new(term.options["multi"]).bool_value
+      end
 
       result = [] of Hash(String, Datum)
 
@@ -26,27 +46,28 @@ module ReQL
 
         target.each do |value|
           value = value.as_datum
-          group = group_func.eval(self, {value}).as_datum
-          stream = stream_table[group]?
-          unless stream
-            stream = stream_table[group] = GroupStream.new
-            group_count += 1
-            spawn do
-              begin
-                evaluator = Evaluator.new(@manager, @worker)
-                evaluator.vars = @vars.dup
-                evaluator.now = @now
+          each_group(group_func.eval(self, {value}).as_datum, multi) do |group|
+            stream = stream_table[group]?
+            unless stream
+              stream = stream_table[group] = GroupStream.new
+              group_count += 1
+              spawn do
+                begin
+                  evaluator = Evaluator.new(@manager, @worker)
+                  evaluator.vars = @vars.dup
+                  evaluator.now = @now
 
-                result_channel.send({
-                  group,
-                  aggregation_func.eval(evaluator, {stream.not_nil!}).as_datum,
-                })
-              rescue exception
-                result_channel.send(exception)
+                  result_channel.send({
+                    group,
+                    aggregation_func.eval(evaluator, {stream.not_nil!}).as_datum,
+                  })
+                rescue exception
+                  result_channel.send(exception)
+                end
               end
             end
+            stream.not_nil! << value
           end
-          stream.not_nil! << value
         end
 
         stream_table.each_value &.<<(nil)
@@ -67,8 +88,9 @@ module ReQL
 
         target.each do |value|
           value = value.as_datum
-          group = group_func.eval(self, {value}).as_datum
-          groups[group] << value
+          each_group(group_func.eval(self, {value}).as_datum, multi) do |group|
+            groups[group] << value
+          end
         end
 
         groups.each do |(group, array)|
