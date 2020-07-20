@@ -183,7 +183,7 @@ module RethinkDB
         end
       rescue IO::EOFError
         # This is expected when client closes the connection
-      rescue err : Errno
+      rescue err
         err.inspect_with_backtrace
       ensure
         client.try &.close rescue nil

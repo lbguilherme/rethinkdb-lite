@@ -159,14 +159,14 @@ module RethinkDB
     end
 
     class Response
-      JSON.mapping({
-        t: ResponseType,
-        r: Array(JSON::Any),
-        e: {type: ErrorType, nilable: true},
-        b: {type: Array(JSON::Any), nilable: true},
-        p: {type: JSON::Any, nilable: true},
-        n: {type: Array(Int32), nilable: true},
-      })
+      include JSON::Serializable
+
+      property t : ResponseType
+      property r : Array(JSON::Any)
+      property e : ErrorType?
+      property b : Array(JSON::Any)?
+      property p : JSON::Any?
+      property n : Array(Int32)?
     end
 
     class Query

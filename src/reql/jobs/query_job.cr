@@ -1,8 +1,9 @@
 require "./job"
 require "../executor/stream"
+require "future"
 
 class ReQL::QueryJob < ReQL::Job
-  @future_result : Concurrent::Future(ReQL::AbstractValue)?
+  @future_result : Future::Compute(ReQL::AbstractValue)?
   getter term
 
   def initialize(job_manager, @evaluator : Evaluator, @term : Term::Type)
