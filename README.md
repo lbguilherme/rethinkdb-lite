@@ -1,4 +1,4 @@
-[![GitHub Actions](https://github.com/lbguilherme/rethinkdb-lite/workflows/Crystal%20CI/badge.svg)](https://github.com/lbguilherme/rethinkdb-lite/actions?query=workflow%3A%22Crystal+CI%22) [![Crystal Version](https://img.shields.io/badge/crystal%20-0.33.0-brightgreen.svg)](https://github.com/crystal-lang/crystal/releases/tag/0.33.0)
+[![GitHub Actions](https://github.com/lbguilherme/rethinkdb-lite/workflows/Crystal%20CI/badge.svg)](https://github.com/lbguilherme/rethinkdb-lite/actions?query=workflow%3A%22Crystal+CI%22) [![Crystal Version](https://img.shields.io/badge/crystal%20-0.35.1-brightgreen.svg)](https://github.com/crystal-lang/crystal/releases/tag/0.35.1)
 
 # RethinkDB-lite
 

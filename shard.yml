@@ -15,6 +15,6 @@ dependencies:
   future:
     github: crystal-community/future.cr
 
-crystal: 0.33.0
+crystal: 0.35.1
 
 license: MIT

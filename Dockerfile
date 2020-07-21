@@ -22,7 +22,7 @@ WORKDIR /webui
 RUN npm ci
 RUN npm run build
 
-FROM crystallang/crystal:0.33.0 AS builder
+FROM crystallang/crystal:0.35.1 AS builder
 COPY --from=duktape /libduktape.a /usr/lib
 COPY --from=rocksdb /librocksdb.a /usr/lib
 COPY --from=rocksdb /usr/local/include/rocksdb /usr/include/rocksdb
@@ -34,7 +34,7 @@ COPY src src
 RUN crystal build -Dpreview_mt --release src/main.cr
 RUN strip /app/main
 
-FROM crystallang/crystal:0.33.0
+FROM crystallang/crystal:0.35.1
 COPY --from=builder /app/main /rethinkdb-lite
 COPY --from=webui /webui/dist /vendor/rethinkdb-webui/dist
 CMD ["/rethinkdb-lite"]
