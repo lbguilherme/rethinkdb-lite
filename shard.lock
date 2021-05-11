@@ -6,5 +6,5 @@ shards:
 
   rocksdb:
     git: https://github.com/lbguilherme/rocksdb-crystal.git
-    version: 0.1.0+git.commit.16cd3010e23c65199ddade92be70b06411ea9576
+    version: 0.1.0+git.commit.1a6237b620a5a0c711abb1f07754ba56c33c465c
 
