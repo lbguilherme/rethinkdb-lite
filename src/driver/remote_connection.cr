@@ -134,6 +134,14 @@ module RethinkDB
       STOP         = 3
       NOREPLY_WAIT = 4
       SERVER_INFO  = 5
+
+      def to_json(json : JSON::Builder)
+        json.number(value)
+      end
+
+      def self.new(pull : JSON::PullParser)
+        from_value(pull.read_int)
+      end
     end
 
     enum ResponseType
@@ -145,6 +153,14 @@ module RethinkDB
       CLIENT_ERROR     = 16
       COMPILE_ERROR    = 17
       RUNTIME_ERROR    = 18
+
+      def to_json(json : JSON::Builder)
+        json.number(value)
+      end
+
+      def self.new(pull : JSON::PullParser)
+        from_value(pull.read_int)
+      end
     end
 
     enum ErrorType
@@ -156,6 +172,14 @@ module RethinkDB
       OP_INDETERMINATE = 4200000
       USER             = 5000000
       PERMISSION_ERROR = 6000000
+
+      def to_json(json : JSON::Builder)
+        json.number(value)
+      end
+
+      def self.new(pull : JSON::PullParser)
+        from_value(pull.read_int)
+      end
     end
 
     class Response
