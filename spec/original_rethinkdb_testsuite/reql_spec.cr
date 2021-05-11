@@ -107,14 +107,6 @@ def recursive_match(result, target)
   end
 end
 
-# def recursive_match(result : Array, target : Array)
-#   result.should be_a Array(ReQL::Datum)
-#   result.size.should eq target.size
-#   result.size.times do |i|
-#     recursive_match result[i], target[i]
-#   end
-# end
-
 struct ReqlMatchers
   def int_cmp(value)
     IntCmpMatcher.new(value.to_i64)

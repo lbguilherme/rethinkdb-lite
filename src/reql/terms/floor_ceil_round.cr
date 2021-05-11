@@ -38,7 +38,7 @@ module ReQL
 
     def eval_term(term : RoundTerm)
       target = eval(term.args[0])
-      Datum.new(target.number_value.round)
+      Datum.new(target.number_value.round(:ties_away))
     end
   end
 end

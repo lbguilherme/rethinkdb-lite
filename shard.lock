@@ -2,9 +2,9 @@ version: 2.0
 shards:
   future:
     git: https://github.com/crystal-community/future.cr.git
-    version: 0.1.0
+    version: 1.0.0
 
   rocksdb:
     git: https://github.com/lbguilherme/rocksdb-crystal.git
-    version: 0.1.0+git.commit.5136ce80a3ad90904c429e3989c5d3625c1a16c8
+    version: 0.1.0+git.commit.16cd3010e23c65199ddade92be70b06411ea9576
 

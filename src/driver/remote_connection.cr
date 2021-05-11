@@ -88,7 +88,7 @@ module RethinkDB
             @socket.read(slice)
             @channels[id]?.try &.send String.new(slice)
           end
-        rescue IO::EOFError | Errno
+        rescue IO::Error
           @channels.each_value &.close
           @channels.clear
           @socket.close rescue nil
